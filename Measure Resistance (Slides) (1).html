@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Measure Resistance with a Multimeter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bench:#E8EFF4; --panel:#FFFFFF; --panel2:#F2F6F9; --ink:#16293B; --muted:#4A5E70; --line:#B9C8D5;
+  --accent:#1B5FC1; --accent-ink:#FFFFFF; --good:#0B6B52; --goodbg:#DDF3EA; --warn:#7A4800; --warnbg:#FFF0D1;
+  --danger:#A3211A; --dangerbg:#FDE4E1; --probe-line:#16293B;
+  --font-body:"Atkinson Hyperlegible", Verdana, "Segoe UI", system-ui, sans-serif;
+  --font-head:"Bricolage Grotesque", "Atkinson Hyperlegible", Verdana, system-ui, sans-serif;
+  --font-lcd:"Share Tech Mono", "Courier New", monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bench:#0E1A26; --panel:#15273A; --panel2:#1B3047; --ink:#E7EFF6; --muted:#A9BBCB; --line:#33495D;
+    --accent:#6CA6FF; --accent-ink:#0B1622; --good:#5FD3A8; --goodbg:#103A2E; --warn:#FFC766; --warnbg:#3B2C0B;
+    --danger:#FF9A91; --dangerbg:#3F1714; --probe-line:#E7EFF6;
+  }
+}
+:root[data-theme="dark"]{
+  --bench:#0E1A26; --panel:#15273A; --panel2:#1B3047; --ink:#E7EFF6; --muted:#A9BBCB; --line:#33495D;
+  --accent:#6CA6FF; --accent-ink:#0B1622; --good:#5FD3A8; --goodbg:#103A2E; --warn:#FFC766; --warnbg:#3B2C0B;
+  --danger:#FF9A91; --dangerbg:#3F1714; --probe-line:#E7EFF6;
+}
+html{height:auto;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bench);color:var(--ink);font-family:var(--font-body);font-size:18px;line-height:1.6}
+[hidden]{display:none!important}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--font-head);line-height:1.15;margin:0 0 .5em}
+h1{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800}
+h3{font-size:1.25rem;font-weight:600}
+p{margin:0 0 1em;max-width:62ch}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+/* nav */
+.topnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--panel);border-bottom:2px solid var(--line)}
+.topnav .wrap{display:flex;gap:6px;overflow-x:auto;padding:8px 20px;scrollbar-width:thin}
+.topnav a{white-space:nowrap;text-decoration:none;color:var(--ink);padding:8px 14px;border-radius:999px;font-weight:700;font-size:.95rem}
+.topnav a:hover{background:var(--panel2)}
+
+/* hero */
+.hero{padding:44px 0 36px}
+.hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:32px;align-items:center}
+.hero .lead{font-size:1.15rem}
+.goals{margin:0 0 1.2em;padding-left:1.2em}
+.goals li{margin-bottom:.4em}
+.btn{font:inherit;font-weight:700;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:12px 22px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block;min-height:48px}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.hero-meter{max-width:260px;margin:0 auto;transform:rotate(3deg)}
+
+/* sections */
+section.part{padding:44px 0;border-top:2px solid var(--line)}
+.intro{font-size:1.1rem}
+.cols{display:grid;grid-template-columns:minmax(260px,320px) 1fr;gap:32px;align-items:start}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:20px}
+.card + .card{margin-top:18px}
+.callout{border-left:8px solid var(--accent);background:var(--panel);border-radius:0 12px 12px 0;padding:14px 18px;margin:0 0 18px}
+.callout.danger{border-color:var(--danger);background:var(--dangerbg)}
+.callout.tip{border-color:var(--good);background:var(--goodbg)}
+.callout p:last-child{margin-bottom:0}
+.callout strong.t{display:block;font-family:var(--font-head);font-size:1.1rem}
+
+/* meter */
+.meter{width:100%;max-width:300px;margin:0 auto}
+.meter-svg{width:100%;height:auto;display:block}
+.m-body{fill:#F4B400;stroke:#16293B;stroke-width:3}
+.m-bezel{fill:#22303D}
+.m-lcd{fill:#C5D3A8}
+.lcd-num{font-family:var(--font-lcd);font-size:46px;fill:#1F2A1A}
+.lcd-unit{font-family:var(--font-lcd);font-size:22px;fill:#1F2A1A}
+.lcd-tag{font-family:var(--font-lcd);font-size:11px;fill:#3C4A33}
+.m-brand{font-family:var(--font-head);font-weight:800;font-size:11px;letter-spacing:.2em;fill:#16293B}
+.knob1{fill:#2B3948;stroke:#0E151C;stroke-width:3}
+.knob2{fill:#3A4C5E}
+.pointer{fill:#fff;transition:transform .25s ease;transform-box:view-box;transform-origin:130px 235px}
+.dial-opt .dial-hit{fill:#F4B400;stroke:#16293B;stroke-width:2}
+.dial-opt .dial-txt{font-family:var(--font-head);font-weight:800;font-size:17px;fill:#16293B;pointer-events:none}
+.dial-opt.off .dial-txt{font-size:12px}
+.dial-opt.on .dial-hit{fill:#16293B}
+.dial-opt.on .dial-txt{fill:#fff}
+.meter.live .dial-opt{cursor:pointer}
+.meter.live .dial-opt:hover .dial-hit{fill:#FFD966}
+.meter.live .dial-opt.on:hover .dial-hit{fill:#16293B}
+.dial-opt:focus-visible{outline:none}
+.dial-opt:focus-visible .dial-hit{stroke:#1B5FC1;stroke-width:5}
+.port{fill:#17212B;stroke:#000;stroke-width:2}
+.port-in{fill:none;stroke:#5B6B7B;stroke-width:2}
+.port-txt{font-family:var(--font-head);font-weight:800;font-size:14px;fill:#16293B}
+.hlring{fill:none;stroke:#1B5FC1;stroke-width:5;stroke-dasharray:9 6;opacity:0;pointer-events:none}
+.m-part.hl .hlring{opacity:1}
+.plug-black{fill:#0A0E13;stroke:#fff;stroke-width:2.5}
+.plug-red{fill:#E0382E;stroke:#fff;stroke-width:2.5}
+.probe-wrap{margin-top:10px;background:#EEF3F7;border:2px solid var(--line);border-radius:12px;padding:4px}
+.probe-wrap.hl{outline:4px dashed var(--accent);outline-offset:2px}
+.pv-label{font-size:11px;fill:#4A5E70;font-family:var(--font-body)}
+.pv-name{font-size:12px;font-weight:700;fill:#16293B;stroke:#fff;stroke-width:3;paint-order:stroke;font-family:var(--font-body)}
+.says{margin-top:10px;padding:12px 14px;border-radius:10px;border:2px solid var(--line);background:var(--panel);min-height:3.4em;font-size:1rem;line-height:1.45}
+.says.warn{border-color:var(--warn);background:var(--warnbg);color:var(--ink)}
+.says.danger{border-color:var(--danger);background:var(--dangerbg)}
+.says.ok{border-color:var(--good);background:var(--goodbg)}
+.ports-ctl{margin-top:12px;display:grid;gap:8px;font-size:.95rem}
+.ports-ctl .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid var(--ink)}
+.dot.black{background:#0A0E13}.dot.red{background:#E0382E}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{font:inherit;font-weight:700;background:var(--panel);color:var(--ink);border:0;padding:8px 12px;min-height:44px;cursor:pointer;border-right:2px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+/* vocab */
+.vocab{display:grid;gap:10px;margin:18px 0 0;padding:0;list-style:none}
+.vocab button{width:100%;text-align:left;font:inherit;background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:12px 16px;cursor:pointer;min-height:56px}
+.vocab button b{font-family:var(--font-head);font-size:1.1rem;display:block}
+.vocab button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent)}
+
+/* steps */
+.steps{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:10px;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:12px 14px}
+.steps li::before{content:counter(s);flex:0 0 34px;height:34px;border-radius:50%;background:var(--panel2);border:2px solid var(--line);display:grid;place-items:center;font-weight:700}
+.steps li.done{border-color:var(--good);background:var(--goodbg)}
+.steps li.done::before{content:"\2713";background:var(--good);color:#fff;border-color:var(--good)}
+.units{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.units div{background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:10px 14px}
+.units b{font-family:var(--font-lcd);font-size:1.3rem}
+
+/* multiple choice */
+.mc{margin-top:14px}
+.mc-q{font-weight:700;margin-bottom:.5em}
+.mc-opts{display:flex;flex-wrap:wrap;gap:10px}
+.opt{font:inherit;font-weight:700;background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:10px 16px;min-height:48px;cursor:pointer;text-align:left}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.right{background:var(--goodbg);border-color:var(--good);color:var(--ink)}
+.opt.wrong{background:var(--warnbg);border-color:var(--warn);color:var(--ink);text-decoration:line-through}
+.opt:disabled{cursor:default}
+.mc-fb{margin:10px 0 0;font-weight:700}
+.mc-fb.good{color:var(--good)}.mc-fb.warn{color:var(--warn)}
+
+/* parts lab */
+.progress{height:16px;background:var(--panel2);border:2px solid var(--line);border-radius:999px;overflow:hidden;margin:6px 0 14px}
+.progress i{display:block;height:100%;width:0;background:var(--good);transition:width .3s}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.item{font:inherit;text-align:left;background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;min-height:76px;display:flex;flex-direction:column;gap:2px}
+.item:hover{border-color:var(--accent)}
+.item[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent)}
+.item .icon{background:#EEF3F7;border-radius:8px;padding:4px 6px;margin-bottom:6px;display:block}.item .icon svg{display:block;width:100%;height:auto}
+.item b{font-family:var(--font-head)}
+.item small{color:var(--muted);line-height:1.3}
+.item .got{font-family:var(--font-lcd);font-size:1.05rem;color:var(--good)}
+.item .got.no{color:var(--muted)}
+.item.measured{background:var(--panel2)}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:1rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:2px solid var(--line)}
+th{font-family:var(--font-head)}
+td.num{font-family:var(--font-lcd);font-size:1.15rem;white-space:nowrap}
+.empty{color:var(--muted);font-style:italic}
+
+/* facts */
+.fact{background:var(--panel);border:2px solid var(--accent);border-radius:14px;padding:16px 18px;margin-top:14px}
+.fact p:last-of-type{margin-bottom:.6em}
+.fact h3{margin-bottom:.4em}
+.listen{font:inherit;font-weight:700;font-size:.95rem;background:transparent;color:var(--accent);border:2px solid var(--accent);border-radius:999px;padding:6px 14px;min-height:40px;cursor:pointer}
+.listen[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+/* wire lab */
+.ctl-group{margin:0 0 14px;border:0;padding:0}
+.ctl-group legend{font-weight:700;margin-bottom:6px;padding:0}
+.wire-box{background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:8px 6px;margin-bottom:12px}
+.mission{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.mission h3{margin-bottom:.3em}
+
+/* quiz */
+.q{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.q .mc-opts{flex-direction:column;align-items:stretch}
+.q .opt{text-align:left}
+.q .expl{margin:10px 0 0}
+.score{background:var(--goodbg);border:3px solid var(--good);border-radius:16px;padding:22px;text-align:center}
+.score .big{font-family:var(--font-head);font-size:2.4rem;font-weight:800}
+
+footer{padding:28px 0 48px;color:var(--muted);border-top:2px solid var(--line)}
+
+@media (max-width:640px){
+  .hero-grid,.cols{grid-template-columns:1fr}
+  .hero-meter{max-width:200px;order:-1}
+  body{font-size:17px}
+}
+@media (prefers-reduced-motion: reduce){ .pointer,.progress i{transition:none} html{scroll-behavior:auto} }
+
+/* ---- slide deck layout ---- */
+html{height:100%}
+body{height:100%;display:flex;flex-direction:column;overflow:hidden;font-size:17px;line-height:1.5}
+.deck{flex:1;min-height:0;display:flex;flex-direction:column}
+.stage{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
+.slide{display:none}
+.slide.active{display:block}
+section.part.slide{padding:14px 0 20px;border-top:0}
+.hero.slide{padding:14px 0 20px}
+.wrap{max-width:1000px}
+h1{font-size:clamp(1.9rem,5vw,2.8rem)}
+h2{font-size:clamp(1.3rem,3vw,1.75rem);margin-bottom:.35em}
+.hero .lead,.intro{font-size:1rem}
+p{margin-bottom:.7em}
+.cols{grid-template-columns:minmax(210px,250px) 1fr;gap:20px}
+.cols.even{grid-template-columns:1fr 1fr}
+.meter{max-width:230px}
+.says{font-size:.92rem;min-height:2.8em;padding:8px 10px;margin-top:8px}
+.ports-ctl{font-size:.9rem;margin-top:8px}
+.seg button{padding:6px 10px;min-height:40px}
+.callout{padding:10px 14px;margin-bottom:12px}
+.steps{gap:6px;margin-bottom:12px}
+.steps li{padding:8px 12px}
+.items{grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:8px}
+.item{min-height:0;padding:6px 8px}
+.item small{font-size:.8rem}
+.item .icon{margin-bottom:4px;padding:2px 4px}
+.ctl-group{margin:0 0 8px}
+.ctl-row{display:flex;flex-wrap:wrap;gap:6px 22px}
+.wire-box{margin-bottom:8px}
+.wire-box svg{max-height:70px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 8px}
+.tabs button{font:inherit;font-weight:700;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 14px;min-height:42px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.mission{padding:14px;margin-bottom:0}
+.q{display:none}
+.q.cur{display:block}
+.q .mc-opts{flex-direction:column;align-items:stretch}
+td,th{padding:5px 8px}
+table{font-size:.95rem}
+.btn:disabled{opacity:.4;cursor:default;filter:none}
+.btn{min-height:44px;padding:8px 20px}
+
+.bar{flex:0 0 auto;display:flex;align-items:center;gap:12px;background:var(--panel);border-top:2px solid var(--line);padding:8px 14px}
+.bar .mid{flex:1;text-align:center;min-width:0}
+#slideLbl{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.dots button{width:22px;height:22px;border-radius:50%;border:2px solid var(--accent);background:transparent;padding:0;cursor:pointer}
+.dots button.on{background:var(--accent)}
+@media (max-width:640px){
+  .cols.even{grid-template-columns:1fr}
+  .meter{max-width:210px}
+  #slideLbl{display:none}
+  .hero-meter{max-width:150px}
+}
+</style>
+</head>
+<body>
+
+<div class="deck">
+<main class="stage" id="stage">
+
+<!-- SLIDE 1 -->
+<header class="hero slide active" data-title="Start">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>Measure resistance with a multimeter</h1>
+      <p class="lead">Resistance tells you how hard it is for electric current to flow through something. A multimeter measures it. You will learn how, then test parts and wires to see what changes resistance.</p>
+      <p><strong>When you finish, you can:</strong></p>
+      <ul class="goals">
+        <li>Set up a multimeter to measure resistance.</li>
+        <li>Read the number and the units.</li>
+        <li>Explain what changes resistance: material, width, and length.</li>
+      </ul>
+      <button class="btn" id="startBtn" type="button">Start</button>
+      <p style="margin-top:1em;color:var(--muted);font-size:.9rem">Have a real multimeter? Follow along with it. Use the virtual one on these slides to practice. Readings are simulated so every class sees the same numbers.</p>
+    </div>
+    <div class="hero-meter" aria-hidden="true" id="heroMeter"></div>
+  </div>
+</header>
+
+<!-- SLIDE 2 -->
+<section class="part slide" id="meet" data-title="Meet the meter">
+  <div class="wrap">
+    <h2>1. Meet the multimeter</h2>
+    <p class="intro">A multimeter measures electricity. It can measure more than one thing. That is why it is called a <em>multi</em>meter. Today you will use it to measure <strong>resistance</strong>.</p>
+    <div class="cols">
+      <div id="meetMeter"></div>
+      <div>
+        <p><strong>Tap a part name.</strong> The part lights up on the meter.</p>
+        <ul class="vocab" id="vocab"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3 -->
+<section class="part slide" id="setup" data-title="Set up the meter">
+  <div class="wrap">
+    <h2>2. Set up the meter</h2>
+    <div class="callout danger">
+      <strong class="t">Safety rule</strong>
+      <p>Never measure resistance on a part that has power. Take it out of the circuit first. Power can damage the meter.</p>
+    </div>
+    <div class="cols">
+      <div>
+        <div id="setupMeter"></div>
+        <div class="card" style="margin-top:10px;padding:12px">
+          <p style="margin-bottom:.4em;font-size:.95rem"><strong>What are the probes touching?</strong></p>
+          <div class="seg" id="setupLoad" role="group" aria-label="What the probes touch" style="flex-wrap:wrap">
+            <button type="button" data-l="air" aria-pressed="true">Nothing</button>
+            <button type="button" data-l="short" aria-pressed="false">Each other</button>
+            <button type="button" data-l="part" aria-pressed="false">Mystery resistor</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p>Follow the steps. Use the meter on the left. Each step turns green when you get it right.</p>
+        <ol class="steps" id="setupSteps">
+          <li data-step="black">Plug the <strong>black</strong> lead into <strong>COM</strong>.</li>
+          <li data-step="red">Plug the <strong>red</strong> lead into <strong>VΩ</strong>.</li>
+          <li data-step="dial">Turn the dial to <strong>Ω</strong>.</li>
+          <li data-step="short">Test the meter. Touch the two probes <strong>together</strong>. You should see about 0.</li>
+          <li data-step="part">Touch the probes to the two ends of the <strong>mystery resistor</strong>.</li>
+          <li data-step="read">Read the number <strong>and</strong> the units. (Next slide)</li>
+        </ol>
+        <div class="callout tip">
+          <strong class="t">Good to know</strong>
+          <p>On a real meter, probes touching may read a little more than 0, like 0.2 Ω. That is the resistance of the meter's own wires.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4 -->
+<section class="part slide" id="units" data-title="Ohms and units">
+  <div class="wrap">
+    <h2>Ohms and units</h2>
+    <p class="intro">Resistance is measured in <strong>ohms</strong>. The symbol is Ω.</p>
+    <div class="units">
+      <div><b>Ω</b><br>ohms</div>
+      <div><b>kΩ</b><br>1 kΩ = 1,000 Ω<br><small>k means thousand</small></div>
+      <div><b>MΩ</b><br>1 MΩ = 1,000,000 Ω<br><small>M means million</small></div>
+    </div>
+    <p><strong>OL</strong> means "over limit." The resistance is too big for the meter to measure.</p>
+    <div class="card">
+      <div id="setupQ"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5 -->
+<section class="part slide" id="parts" data-title="Test parts">
+  <div class="wrap">
+    <h2>3. Test parts. Is there any that has no resistance?</h2>
+    <p class="intro">Your mission: measure at least <strong>6</strong> parts. Look for a part that reads exactly 0 Ω. Does one exist?</p>
+    <div class="cols">
+      <div>
+        <div id="partsMeter"></div>
+        <p style="margin:10px 0 8px;font-size:.95rem">Turn the dial to <strong>Ω</strong>. Then tap a part. The probes touch both ends of it.</p>
+        <button class="btn ghost" id="liftBtn" type="button">Lift the probes</button>
+      </div>
+      <div>
+        <div class="progress" aria-hidden="true"><i id="partsBar"></i></div>
+        <p id="partsCount" style="font-weight:700;margin-bottom:.5em">Parts measured: 0 of 14</p>
+        <div class="items" id="items"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6 -->
+<section class="part slide" id="found" data-title="What did you find?">
+  <div class="wrap">
+    <h2>What did you find?</h2>
+    <div class="cols even">
+      <div class="card">
+        <h3>Your results</h3>
+        <div class="tbl-wrap" id="partsTable"></div>
+      </div>
+      <div>
+        <div class="card">
+          <div id="q1"></div>
+          <div id="q2"></div>
+        </div>
+        <div class="fact" id="fact1">
+          <h3>Facts: materials</h3>
+          <div id="fact1text">
+            <p>Different materials have different amounts of resistance. Some materials don't allow current to flow through easily, these are called insulators. Other materials, called conductors, allow current to flow through easily. Metals are conductors. Some metals have more resistance than others. Copper, aluminum, and gold have very low resistance and are excellent conductors of electricity. Copper is most commonly used in large circuits like those found in buildings and devices because it is stronger than aluminum and less expensive than gold.</p>
+          </div>
+          <button class="listen" type="button" data-target="#fact1text" aria-pressed="false">Listen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7 -->
+<section class="part slide" id="wires" data-title="Test wires">
+  <div class="wrap">
+    <h2>4. Test wires. What changes resistance?</h2>
+    <p class="intro">Build a wire. Pick the metal, width, and length. Turn the dial to <strong>Ω</strong> first. Then try the missions.</p>
+    <div class="cols">
+      <div id="wireMeter"></div>
+      <div>
+        <div class="card" style="padding:14px">
+          <fieldset class="ctl-group"><legend>Metal</legend>
+            <div class="seg" id="ctlMat" style="flex-wrap:wrap"></div>
+          </fieldset>
+          <div class="ctl-row">
+            <fieldset class="ctl-group"><legend>Width</legend>
+              <div class="seg" id="ctlWid"></div>
+            </fieldset>
+            <fieldset class="ctl-group"><legend>Length</legend>
+              <div class="seg" id="ctlLen"></div>
+            </fieldset>
+          </div>
+          <div class="wire-box"><svg id="wireSvg" viewBox="0 0 300 90" width="100%" role="img" aria-label="Picture of your wire"></svg></div>
+          <button class="btn" id="saveBtn" type="button">Save this reading</button>
+          <button class="btn ghost" id="clearBtn" type="button">Clear table</button>
+          <span id="saveMsg" role="status" aria-live="polite" style="margin-left:8px;font-weight:700"></span>
+          <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Saved readings</summary>
+            <div class="tbl-wrap" id="wireTable" style="margin-top:6px"></div>
+          </details>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Missions" id="missTabs">
+          <button type="button" role="tab" aria-selected="true" data-m="missA">A: Metals</button>
+          <button type="button" role="tab" aria-selected="false" data-m="missB">B: Width</button>
+          <button type="button" role="tab" aria-selected="false" data-m="missC">C: Length</button>
+          <button type="button" role="tab" aria-selected="false" data-m="missD">Challenge</button>
+        </div>
+
+        <div class="mission" id="missA" role="tabpanel">
+          <h3>Mission A: Try different metals</h3>
+          <p>Set width to <strong>wide</strong> and length to <strong>25 m</strong>. Tap each metal. Read the meter each time.</p>
+          <div id="mA"></div>
+          <div class="fact" id="factA" hidden>
+            <p><strong>Look at your numbers:</strong> copper, aluminum, and gold read low. These are great conductors. Nichrome reads high. It is a metal that resists current a lot.</p>
+            <div id="factAtext"><p>Some metals have more resistance than others. Copper, aluminum, and gold have very low resistance and are excellent conductors of electricity. Copper is most commonly used in large circuits like those found in buildings and devices because it is stronger than aluminum and less expensive than gold.</p></div>
+            <button class="listen" type="button" data-target="#factAtext" aria-pressed="false">Listen</button>
+          </div>
+        </div>
+
+        <div class="mission" id="missB" role="tabpanel" hidden>
+          <h3>Mission B: Try different widths</h3>
+          <p>Pick <strong>copper</strong> and <strong>25 m</strong>. Switch between thin and wide. Compare the numbers.</p>
+          <div id="mB"></div>
+          <div class="fact" id="factB" hidden>
+            <div id="factBtext"><p>Wire shape also can impact resistance. Wide wires have lots of space for current. This means that wide wires have lower resistance. Skinnier wires don't have as much room for the current. They have higher resistance. This is why power lines that you see outside are much wider than the wires you see in your home. The power lines need to carry more current so more space is needed to prevent overheating.</p></div>
+            <button class="listen" type="button" data-target="#factBtext" aria-pressed="false">Listen</button>
+          </div>
+        </div>
+
+        <div class="mission" id="missC" role="tabpanel" hidden>
+          <h3>Mission C: Try different lengths</h3>
+          <p>Pick <strong>copper</strong> and <strong>thin</strong>. Switch between 5 m, 25 m, and 100 m. Compare the numbers.</p>
+          <div id="mC"></div>
+          <div class="fact" id="factC" hidden>
+            <div id="factCtext"><p>Length also impacts resistance. Longer wires resist the flow of current more than shorter wires. This is another reason power lines need wide wires. Power lines are very long when compared to the wires in your home.</p></div>
+            <button class="listen" type="button" data-target="#factCtext" aria-pressed="false">Listen</button>
+          </div>
+        </div>
+
+        <div class="mission" id="missD" role="tabpanel" hidden>
+          <h3>Challenge: Lowest resistance</h3>
+          <p>Build the wire with the <strong>lowest resistance</strong> you can. Use the controls above. Then tap check.</p>
+          <button class="btn" id="chalBtn" type="button">Check my wire</button>
+          <p id="chalMsg" role="status" aria-live="polite" style="margin:10px 0 0;font-weight:700"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8 -->
+<section class="part slide" id="check" data-title="Check yourself">
+  <div class="wrap">
+    <h2>5. Check yourself</h2>
+    <p class="intro">Answer 8 questions. You get one try on each.</p>
+    <p id="qprog" style="font-weight:700"></p>
+    <div id="quiz"></div>
+    <div id="quizResult"></div>
+  </div>
+</section>
+
+</main>
+
+<nav class="bar" aria-label="Slides">
+  <button class="btn ghost" id="prevBtn" type="button">Back</button>
+  <div class="mid">
+    <span id="slideLbl" aria-live="polite"></span>
+    <div class="dots" id="dots"></div>
+  </div>
+  <button class="btn" id="nextBtn" type="button">Next</button>
+</nav>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+function polar(cx,cy,r,deg){var a=deg*Math.PI/180;return [cx+r*Math.sin(a),cy-r*Math.cos(a)];}
+function $(s,r){return (r||document).querySelector(s);}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+
+/* ---------- reading logic ---------- */
+function fmtOhms(r){
+  if(r===Infinity) return {num:'OL',unit:'',word:'over limit'};
+  if(r<1000) return {num:r.toFixed(1),unit:'Ω',word:'ohms'};
+  if(r<1000000) return {num:(r/1000).toFixed(2),unit:'kΩ',word:'kilohms'};
+  return {num:(r/1000000).toFixed(2),unit:'MΩ',word:'megohms'};
+}
+function reading(st){
+  var L=st.load;
+  if(st.dial==='OFF') return {num:'',unit:'',msg:'The meter is OFF. Turn the dial to Ω.',tone:''};
+  if(st.black!=='COM'||st.red!=='VΩ') return {num:'Err',unit:'',msg:'Check the leads. The black lead goes in COM. The red lead goes in VΩ.',tone:'warn'};
+  if(st.dial==='V'){
+    if(L.kind==='live') return {num:'1.58',unit:'V',msg:'That number is voltage (V), not resistance. Turn the dial to Ω.',tone:'warn'};
+    return {num:'0.00',unit:'V',msg:'The dial is on V (volts). Turn it to Ω to measure resistance.',tone:'warn'};
+  }
+  if(st.dial==='A') return {num:'0.00',unit:'A',msg:'The dial is on A (amps). Turn it to Ω to measure resistance.',tone:'warn'};
+  if(L.kind==='live') return {num:'----',unit:'',msg:'STOP! This part has power. Never measure resistance on a part with power. Lift the probes.',tone:'danger'};
+  if(L.kind==='air') return {num:'OL',unit:'',msg:'OL means "over limit." The probes are not touching anything, so no current can flow.',tone:''};
+  if(L.kind==='short') return {num:'0.0',unit:'Ω',msg:'Probes touching = about 0 Ω. The meter works!',tone:'ok',ok:true,ohms:0};
+  var f=fmtOhms(L.ohms);
+  if(L.ohms===Infinity) return {num:'OL',unit:'',msg:L.name+': OL. The resistance is too big to measure. Current cannot flow through it. It is an insulator.',tone:'ok',ok:true,ohms:Infinity,f:f};
+  return {num:f.num,unit:f.unit,msg:L.name+': '+f.num+' '+f.unit+' ('+f.word+')',tone:'ok',ok:true,ohms:L.ohms,f:f};
+}
+
+/* ---------- meter component ---------- */
+var DIALS=[['OFF',-120,'off'],['V',-45,'volts'],['A',45,'amps'],['Ω',120,'ohms']];
+var PORTS=[['10A',60],['COM',130],['VΩ',200]];
+var OUT='#16293B';
+function resistorIcon(b1,b2,b3){
+  return {svg:'<line x1="4" y1="20" x2="32" y2="20" stroke="#8A95A0" stroke-width="3" stroke-linecap="round"/><line x1="88" y1="20" x2="116" y2="20" stroke="#8A95A0" stroke-width="3" stroke-linecap="round"/>'+
+    '<rect x="28" y="9" width="64" height="22" rx="10" fill="#E2C9A0" stroke="'+OUT+'" stroke-width="2"/>'+
+    '<rect x="38" y="10" width="6" height="20" fill="'+b1+'"/><rect x="49" y="10" width="6" height="20" fill="'+b2+'"/><rect x="60" y="10" width="6" height="20" fill="'+b3+'"/><rect x="76" y="10" width="5" height="20" fill="#C9A227"/>',a:[4,20],b:[116,20]};
+}
+var ICONS={
+  box:function(L){return {svg:'<rect x="4" y="8" width="112" height="24" rx="4" fill="'+(L.color||'#888')+'" stroke="'+OUT+'" stroke-width="2"/>',a:[4,20],b:[116,20]};},
+  wire:function(L){var sw=L.sw||6;return {svg:'<line x1="6" y1="20" x2="114" y2="20" stroke="'+OUT+'" stroke-width="'+(sw+3)+'" stroke-linecap="round"/><line x1="6" y1="20" x2="114" y2="20" stroke="'+L.color+'" stroke-width="'+sw+'" stroke-linecap="round"/>',a:[6,20],b:[114,20]};},
+  cu:function(){var p='M6,22 C26,2 44,38 62,20 S96,4 114,18';return {svg:'<path d="'+p+'" fill="none" stroke="'+OUT+'" stroke-width="8" stroke-linecap="round"/><path d="'+p+'" fill="none" stroke="#C97A3E" stroke-width="5" stroke-linecap="round"/>',a:[6,22],b:[114,18]};},
+  al:function(){return {svg:'<polygon points="4,12 20,9 36,13 52,9 68,13 84,9 100,13 116,10 116,30 100,32 84,28 68,32 52,28 36,32 20,28 4,31" fill="#D5DCE2" stroke="'+OUT+'" stroke-width="2" stroke-linejoin="round"/><path d="M10,18 L40,20 L70,17 L108,20" stroke="#fff" stroke-width="2" fill="none" opacity=".85"/>',a:[4,20],b:[116,20]};},
+  clip:function(){var p='M108,26 L14,26 A8,8 0 0 1 14,10 L102,10 A6,6 0 0 1 102,22 L40,22';return {svg:'<path d="'+p+'" fill="none" stroke="'+OUT+'" stroke-width="6.5" stroke-linecap="round"/><path d="'+p+'" fill="none" stroke="#A9B4BF" stroke-width="3.5" stroke-linecap="round"/>',a:[40,22],b:[108,26]};},
+  pen:function(){return {svg:'<rect x="4" y="15" width="112" height="10" rx="5" fill="#50505A" stroke="'+OUT+'" stroke-width="2"/><path d="M12,18 H108" stroke="#9A9AA6" stroke-width="1.5" opacity=".8"/>',a:[4,20],b:[116,20]};},
+  spk:function(){return {svg:'<line x1="4" y1="20" x2="42" y2="20" stroke="#6B7782" stroke-width="3" stroke-linecap="round"/><line x1="78" y1="20" x2="116" y2="20" stroke="#6B7782" stroke-width="3" stroke-linecap="round"/><circle cx="60" cy="20" r="19" fill="#2B3440" stroke="'+OUT+'" stroke-width="2"/><circle cx="60" cy="20" r="12" fill="#4A5766" stroke="#8795A3" stroke-width="1.5"/><circle cx="60" cy="20" r="5" fill="#1B2430"/>',a:[4,20],b:[116,20]};},
+  mot:function(){return {svg:'<rect x="96" y="18" width="16" height="4" fill="#C4CCD3" stroke="'+OUT+'" stroke-width="1.5"/><rect x="30" y="6" width="68" height="28" rx="6" fill="#AEB8C2" stroke="'+OUT+'" stroke-width="2"/><rect x="30" y="6" width="14" height="28" rx="4" fill="#7E8A96"/><line x1="56" y1="10" x2="56" y2="30" stroke="#8C97A2" stroke-width="2"/><line x1="4" y1="13" x2="30" y2="13" stroke="#D63A2F" stroke-width="3" stroke-linecap="round"/><line x1="4" y1="27" x2="30" y2="27" stroke="#1B2430" stroke-width="3" stroke-linecap="round"/>',a:[4,13],b:[4,27]};},
+  bulb:function(){return {svg:'<circle cx="38" cy="20" r="17" fill="#FFF4B8" stroke="'+OUT+'" stroke-width="2"/><path d="M27,32 L31,17 L35,27 L40,15 L44,28 L49,32" fill="none" stroke="#6B5B2A" stroke-width="1.8"/><rect x="54" y="11" width="32" height="18" fill="#B8C2CC" stroke="'+OUT+'" stroke-width="2"/><path d="M62,11 V29 M70,11 V29 M78,11 V29" stroke="#7E8A96" stroke-width="1.5"/><rect x="86" y="15" width="12" height="10" rx="2" fill="#7E8A96" stroke="'+OUT+'" stroke-width="2"/>',a:[70,29],b:[98,20]};},
+  r1:function(){return resistorIcon('#F28C28','#F28C28','#7B4A21');},
+  r2:function(){return resistorIcon('#F2D024','#7F3FBF','#D32F2F');},
+  rub:function(){return {svg:'<rect x="8" y="9" width="104" height="22" rx="11" fill="none" stroke="'+OUT+'" stroke-width="9"/><rect x="8" y="9" width="104" height="22" rx="11" fill="none" stroke="#D9A66C" stroke-width="6"/>',a:[8,20],b:[112,20]};},
+  rul:function(){var t='',i;for(i=0;i<15;i++){t+='M'+(10+i*7)+',8 v'+(i%5===0?12:7)+' ';}return {svg:'<rect x="4" y="8" width="112" height="24" rx="3" fill="#BFE0F2" stroke="'+OUT+'" stroke-width="2"/><path d="'+t+'" stroke="'+OUT+'" stroke-width="1.4" fill="none"/>',a:[4,20],b:[116,20]};},
+  stk:function(){return {svg:'<rect x="4" y="9" width="112" height="22" rx="11" fill="#E6BE86" stroke="'+OUT+'" stroke-width="2"/><path d="M22,15 H62 M40,25 H96 M70,17 H100" stroke="#C99A5E" stroke-width="1.5" fill="none"/>',a:[4,20],b:[116,20]};},
+  mar:function(){return {svg:'<circle cx="60" cy="20" r="17" fill="#9ED8E3" stroke="'+OUT+'" stroke-width="2"/><path d="M48,23 C50,10 70,10 72,20 C70,31 54,31 50,24" fill="none" stroke="#3B82C4" stroke-width="3"/><path d="M49,14 A13,13 0 0 1 58,8" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>',a:[43,20],b:[77,20]};},
+  pap:function(){return {svg:'<path d="M26,4 H80 L96,20 V36 H26 Z" fill="#fff" stroke="'+OUT+'" stroke-width="2" stroke-linejoin="round"/><path d="M80,4 V20 H96" fill="#E3E9EE" stroke="'+OUT+'" stroke-width="2" stroke-linejoin="round"/><path d="M32,12 H70 M32,25 H90 M32,30 H90" stroke="#9AA8B5" stroke-width="2" fill="none"/>',a:[26,20],b:[96,20]};},
+  bat:function(){return {svg:'<rect x="102" y="14" width="10" height="12" rx="2" fill="#C4CCD3" stroke="'+OUT+'" stroke-width="2"/><rect x="8" y="7" width="94" height="26" rx="4" fill="#2F9E5E" stroke="'+OUT+'" stroke-width="2"/><rect x="8" y="7" width="22" height="26" rx="4" fill="#1B2430"/><text x="19" y="25" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">−</text><text x="60" y="25" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">AA</text><text x="90" y="25" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">+</text>',a:[8,20],b:[112,20]};}
+};
+function probeSvg(L){
+  var tb,tr,extra='';
+  if(L.kind==='short'){tb=[123,96];tr=[137,96];}
+  else if(L.kind==='air'){tb=[75,58];tr=[185,58];}
+  else{
+    var d=(ICONS[L.icon]||ICONS.box)(L);
+    tb=[70+d.a[0],78+d.a[1]];tr=[70+d.b[0],78+d.b[1]];
+    extra='<g transform="translate(70,78)">'+d.svg+'</g>'+
+          '<text x="130" y="126" text-anchor="middle" class="pv-name">'+L.name+'</text>';
+  }
+  return '<svg viewBox="0 0 260 130" width="100%" aria-hidden="true">'+extra+
+    '<line x1="30" y1="2" x2="'+tb[0]+'" y2="'+tb[1]+'" stroke="#1B2430" stroke-width="7" stroke-linecap="round"/>'+
+    '<line x1="230" y1="2" x2="'+tr[0]+'" y2="'+tr[1]+'" stroke="#D63A2F" stroke-width="7" stroke-linecap="round"/>'+
+    '<circle cx="'+tb[0]+'" cy="'+tb[1]+'" r="4" fill="#DDE3E8" stroke="#16293B" stroke-width="1.5"/>'+
+    '<circle cx="'+tr[0]+'" cy="'+tr[1]+'" r="4" fill="#DDE3E8" stroke="#16293B" stroke-width="1.5"/>'+
+    '<text x="6" y="126" class="pv-label">black probe</text><text x="254" y="126" text-anchor="end" class="pv-label">red probe</text></svg>';
+}
+function createMeter(mount,o){
+  o=o||{};
+  var st={dial:o.dial!==undefined?o.dial:'OFF',black:o.black||'COM',red:o.red||'VΩ',load:o.load||{kind:'air'}};
+  var interactive=o.interactive!==false;
+  var cx=130,cy=235;
+  var dialSvg=DIALS.map(function(d){
+    var p=polar(cx,cy,86,d[1]);
+    return '<g class="dial-opt'+(d[0]==='OFF'?' off':'')+'" data-dial="'+d[0]+'"'+(interactive?' tabindex="0" role="button" aria-label="Dial: '+d[2]+'"':'')+'>'+
+      '<circle class="dial-hit" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="19"/>'+
+      '<text class="dial-txt" x="'+p[0].toFixed(1)+'" y="'+(p[1]+6).toFixed(1)+'" text-anchor="middle">'+d[0]+'</text></g>';
+  }).join('');
+  var portSvg=PORTS.map(function(p){
+    return '<text class="port-txt" x="'+p[1]+'" y="340" text-anchor="middle">'+p[0]+'</text>'+
+      '<circle class="port" cx="'+p[1]+'" cy="372" r="17"/><circle class="port-in" cx="'+p[1]+'" cy="372" r="9"/>';
+  }).join('');
+  var svg=
+  '<svg class="meter-svg" viewBox="0 0 260 440" role="img" aria-label="Multimeter">'+
+    '<rect class="m-body" x="10" y="5" width="240" height="430" rx="28"/>'+
+    '<g class="m-part" data-part="display"><rect class="m-bezel" x="30" y="26" width="200" height="102" rx="12"/>'+
+      '<rect class="m-lcd" x="38" y="34" width="184" height="86" rx="6"/>'+
+      '<text class="lcd-tag" x="46" y="50">AUTO</text>'+
+      '<text class="lcd-num" x="186" y="98" text-anchor="end" data-r="num"></text>'+
+      '<text class="lcd-unit" x="214" y="98" text-anchor="end" data-r="unit"></text>'+
+      '<rect class="hlring" x="24" y="20" width="212" height="114" rx="16"/></g>'+
+    '<text class="m-brand" x="130" y="152" text-anchor="middle">MULTIMETER</text>'+
+    '<g class="m-part" data-part="dial"><circle class="knob1" cx="130" cy="235" r="62"/><circle class="knob2" cx="130" cy="235" r="46"/>'+
+      '<polygon class="pointer" data-r="pointer" points="130,182 123,208 137,208"/>'+
+      dialSvg+'<circle class="hlring" cx="130" cy="235" r="108"/></g>'+
+    '<g>'+portSvg+'</g>'+
+    '<g data-r="plugs"></g>'+
+    '<g class="m-part" data-part="10A"><circle class="hlring" cx="60" cy="372" r="30"/></g>'+
+    '<g class="m-part" data-part="COM"><circle class="hlring" cx="130" cy="372" r="30"/></g>'+
+    '<g class="m-part" data-part="VΩ"><circle class="hlring" cx="200" cy="372" r="30"/></g>'+
+  '</svg>';
+  var portsCtl='';
+  if(o.showPorts){
+    portsCtl='<div class="ports-ctl">'+['black','red'].map(function(c){
+      return '<div class="row"><span class="dot '+c+'"></span><span>'+(c==='black'?'Black':'Red')+' lead goes in:</span>'+
+        '<div class="seg" data-lead="'+c+'" role="group" aria-label="'+c+' lead port">'+
+        PORTS.map(function(p){return '<button type="button" data-port="'+p[0]+'" aria-pressed="false">'+p[0]+'</button>';}).join('')+
+        '</div></div>';
+    }).join('')+'</div>';
+  }
+  mount.innerHTML='<div class="meter'+(interactive?' live':'')+'">'+svg+
+    (o.minimal?'':'<div class="probe-wrap" data-part="probes" data-r="probe"></div><div class="says" role="status" aria-live="polite" data-r="says"></div>')+
+    portsCtl+'</div>';
+  var root=mount.firstChild;
+  var api={st:st,onChange:o.onChange||null};
+
+  function update(){
+    var r=reading(st);
+    $('[data-r="num"]',root).textContent=r.num;
+    $('[data-r="unit"]',root).textContent=r.unit;
+    var d=DIALS.filter(function(x){return x[0]===st.dial;})[0];
+    $('[data-r="pointer"]',root).style.transform='rotate('+d[1]+'deg)';
+    $$('.dial-opt',root).forEach(function(g){g.classList.toggle('on',g.getAttribute('data-dial')===st.dial);});
+    var pl='';
+    function plug(port,cls,rad){var x=PORTS.filter(function(p){return p[0]===port;})[0][1];return '<circle class="'+cls+'" cx="'+x+'" cy="372" r="'+rad+'"/>';}
+    pl+=plug(st.black,'plug-black',12);
+    pl+=plug(st.red,'plug-red',st.red===st.black?6:12);
+    $('[data-r="plugs"]',root).innerHTML=pl;
+    $('svg',root).setAttribute('aria-label','Multimeter. Display shows '+(r.num||'nothing')+' '+r.unit+'. Dial on '+st.dial+'.');
+    var pr=$('[data-r="probe"]',root); if(pr) pr.innerHTML=probeSvg(st.load);
+    var sy=$('[data-r="says"]',root); if(sy){sy.textContent=r.msg;sy.className='says '+(r.tone||'');}
+    $$('.ports-ctl .seg',root).forEach(function(seg){
+      var lead=seg.getAttribute('data-lead');
+      $$('button',seg).forEach(function(b){b.setAttribute('aria-pressed',String(st[lead]===b.getAttribute('data-port')));});
+    });
+    if(api.onChange) api.onChange(st,r);
+  }
+  api.update=update;
+  api.setLoad=function(l){st.load=l;update();};
+  api.setDial=function(d){st.dial=d;update();};
+  api.highlight=function(part){
+    $$('.m-part',root).forEach(function(g){g.classList.toggle('hl',g.getAttribute('data-part')===part);});
+    var pw=$('.probe-wrap',root); if(pw) pw.classList.toggle('hl',part==='probes');
+  };
+  if(interactive){
+    $$('.dial-opt',root).forEach(function(g){
+      function go(){api.setDial(g.getAttribute('data-dial'));}
+      g.addEventListener('click',go);
+      g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+    });
+  }
+  $$('.ports-ctl .seg',root).forEach(function(seg){
+    var lead=seg.getAttribute('data-lead');
+    $$('button',seg).forEach(function(b){b.addEventListener('click',function(){st[lead]=b.getAttribute('data-port');update();});});
+  });
+  update();
+  return api;
+}
+
+/* ---------- multiple choice ---------- */
+function renderMC(mount,cfg){
+  mount.classList.add('mc');
+  mount.innerHTML='<p class="mc-q" id="'+cfg.id+'-q">'+cfg.q+'</p><div class="mc-opts" role="group" aria-labelledby="'+cfg.id+'-q">'+
+    cfg.options.map(function(o,i){return '<button type="button" class="opt" data-i="'+i+'">'+o+'</button>';}).join('')+
+    '</div><p class="mc-fb" role="status" aria-live="polite"></p>';
+  var fb=$('.mc-fb',mount),done=false;
+  $$('.opt',mount).forEach(function(b){
+    b.addEventListener('click',function(){
+      if(done) return;
+      var g=cfg.guard&&cfg.guard();
+      if(g){fb.className='mc-fb warn';fb.textContent=g;return;}
+      var i=+b.getAttribute('data-i');
+      if(i===cfg.correct){
+        done=true;b.classList.add('right');fb.className='mc-fb good';fb.textContent='Yes! '+cfg.right;
+        $$('.opt',mount).forEach(function(x){x.disabled=true;});
+        if(cfg.onCorrect) cfg.onCorrect();
+      }else{
+        b.classList.add('wrong');b.disabled=true;fb.className='mc-fb warn';fb.textContent=cfg.wrong;
+      }
+    });
+  });
+}
+
+/* ---------- hero meter ---------- */
+createMeter($('#heroMeter'),{dial:'Ω',interactive:false,minimal:true,load:{kind:'ohms',ohms:4700,name:'Resistor',color:'#D8B98A'}});
+
+/* ---------- Part 1: parts of a meter ---------- */
+var meet=createMeter($('#meetMeter'),{dial:'Ω',interactive:false});
+var VOCAB=[
+  ['display','Display','Shows the number. Look here for the reading and the units.'],
+  ['dial','Dial','Picks what you measure. For resistance, turn it to Ω.'],
+  ['COM','COM port','COM means common. The black lead always goes here.'],
+  ['VΩ','VΩ port','The red lead goes here to measure resistance (Ω) or voltage (V).'],
+  ['10A','10A port','Only for measuring big current. Do not use it for resistance.'],
+  ['probes','Probes','The metal tips. Touch them to the two ends of the part you test.']
+];
+var vocabEl=$('#vocab');
+VOCAB.forEach(function(v){
+  var li=document.createElement('li');
+  li.innerHTML='<button type="button" aria-pressed="false" data-p="'+v[0]+'"><b>'+v[1]+'</b>'+v[2]+'</button>';
+  vocabEl.appendChild(li);
+});
+$$('button',vocabEl).forEach(function(b){
+  b.addEventListener('click',function(){
+    var on=b.getAttribute('aria-pressed')==='true';
+    $$('button',vocabEl).forEach(function(x){x.setAttribute('aria-pressed','false');});
+    if(on){meet.highlight(null);}else{b.setAttribute('aria-pressed','true');meet.highlight(b.getAttribute('data-p'));}
+  });
+});
+
+/* ---------- Part 2: setup ---------- */
+var flags={short:false,part:false,read:false};
+var MYSTERY={kind:'ohms',ohms:4700,name:'Mystery resistor',color:'#D8B98A'};
+var LOADS={air:{kind:'air'},short:{kind:'short'},part:MYSTERY};
+var setup=createMeter($('#setupMeter'),{dial:'OFF',black:'VΩ',red:'10A',showPorts:true,onChange:function(st,r){
+  var okLeads=st.black==='COM'&&st.red==='VΩ';
+  if(okLeads&&st.dial==='Ω'&&st.load.kind==='short') flags.short=true;
+  if(okLeads&&st.dial==='Ω'&&st.load.kind==='ohms') flags.part=true;
+  var done={black:st.black==='COM',red:st.red==='VΩ',dial:st.dial==='Ω',short:flags.short,part:flags.part,read:flags.read};
+  $$('#setupSteps li').forEach(function(li){li.classList.toggle('done',!!done[li.getAttribute('data-step')]);});
+  $$('#setupLoad button').forEach(function(b){b.setAttribute('aria-pressed',String(st.load.kind===(b.getAttribute('data-l')==='part'?'ohms':b.getAttribute('data-l'))));});
+}});
+$$('#setupLoad button').forEach(function(b){b.addEventListener('click',function(){setup.setLoad(LOADS[b.getAttribute('data-l')]);});});
+renderMC($('#setupQ'),{id:'sq',q:'Set up your meter and touch the mystery resistor. The meter shows 4.70 kΩ. How many ohms is that?',
+  options:['47 Ω','470 Ω','4,700 Ω','4,700,000 Ω'],correct:2,
+  guard:function(){return flags.part?null:'Do the steps first. Touch the probes to the mystery resistor.';},
+  right:'k means thousand. 4.70 kΩ is 4,700 Ω.',wrong:'Not quite. Remember, k means thousand.',
+  onCorrect:function(){flags.read=true;setup.update();}});
+
+/* ---------- Part 3: parts lab ---------- */
+var ITEMS=[
+  {id:'cu',name:'Copper wire',sub:'30 cm piece',ohms:0.3,color:'#B87333'},
+  {id:'al',name:'Aluminum foil',sub:'30 cm strip',ohms:0.5,color:'#AEB8C2'},
+  {id:'clip',name:'Paper clip',sub:'steel',ohms:0.8,color:'#7A8691'},
+  {id:'pen',name:'Pencil lead',sub:'graphite, 5 cm',ohms:7.5,color:'#4A4A52'},
+  {id:'spk',name:'Speaker',sub:'small speaker',ohms:8,color:'#3B4A5A'},
+  {id:'mot',name:'Motor',sub:'small hobby motor',ohms:11,color:'#5A6B7C'},
+  {id:'bulb',name:'Light bulb',sub:'flashlight bulb, off',ohms:14,color:'#E8C547'},
+  {id:'r1',name:'Resistor A',sub:'color-band part',ohms:330,color:'#D8B98A'},
+  {id:'r2',name:'Resistor B',sub:'color-band part',ohms:4700,color:'#C9A36B'},
+  {id:'rub',name:'Rubber band',sub:'rubber',ohms:Infinity,color:'#C0584B'},
+  {id:'rul',name:'Plastic ruler',sub:'plastic',ohms:Infinity,color:'#7FB6D9'},
+  {id:'stk',name:'Craft stick',sub:'wood',ohms:Infinity,color:'#D2A66E'},
+  {id:'mar',name:'Glass marble',sub:'glass',ohms:Infinity,color:'#9ED2D9'},
+  {id:'pap',name:'Paper',sub:'sheet of paper',ohms:Infinity,color:'#E9E4D6'},
+  {id:'bat',name:'AA battery',sub:'has power!',live:true,color:'#3AA16B'}
+];
+var TOTAL=ITEMS.filter(function(i){return !i.live;}).length;
+var measured={},order=[],currentItem=null;
+function lc(it){return it.live?{kind:'live',name:it.name,color:it.color,id:it.id,icon:it.id}:{kind:'ohms',ohms:it.ohms,name:it.name,color:it.color,id:it.id,icon:it.id};}
+var parts=createMeter($('#partsMeter'),{dial:'OFF',onChange:function(st,r){
+  var L=st.load;
+  if(L.id&&r.ok&&L.kind==='ohms'&&!measured[L.id]){measured[L.id]=r;order.push(L.id);renderParts();}
+  else renderParts();
+}});
+function renderParts(){
+  var n=order.length;
+  $('#partsBar').style.width=Math.round(n/TOTAL*100)+'%';
+  $('#partsCount').textContent='Parts measured: '+n+' of '+TOTAL;
+  $$('#items .item').forEach(function(b){
+    var id=b.getAttribute('data-id');
+    b.setAttribute('aria-pressed',String(parts.st.load.id===id));
+    b.classList.toggle('measured',!!measured[id]);
+    var g=$('.got',b);
+    if(measured[id]){g.textContent=measured[id].num+' '+measured[id].unit;g.className='got'+(measured[id].ohms===Infinity?' no':'');}
+  });
+  var t=$('#partsTable');
+  if(!n){t.innerHTML='<p class="empty">No parts measured yet.</p>';return;}
+  var rows=order.map(function(id){
+    var it=ITEMS.filter(function(x){return x.id===id;})[0],r=measured[id];
+    return '<tr><td>'+it.name+'</td><td class="num">'+r.num+' '+r.unit+'</td><td>'+(r.ohms===Infinity?'No (insulator)':'Yes')+'</td></tr>';
+  }).join('');
+  t.innerHTML='<table><thead><tr><th>Part</th><th>Reading</th><th>Does current flow?</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+var itemsEl=$('#items');
+ITEMS.forEach(function(it){
+  var b=document.createElement('button');b.type='button';b.className='item';b.setAttribute('data-id',it.id);b.setAttribute('aria-pressed','false');
+  b.innerHTML='<span class="icon"><svg viewBox="0 0 120 40" aria-hidden="true">'+ICONS[it.id]({color:it.color}).svg+'</svg></span><b>'+it.name+'</b><small>'+it.sub+'</small><span class="got"></span>';
+  b.addEventListener('click',function(){parts.setLoad(lc(it));});
+  itemsEl.appendChild(b);
+});
+$('#liftBtn').addEventListener('click',function(){parts.setLoad({kind:'air'});});
+renderParts();
+function conductorsMeasured(){return order.filter(function(id){return measured[id].ohms!==Infinity;}).length;}
+renderMC($('#q1'),{id:'q1',q:'Look at your results. Did any part that lets current flow read exactly 0 Ω?',
+  options:['Yes, some did','No. Every one had some resistance'],correct:1,
+  guard:function(){return order.length>=6?null:'Measure at least 6 parts first. Turn the dial to Ω, then tap parts.';},
+  right:'Every electrical part has resistance. Even a short copper wire is a little more than 0.',
+  wrong:'Check your table again. Is there a reading of exactly 0?'});
+renderMC($('#q2'),{id:'q2',q:'Some parts read OL. What does that tell you?',
+  options:['The meter is broken','The resistance is too big to measure. It is an insulator','The resistance is zero'],correct:1,
+  guard:function(){return order.length>=6?null:'Measure at least 6 parts first.';},
+  right:'Insulators do not let current flow easily.',wrong:'Try again. OL means over limit.'});
+
+/* ---------- Part 4: wire lab ---------- */
+var MATS=[
+  {id:'cu',name:'Copper',rho:1,color:'#B87333'},
+  {id:'al',name:'Aluminum',rho:1.6,color:'#A8B3BD'},
+  {id:'au',name:'Gold',rho:1.4,color:'#E0B400'},
+  {id:'fe',name:'Steel',rho:6,color:'#6B7782'},
+  {id:'ni',name:'Nichrome',rho:65,color:'#7B6F94'}
+];
+var WIDS=[{id:'thin',name:'Thin',area:1,sw:4},{id:'wide',name:'Wide',area:4,sw:14}];
+var LENS=[{id:'5',name:'5 m',m:5,px:65},{id:'25',name:'25 m',m:25,px:143},{id:'100',name:'100 m',m:100,px:260}];
+var wire={mat:'cu',wid:'wide',len:'25'};
+function pick(arr,id){return arr.filter(function(x){return x.id===id;})[0];}
+function wireOhms(){return 0.2*pick(MATS,wire.mat).rho*pick(LENS,wire.len).m/pick(WIDS,wire.wid).area;}
+function wireName(){return pick(MATS,wire.mat).name+', '+pick(WIDS,wire.wid).name.toLowerCase()+', '+pick(LENS,wire.len).name;}
+var wm=createMeter($('#wireMeter'),{dial:'OFF'});
+function applyWire(){
+  var m=pick(MATS,wire.mat),w=pick(WIDS,wire.wid),l=pick(LENS,wire.len);
+  wm.setLoad({kind:'ohms',ohms:wireOhms(),name:wireName(),color:m.color,icon:'wire',sw:w.sw});
+  var x1=20,x2=20+l.px;
+  $('#wireSvg').innerHTML='<line x1="'+x1+'" y1="38" x2="'+x2+'" y2="38" stroke="'+m.color+'" stroke-width="'+w.sw+'" stroke-linecap="round"/>'+
+    '<circle cx="'+x1+'" cy="38" r="5" fill="#1B2430"/><circle cx="'+x2+'" cy="38" r="5" fill="#D63A2F"/>'+
+    '<text x="'+x1+'" y="76" style="font:700 13px var(--font-body);fill:var(--ink)">'+m.name+', '+w.name.toLowerCase()+', '+l.name+'</text>';
+  $$('#ctlMat button').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-v')===wire.mat));});
+  $$('#ctlWid button').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-v')===wire.wid));});
+  $$('#ctlLen button').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-v')===wire.len));});
+}
+function buildSeg(sel,arr,key){
+  var el=$(sel);
+  el.innerHTML=arr.map(function(a){return '<button type="button" data-v="'+a.id+'" aria-pressed="false">'+a.name+'</button>';}).join('');
+  $$('button',el).forEach(function(b){b.addEventListener('click',function(){wire[key]=b.getAttribute('data-v');applyWire();});});
+}
+buildSeg('#ctlMat',MATS,'mat');buildSeg('#ctlWid',WIDS,'wid');buildSeg('#ctlLen',LENS,'len');
+applyWire();
+
+var saved=[];
+function renderSaved(){
+  var t=$('#wireTable');
+  if(!saved.length){t.innerHTML='<p class="empty">Saved readings show here.</p>';return;}
+  t.innerHTML='<table><thead><tr><th>Metal</th><th>Width</th><th>Length</th><th>Reading</th></tr></thead><tbody>'+
+    saved.map(function(s){return '<tr><td>'+s.m+'</td><td>'+s.w+'</td><td>'+s.l+'</td><td class="num">'+s.r+'</td></tr>';}).join('')+'</tbody></table>';
+}
+renderSaved();
+$('#saveBtn').addEventListener('click',function(){
+  var r=reading(wm.st),msg=$('#saveMsg');
+  if(!r.ok){msg.textContent='Set the meter first. Turn the dial to Ω.';return;}
+  saved.unshift({m:pick(MATS,wire.mat).name,w:pick(WIDS,wire.wid).name,l:pick(LENS,wire.len).name,r:r.num+' '+r.unit});
+  if(saved.length>12) saved.pop();
+  msg.textContent='Saved.';renderSaved();
+});
+$('#clearBtn').addEventListener('click',function(){saved=[];$('#saveMsg').textContent='';renderSaved();});
+
+renderMC($('#mA'),{id:'mA',q:'Which metal had the HIGHEST resistance?',options:['Copper','Gold','Aluminum','Nichrome'],correct:3,
+  guard:function(){return reading(wm.st).ok?null:'Turn the dial to Ω and test the metals first.';},
+  right:'Nichrome resists current the most.',wrong:'Not that one. Compare the numbers for all five metals.',
+  onCorrect:function(){$('#factA').hidden=false;}});
+renderMC($('#mB'),{id:'mB',q:'Which wire has LOWER resistance?',options:['Thin wire','Wide wire'],correct:1,
+  guard:function(){return reading(wm.st).ok?null:'Turn the dial to Ω and test the wires first.';},
+  right:'Wide wires have more room for current.',wrong:'Look again. Compare the thin number to the wide number.',
+  onCorrect:function(){$('#factB').hidden=false;}});
+renderMC($('#mC'),{id:'mC',q:'Which wire has LOWER resistance?',options:['Short wire','Long wire'],correct:0,
+  guard:function(){return reading(wm.st).ok?null:'Turn the dial to Ω and test the wires first.';},
+  right:'Longer wires resist the flow of current more.',wrong:'Look again. Compare 5 m to 100 m.',
+  onCorrect:function(){$('#factC').hidden=false;}});
+$('#chalBtn').addEventListener('click',function(){
+  var m=$('#chalMsg');
+  if(wire.mat==='cu'&&wire.wid==='wide'&&wire.len==='5'){m.textContent='Great! Copper, wide, and short gives the lowest resistance here: 0.3 Ω. Check the meter.';}
+  else{
+    var hints=[];
+    if(wire.mat!=='cu') hints.push('Pick the metal that read lowest in Mission A.');
+    if(wire.wid!=='wide') hints.push('Wider is better.');
+    if(wire.len!=='5') hints.push('Shorter is better.');
+    m.textContent='Not yet. '+hints.join(' ');
+  }
+});
+
+/* ---------- Part 5: quiz ---------- */
+var QUIZ=[
+  {q:'Which tool measures resistance?',o:['Thermometer','Multimeter','Ruler'],c:1,e:'A multimeter measures electricity, including resistance.'},
+  {q:'What is resistance measured in?',o:['Ohms (Ω)','Volts (V)','Amps (A)'],c:0,e:'Resistance is measured in ohms. The symbol is Ω.'},
+  {q:'To measure resistance, where does the black lead go?',o:['10A','COM','VΩ'],c:1,e:'The black lead always goes in COM.'},
+  {q:'When is it OK to measure resistance?',o:['When the part is connected to a battery','When the part has no power','When the part is plugged in the wall'],c:1,e:'Never measure resistance on a part with power. It can damage the meter.'},
+  {q:'The meter shows 2.20 kΩ. How many ohms is that?',o:['22 Ω','220 Ω','2,200 Ω'],c:2,e:'k means thousand. 2.20 kΩ is 2,200 Ω.'},
+  {q:'A rubber band reads OL. What kind of material is it?',o:['Conductor','Insulator','Copper'],c:1,e:'OL means the resistance is too big to measure. Insulators do not let current flow easily.'},
+  {q:'Which wire has the LOWEST resistance?',o:['Thin, long copper','Wide, short copper','Thin, short copper','Wide, long copper'],c:1,e:'Wide and short is best. Wide wires have room for current. Short wires resist less.'},
+  {q:'Why are power lines so wide?',o:['They carry a lot of current, so they need more space to prevent overheating','They look better','They are cheaper'],c:0,e:'Power lines carry lots of current. Wide wires have lower resistance, so they stay cooler.'}
+];
+var score=0,answered=0,qz=$('#quiz');
+function buildQuiz(){
+  score=0;answered=0;$('#quizResult').innerHTML='';
+  qz.innerHTML=QUIZ.map(function(q,qi){
+    return '<div class="q" data-q="'+qi+'"><p class="mc-q"><span>'+(qi+1)+'. </span>'+q.q+'</p><div class="mc-opts" role="group" aria-label="Question '+(qi+1)+'">'+
+      q.o.map(function(o,i){return '<button type="button" class="opt" data-i="'+i+'">'+o+'</button>';}).join('')+'</div><p class="expl mc-fb" role="status" aria-live="polite"></p></div>';
+  }).join('');
+  $$('.q',qz)[0].classList.add('cur');$('#qprog').textContent='Question 1 of '+QUIZ.length;
+  $$('.q',qz).forEach(function(box){
+    var qi=+box.getAttribute('data-q'),q=QUIZ[qi];
+    $$('.opt',box).forEach(function(b){
+      b.addEventListener('click',function(){
+        var i=+b.getAttribute('data-i'),fb=$('.expl',box);
+        $$('.opt',box).forEach(function(x){x.disabled=true;});
+        if(i===q.c){score++;b.classList.add('right');fb.className='expl mc-fb good';fb.textContent='Correct. '+q.e;}
+        else{b.classList.add('wrong');$$('.opt',box)[q.c].classList.add('right');fb.className='expl mc-fb warn';fb.textContent='Not quite. '+q.e;}
+        answered++;
+        if(answered===QUIZ.length){showScore();}
+        else{
+          var nb=document.createElement('button');nb.type='button';nb.className='btn';nb.textContent='Next question';nb.style.marginTop='12px';
+          nb.addEventListener('click',function(){box.classList.remove('cur');$$('.q',qz)[qi+1].classList.add('cur');$('#qprog').textContent='Question '+(qi+2)+' of '+QUIZ.length;});
+          box.appendChild(nb);nb.focus();
+        }
+      });
+    });
+  });
+}
+function showScore(){
+  var pro=score>=7;
+  $('#quizResult').innerHTML='<div class="score"><div class="big">'+score+' out of '+QUIZ.length+'</div>'+
+    '<p style="margin:.4em auto 1em">'+(pro?'Resistance Pro! You can set up a multimeter and explain what changes resistance.':'Good work. Go back to the parts you missed and try again.')+'</p>'+
+    '<button class="btn" id="retry" type="button">Try the quiz again</button></div>';
+  $('#retry').addEventListener('click',function(){buildQuiz();qz.scrollIntoView();});
+  $('#quizResult').scrollIntoView({block:'nearest'});
+}
+buildQuiz();
+
+/* ---------- listen buttons ---------- */
+var speaking=null;
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('.listen'); if(!b) return;
+  try{
+    var s=window.speechSynthesis; if(!s) return;
+    var was=b.getAttribute('aria-pressed')==='true';
+    s.cancel();
+    $$('.listen').forEach(function(x){x.setAttribute('aria-pressed','false');x.textContent='Listen';});
+    if(was) return;
+    var u=new SpeechSynthesisUtterance($(b.getAttribute('data-target')).innerText);
+    u.rate=0.9;
+    u.onend=function(){b.setAttribute('aria-pressed','false');b.textContent='Listen';};
+    b.setAttribute('aria-pressed','true');b.textContent='Stop';
+    s.speak(u);
+  }catch(err){}
+});
+
+
+/* ---------- slide navigation ---------- */
+var slides=$$('.slide'),cur=0,dotsEl=$('#dots');
+slides.forEach(function(sl,i){
+  var b=document.createElement('button');b.type='button';
+  b.setAttribute('aria-label','Go to slide '+(i+1)+': '+sl.getAttribute('data-title'));
+  b.addEventListener('click',function(){go(i);});
+  dotsEl.appendChild(b);
+});
+function go(i){
+  cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach(function(sl,k){sl.classList.toggle('active',k===cur);});
+  $$('#dots button').forEach(function(b,k){b.classList.toggle('on',k===cur);if(k===cur)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+  $('#slideLbl').textContent='Slide '+(cur+1)+' of '+slides.length+': '+slides[cur].getAttribute('data-title');
+  $('#prevBtn').disabled=(cur===0);
+  $('#nextBtn').disabled=(cur===slides.length-1);
+  $('#stage').scrollTop=0;
+  try{if(window.speechSynthesis) window.speechSynthesis.cancel();}catch(e){}
+  $$('.listen').forEach(function(x){x.setAttribute('aria-pressed','false');x.textContent='Listen';});
+}
+$('#prevBtn').addEventListener('click',function(){go(cur-1);});
+$('#nextBtn').addEventListener('click',function(){go(cur+1);});
+$('#startBtn').addEventListener('click',function(){go(1);});
+document.addEventListener('keydown',function(e){
+  if(e.altKey||e.ctrlKey||e.metaKey) return;
+  if(e.key==='ArrowRight') go(cur+1);
+  else if(e.key==='ArrowLeft') go(cur-1);
+});
+go(0);
+
+/* mission tabs */
+$$('#missTabs button').forEach(function(b){
+  b.addEventListener('click',function(){
+    $$('#missTabs button').forEach(function(x){x.setAttribute('aria-selected',String(x===b));});
+    ['missA','missB','missC','missD'].forEach(function(id){$('#'+id).hidden=(id!==b.getAttribute('data-m'));});
+  });
+});
+
+})();
+</script>
+</body>
+</html>
