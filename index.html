@@ -318,6 +318,61 @@ table{font-size:.95rem}
 .tabs{margin:8px 0 6px}
 .card.ctl{padding:10px 14px}
 .ctl-group{margin:0 0 5px}
+
+/* ---- tighten pass: shorter slides, smaller graphics ---- */
+section.part.slide,.hero.slide{padding:6px 0 8px}
+h2{font-size:clamp(1.15rem,2.4vw,1.45rem);margin-bottom:.2em}
+.intro{font-size:.92rem;margin-bottom:.4em}
+p{margin-bottom:.45em}
+.cols.lab{grid-template-columns:minmax(0,.76fr) minmax(0,1fr);gap:16px}
+.meter.wide{max-width:420px}
+.says,.meter .says{min-height:54px;padding:6px 10px;font-size:.88rem;line-height:1.35;margin-top:6px}
+.vocab{gap:5px;margin-top:6px}
+.vocab button{padding:5px 10px;font-size:.88rem;line-height:1.25}
+.vocab button b{font-size:.95rem}
+.steps{gap:4px;margin-bottom:6px}
+.steps li{min-height:38px;padding:5px 10px 5px 50px;font-size:.95rem}
+.steps li::before{left:10px;top:4px;width:30px;height:30px}
+.callout{padding:6px 12px;margin-bottom:8px;font-size:.92rem}
+.items{grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:5px}
+.item{padding:4px 6px}
+.item .icon{margin-bottom:2px;padding:1px 3px}
+.item b{font-size:.85rem;line-height:1.2}
+details.card{padding:6px 12px!important;margin-top:6px!important}
+.bar{padding:5px 12px}
+#slideLbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.btn{min-height:38px;padding:5px 16px}
+.dots button{width:18px;height:18px}
+.card{padding:12px 14px}
+.mission{padding:10px 12px}
+.mission h3{margin-bottom:.15em;font-size:1rem}
+.mission .fact p{font-size:.86rem;line-height:1.35}
+.ctl-group{margin:0 0 3px}
+.ctl-group legend{margin-bottom:2px;font-size:.92rem}
+.card.ctl,.card[style*="padding:10px 14px"]{padding:8px 12px!important}
+.tabs{margin:6px 0 5px}
+.mc{margin-top:6px}
+.mc-q{margin-bottom:.3em;font-size:.95rem}
+.opt{padding:5px 10px;min-height:36px;font-size:.9rem}
+.mc-fb{margin:6px 0 0;font-size:.92rem}
+
+/* ---- tighten pass 2 ---- */
+.ctl-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin:0 0 6px}
+.ctl-line:last-child{margin:0}
+.ctl-pair{display:inline-flex;align-items:center;gap:8px}
+.lg{font-weight:700;font-size:.92rem;min-width:3.3em}
+.ctl-pair .lg{min-width:0}
+#ctlMat{width:auto;flex:1 1 auto}
+.savebar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.savebar details[open]{flex:1 1 100%}
+#saveMsg{font-size:.88rem}
+
+/* ---- tighten pass 3 ---- */
+#saveBtn,#clearBtn{padding:4px 12px;font-size:.9rem;min-height:34px}
+.savebar summary{font-size:.92rem}
+#partsTable td,#partsTable th{padding:2px 8px;font-size:.85rem;line-height:1.25}
+#partsTable td.num{font-size:.95rem}
+#found .card h3{margin-bottom:.3em;font-size:1.05rem}
 </style>
 </head>
 <body>
@@ -366,11 +421,6 @@ table{font-size:.95rem}
     <div class="cols lab">
       <div>
         <div id="setupMeter"></div>
-        <details class="card" style="margin-top:10px;padding:10px 14px"><summary style="cursor:pointer;font-weight:700">Can't drag? Move the probes with buttons</summary><p style="margin:.6em 0 .4em"><strong>What are the probes touching?</strong></p><div class="seg" id="setupLoad" role="group" aria-label="What the probes touch" style="flex-wrap:wrap">
-            <button type="button" data-l="air" aria-pressed="true">Nothing</button>
-            <button type="button" data-l="short" aria-pressed="false">Each other</button>
-            <button type="button" data-l="part" aria-pressed="false">Mystery resistor</button>
-          </div></details>
       </div>
       <div>
         <div class="callout danger">
@@ -385,6 +435,11 @@ table{font-size:.95rem}
           <li data-step="part">Drag a tip to <strong>each end</strong> of the <strong>mystery resistor</strong>.</li>
           <li data-step="read">Read the number <strong>and</strong> the units on the display.</li>
         </ol>
+        <details class="card" style="margin-top:10px;padding:10px 14px"><summary style="cursor:pointer;font-weight:700">Can't drag? Move the probes with buttons</summary><p style="margin:.6em 0 .4em"><strong>What are the probes touching?</strong></p><div class="seg" id="setupLoad" role="group" aria-label="What the probes touch" style="flex-wrap:wrap">
+            <button type="button" data-l="air" aria-pressed="true">Nothing</button>
+            <button type="button" data-l="short" aria-pressed="false">Each other</button>
+            <button type="button" data-l="part" aria-pressed="false">Mystery resistor</button>
+          </div></details>
       </div>
     </div>
   </div>
@@ -398,13 +453,13 @@ table{font-size:.95rem}
     <div class="cols lab">
       <div>
         <div id="partsMeter"></div>
-        <p style="margin:10px 0 8px;font-size:.95rem">Turn the dial to <strong>Ω</strong>. Tap a part to put it on the bench. Then drag a probe tip to <strong>each end</strong> of it.</p>
-        <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;font-size:.95rem">Can't drag? Use buttons</summary><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px"><button class="btn ghost" id="touchBtn" type="button">Touch both ends</button><button class="btn ghost" id="liftBtn" type="button">Lift the probes</button></div></details>
       </div>
       <div>
+        <p style="margin:0 0 6px;font-size:.95rem">Turn the dial to <strong>Ω</strong>. Tap a part to put it on the bench. Then drag a probe tip to <strong>each end</strong> of it.</p>
         <div class="progress" aria-hidden="true"><i id="partsBar"></i></div>
         <p id="partsCount" style="font-weight:700;margin-bottom:.5em">Parts measured: 0 of 14</p>
         <div class="items" id="items"></div>
+        <details style="margin-top:6px"><summary style="cursor:pointer;font-weight:700;font-size:.95rem">Can't drag? Use buttons</summary><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px"><button class="btn ghost" id="touchBtn" type="button">Touch both ends</button><button class="btn ghost" id="liftBtn" type="button">Lift the probes</button></div></details>
       </div>
     </div>
   </div>
@@ -438,28 +493,23 @@ table{font-size:.95rem}
       <div>
         <div id="wireMeter"></div>
         <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;font-size:.95rem">Can't drag? Use buttons</summary><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px"><button class="btn ghost" id="wTouchBtn" type="button">Touch both ends</button><button class="btn ghost" id="wLiftBtn" type="button">Lift the probes</button></div></details>
-        <div style="margin-top:10px">
-        <button class="btn" id="saveBtn" type="button">Save this reading</button>
-          <button class="btn ghost" id="clearBtn" type="button">Clear table</button>
-          <span id="saveMsg" role="status" aria-live="polite" style="margin-left:8px;font-weight:700"></span>
-          <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Saved readings</summary>
-            <div class="tbl-wrap" id="wireTable" style="margin-top:6px"></div>
-          </details>
-        </div>
         </div>
       <div>
-        <div class="card" style="padding:10px 14px">
-          <fieldset class="ctl-group"><legend>Metal</legend>
-            <div class="seg" id="ctlMat" style="flex-wrap:wrap"></div>
-          </fieldset>
-          <div class="ctl-row">
-            <fieldset class="ctl-group"><legend>Width</legend>
-              <div class="seg" id="ctlWid"></div>
-            </fieldset>
-            <fieldset class="ctl-group"><legend>Length</legend>
-              <div class="seg" id="ctlLen"></div>
-            </fieldset>
+        <div class="card" style="padding:8px 12px">
+          <div class="ctl-line" role="group" aria-labelledby="lgMat"><span class="lg" id="lgMat">Metal</span><div class="seg" id="ctlMat"></div></div>
+          <div class="ctl-line">
+            <span class="ctl-pair" role="group" aria-labelledby="lgWid"><span class="lg" id="lgWid">Width</span><div class="seg" id="ctlWid"></div></span>
+            <span class="ctl-pair" role="group" aria-labelledby="lgLen"><span class="lg" id="lgLen">Length</span><div class="seg" id="ctlLen"></div></span>
           </div>
+        </div>
+
+        <div class="savebar" style="margin:6px 0 0">
+        <button class="btn" id="saveBtn" type="button">Save this reading</button>
+          <button class="btn ghost" id="clearBtn" type="button">Clear table</button>
+          <span id="saveMsg" role="status" aria-live="polite" style="font-weight:700"></span>
+          <details style="margin:0"><summary style="cursor:pointer;font-weight:700">Saved readings</summary>
+            <div class="tbl-wrap" id="wireTable" style="margin-top:6px"></div>
+          </details>
         </div>
 
         <div class="tabs" role="tablist" aria-label="Missions" id="missTabs">
@@ -615,9 +665,9 @@ function probeSvg(L){
 
 function leadsMarkup(o){
   var fixed=!!o.fixedPlugs,stat=!!o.staticLeads;
-  function plug(id,cls){return '<g data-r="'+id+'" style="'+(fixed?'':'touch-action:none;cursor:grab')+'">'+(fixed?'':'<circle r="24" fill="transparent"/>')+
+  function plug(id,cls){return '<g data-r="'+id+'" style="'+(fixed?'':'touch-action:none;cursor:grab')+'">'+(fixed?'':'<circle r="28" fill="transparent"/>')+
     '<circle r="14" class="'+cls+'"/><circle r="10" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/><circle r="5" fill="#C4CCD3" stroke="#16293B" stroke-width="1"/></g>';}
-  function tip(id,col){return '<g data-r="'+id+'" style="'+(stat?'':'touch-action:none;cursor:grab')+'">'+(stat?'':'<circle cx="0" cy="-28" r="30" fill="transparent"/>')+
+  function tip(id,col){return '<g data-r="'+id+'" style="'+(stat?'':'touch-action:none;cursor:grab')+'">'+(stat?'':'<circle cx="0" cy="-28" r="34" fill="transparent"/>')+
     '<path d="M-1.5,0 L-3,-18 L3,-18 L1.5,0 Z" fill="#E6EBEF" stroke="#16293B" stroke-width="1.5" stroke-linejoin="round"/>'+
     '<rect x="-6" y="-23" width="12" height="6" rx="1.5" fill="#8A95A0" stroke="#16293B" stroke-width="1.2"/>'+
     '<rect x="-8" y="-52" width="16" height="30" rx="6" fill="'+col+'" stroke="#fff" stroke-width="2"/>'+
@@ -1133,11 +1183,11 @@ document.addEventListener('keydown',function(e){
 go(0);
 
 
-/* ---------- fit to the frame: design 900 x 820, scale down if the frame is smaller ---------- */
+/* ---------- fit to the frame: design 900 x 620, scale down if the frame is smaller ---------- */
 function fit(){
   var d=$('.deck'),iw=window.innerWidth,ih=window.innerHeight;
-  /* design size is 900 wide by 820 tall; shrink to fit any smaller frame (but not below 55%) */
-  var s=(iw<640)?1:Math.max(0.55,Math.min(1,iw/900,ih/820));
+  /* design size is 900 wide by 620 tall; shrink to fit any smaller frame (but not below 55%) */
+  var s=(iw<640)?1:Math.max(0.55,Math.min(1,iw/900,ih/620));
   if(s<1){d.style.flex='none';d.style.width=(iw/s)+'px';d.style.height=(ih/s)+'px';d.style.transform='scale('+s+')';}
   else{d.style.flex='';d.style.width='';d.style.height='';d.style.transform='';}
 }
