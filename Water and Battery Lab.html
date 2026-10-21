@@ -1,0 +1,377 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Water and Battery Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: one big slider on top, two matching pictures side by side, then simple readouts and a match-up key */
+:root{
+  --bg:#eef3f6; --panel:#ffffff; --ink:#1d2a33; --muted:#52626e; --line:#c9d5dd;
+  --water:#2f7fd6; --water-soft:#bcd9f5; --battery:#e0a019; --battery-soft:#fbe7b8;
+  --narrow:#d6453b; --flow:#1f9e74; --glow:#ffd23f; --glow-ink:#a87800; --metal:#7b8a95; --wire:#3a4650;
+  --font:"Lexend", "Verdana", "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121a20; --panel:#1b252d; --ink:#eef3f6; --muted:#a9b8c3; --line:#33424d;
+  --water:#5aa6f0; --water-soft:#1f3a55; --battery:#f2b53a; --battery-soft:#4a3a17;
+  --narrow:#f06a5f; --flow:#3cc796; --glow:#ffdc5c; --glow-ink:#ffdc5c; --metal:#8d9ca7; --wire:#b9c6cf; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121a20; --panel:#1b252d; --ink:#eef3f6; --muted:#a9b8c3; --line:#33424d;
+  --water:#5aa6f0; --water-soft:#1f3a55; --battery:#f2b53a; --battery-soft:#4a3a17;
+  --narrow:#f06a5f; --flow:#3cc796; --glow:#ffdc5c; --glow-ink:#ffdc5c; --metal:#8d9ca7; --wire:#b9c6cf; color-scheme:dark}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding-block:28px 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:grid;gap:22px}
+h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:1.3rem;margin:0 0 10px;font-weight:700}
+.intro{margin:4px 0 0;font-size:1.15rem;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+
+/* control */
+.control{display:grid;gap:12px}
+.control-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+.control label{font-size:1.25rem;font-weight:700}
+.control label .w{color:var(--water)} .control label .b{color:var(--battery)}
+.level-read{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}
+.slider-row{display:flex;align-items:center;gap:12px}
+.step{flex:none;width:52px;height:52px;border-radius:50%;border:2px solid var(--line);background:var(--bg);
+  color:var(--ink);font:700 1.8rem/1 var(--font);cursor:pointer}
+.step:hover{border-color:var(--water)}
+.step:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--water);outline-offset:3px}
+input[type=range]{flex:1;min-width:0;height:44px;accent-color:var(--water);cursor:pointer}
+.ends{display:flex;justify-content:space-between;color:var(--muted);font-size:.95rem;padding-inline:64px}
+
+/* pictures */
+.pics{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.pic{display:grid;gap:8px;min-width:0}
+.pic h2{display:flex;align-items:center;gap:10px}
+.tag{font-size:.85rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:99px}
+.tag.w{background:var(--water-soft);color:var(--ink)} .tag.b{background:var(--battery-soft);color:var(--ink)}
+svg{width:100%;height:auto;display:block}
+svg text{font-family:var(--font);fill:var(--ink);font-size:14px;font-weight:700}
+
+/* readouts */
+.say{font-size:1.3rem;font-weight:700;text-align:center;margin:0;min-height:2em;text-wrap:balance}
+.reads{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:2px;border-top:6px solid var(--c)}
+.read .k{font-weight:700;font-size:1.05rem}
+.read .k small{display:block;font-weight:400;color:var(--muted);font-size:.9rem}
+.read .v{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums}
+.read .note{color:var(--muted);font-size:.9rem}
+
+/* key */
+.key{width:100%;border-collapse:collapse;font-size:1.02rem}
+.key th,.key td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.key th{font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--c);margin-right:8px;vertical-align:-1px}
+.table-scroll{overflow-x:auto}
+.try ul{margin:0;padding-left:1.2em;display:grid;gap:6px}
+
+@media (max-width:760px){
+  .pics{grid-template-columns:1fr}
+  .reads{grid-template-columns:1fr}
+  .ends{padding-inline:0}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Water and Battery Lab</h1>
+    <p class="intro">Move the slider. Watch both pictures change.</p>
+  </header>
+
+  <section class="panel control">
+    <div class="control-top">
+      <label for="level"><span class="w">Water level</span> = <span class="b">Voltage</span></label>
+      <span class="level-read" id="levelRead">4 of 8</span>
+    </div>
+    <div class="slider-row">
+      <button class="step" id="down" type="button" aria-label="Lower the water and remove a battery">−</button>
+      <input type="range" id="level" min="0" max="8" step="1" value="4" aria-describedby="levelRead">
+      <button class="step" id="up" type="button" aria-label="Raise the water and add a battery">+</button>
+    </div>
+    <div class="ends"><span>Less push</span><span>More push</span></div>
+  </section>
+
+  <section class="pics">
+    <div class="panel pic">
+      <h2><span class="tag w">Water</span> The water tank</h2>
+      <svg viewBox="0 0 440 320" role="img" aria-label="A water tank. Water flows out a narrow hole and turns a water wheel. The wheel lights a bulb.">
+        <!-- level ticks -->
+        <g id="ticks"></g>
+        <!-- tank -->
+        <rect x="40" y="30" width="120" height="240" rx="6" fill="var(--panel)" stroke="var(--metal)" stroke-width="4"/>
+        <rect id="water" x="44" y="266" width="112" height="0" fill="var(--water)" opacity=".85"/>
+        <text x="100" y="20" text-anchor="middle">Water tank</text>
+        <!-- pipe -->
+        <rect x="158" y="242" width="106" height="16" fill="var(--panel)" stroke="var(--metal)" stroke-width="3"/>
+        <line id="pipeWater" x1="156" y1="250" x2="263" y2="250" stroke="var(--water)" stroke-width="6" stroke-dasharray="10 6"/>
+        <!-- narrow hole -->
+        <rect x="185" y="240" width="30" height="7" fill="var(--narrow)"/>
+        <rect x="185" y="253" width="30" height="7" fill="var(--narrow)"/>
+        <text x="200" y="232" text-anchor="middle" style="fill:var(--narrow)">Narrow hole</text>
+        <!-- falling water -->
+        <path id="fall" d="M263,250 q10,2 10,46" fill="none" stroke="var(--water)" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 6"/>
+        <!-- wires from wheel to bulb -->
+        <path d="M330,262 H370 V138 M330,244 H394 V124 H384" fill="none" stroke="var(--wire)" stroke-width="3"/>
+        <!-- wheel -->
+        <g id="wheelW" transform="translate(310 252)">
+          <circle r="34" fill="var(--panel)" stroke="var(--metal)" stroke-width="4"/>
+          <g class="paddles" stroke="var(--metal)" stroke-width="4" stroke-linecap="round"></g>
+          <circle r="6" fill="var(--metal)"/>
+        </g>
+        <text x="310" y="204" text-anchor="middle" style="fill:var(--flow)">Water wheel</text>
+        <!-- bulb -->
+        <g class="bulb"></g>
+        <text x="342" y="96" text-anchor="end" style="fill:var(--glow-ink)">Light bulb</text>
+        <!-- basin -->
+        <rect x="250" y="298" width="120" height="14" rx="4" fill="var(--water-soft)" stroke="var(--metal)" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="panel pic">
+      <h2><span class="tag b">Battery</span> The circuit</h2>
+      <svg viewBox="0 0 440 320" role="img" aria-label="A stack of batteries. Electricity flows through a resistor and a current meter, and lights a bulb.">
+        <!-- wire loop -->
+        <path id="wire" d="M160,250 H185 l3,-8 l6,16 l6,-16 l6,16 l6,-16 l3,8 H370 V136 L384,124 H394 V14 H100 V30" fill="none" stroke="var(--wire)" stroke-width="4" stroke-linejoin="round"/>
+        <!-- resistor highlight -->
+        <path d="M185,250 l3,-8 l6,16 l6,-16 l6,16 l6,-16 l3,8" fill="none" stroke="var(--narrow)" stroke-width="5" stroke-linejoin="round"/>
+        <text x="200" y="232" text-anchor="middle" style="fill:var(--narrow)">Resistor</text>
+        <!-- holder -->
+        <rect x="40" y="30" width="120" height="240" rx="6" fill="var(--panel)" stroke="var(--metal)" stroke-width="4"/>
+        <g id="cells"></g>
+        <text x="100" y="292" text-anchor="middle" style="fill:var(--battery)">Batteries</text>
+        <!-- wire glow shows how much current -->
+        <use id="wireGlow" href="#wire" style="stroke:var(--flow);stroke-width:12;opacity:0"/>
+        <!-- moving charges -->
+        <g id="charges"></g>
+        <!-- current meter -->
+        <g id="meter">
+          <rect x="270" y="216" width="80" height="70" rx="10" fill="var(--panel)" stroke="var(--metal)" stroke-width="3"/>
+          <path d="M284,258 A26,26 0 0 1 336,258" fill="none" stroke="var(--line)" stroke-width="6"/>
+          <path id="meterArc" d="M284,258 A26,26 0 0 1 336,258" fill="none" stroke="var(--flow)" stroke-width="6" pathLength="100" stroke-dasharray="0 100"/>
+          <g id="meterTicks" stroke="var(--metal)" stroke-width="1.6"></g>
+          <line id="needle" x1="310" y1="258" x2="286" y2="258" stroke="var(--narrow)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="310" cy="258" r="4" fill="var(--wire)"/>
+          <text id="meterText" x="310" y="279" text-anchor="middle" style="font-size:12px">0.00 A</text>
+        </g>
+        <text x="310" y="204" text-anchor="middle" style="fill:var(--flow)">Current meter</text>
+        <!-- bulb on the wire -->
+        <g class="bulb"></g>
+        <text x="342" y="96" text-anchor="end" style="fill:var(--glow-ink)">Light bulb</text>
+      </svg>
+    </div>
+  </section>
+
+  <p class="say" id="say" aria-live="polite"></p>
+
+  <section class="reads">
+    <div class="read" style="--c:var(--water)">
+      <span class="k">Push <small>Voltage</small></span>
+      <span class="v" id="vRead">6.0 V</span>
+      <span class="note">You change this.</span>
+    </div>
+    <div class="read" style="--c:var(--flow)">
+      <span class="k">Flow <small>Current</small></span>
+      <span class="v" id="iRead">0.60 A</span>
+      <span class="note">This changes by itself.</span>
+    </div>
+    <div class="read" style="--c:var(--narrow)">
+      <span class="k">Narrow spot <small>Resistance</small></span>
+      <span class="v">10 Ω</span>
+      <span class="note">This stays the same.</span>
+    </div>
+  </section>
+
+
+  <section class="panel try">
+    <h2>Try this</h2>
+    <ul>
+      <li>Make the water go up. What happens to the flow?</li>
+      <li>Add batteries. Watch the green dots and the current meter. What happens?</li>
+      <li>Take all the water out. What stops?</li>
+    </ul>
+    <p style="margin:12px 0 0"><b>Big idea:</b> More push = more flow.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  const NS="http://www.w3.org/2000/svg";
+  const MAX=8, STEP_H=28, BOTTOM=266, R=10;
+  const $=id=>document.getElementById(id);
+  const slider=$("level");
+  const mk=(tag,attrs,parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent.appendChild(e);return e;};
+
+  // ticks beside tank
+  for(let i=1;i<=MAX;i++){
+    const y=BOTTOM-i*STEP_H;
+    mk("line",{x1:28,x2:40,y1:y,y2:y,stroke:"var(--metal)","stroke-width":2},$("ticks"));
+    mk("text",{x:22,y:y+5,"text-anchor":"end",style:"font-size:12px;fill:var(--muted)"},$("ticks")).textContent=i;
+  }
+  // wheel paddles
+  document.querySelectorAll(".paddles").forEach(g=>{
+    for(let i=0;i<8;i++){
+      const a=i*Math.PI/4, c=Math.cos(a), s=Math.sin(a);
+      mk("line",{x1:6*c,y1:6*s,x2:42*c,y2:42*s},g);
+    }
+  });
+  // light bulbs
+  const bulbs=[];
+  document.querySelectorAll(".bulb").forEach((g,k)=>{
+    const svg=g.ownerSVGElement;
+    let defs=svg.querySelector("defs")||mk("defs",{},svg);
+    const gid="halo"+k;
+    const rg=mk("radialGradient",{id:gid},defs);
+    mk("stop",{offset:"0","stop-color":"var(--glow)","stop-opacity":"1"},rg);
+    mk("stop",{offset:"0.45","stop-color":"var(--glow)","stop-opacity":"0.55"},rg);
+    mk("stop",{offset:"1","stop-color":"var(--glow)","stop-opacity":"0"},rg);
+    const halo=mk("circle",{cx:370,cy:92,r:60,fill:"url(#"+gid+")",opacity:0},g);
+    const rays=mk("g",{stroke:"var(--glow)","stroke-width":4,"stroke-linecap":"round",opacity:0},g);
+    const rayEls=[];
+    for(let i=0;i<10;i++) rayEls.push(mk("line",{},rays));
+    const glass=mk("path",{d:"M361,118 C361,110 348,104 348,90 A22,22 0 1 1 392,90 C392,104 379,110 379,118 Z",
+      fill:"var(--panel)",stroke:"var(--metal)","stroke-width":3},g);
+    mk("path",{d:"M356,82 A15,15 0 0 1 366,72",fill:"none",stroke:"var(--panel)","stroke-width":3,"stroke-linecap":"round",opacity:.8},g);
+    mk("path",{d:"M366,118 L364,96 M374,118 L376,96",fill:"none",stroke:"var(--metal)","stroke-width":1.6},g);
+    const fil=mk("path",{d:"M364,96 q1.5,-6 3,0 q1.5,-6 3,0 q1.5,-6 3,0 q1.5,-6 3,0",fill:"none",stroke:"var(--metal)","stroke-width":2.4,"stroke-linecap":"round"},g);
+    mk("rect",{x:361,y:118,width:18,height:16,rx:2,fill:"var(--metal)"},g);
+    mk("path",{d:"M361,122 H379 M361,126.5 H379 M361,131 H379",stroke:"var(--panel)","stroke-width":1.6,opacity:.7},g);
+    mk("path",{d:"M365,134 H375 L372,139 H368 Z",fill:"var(--wire)"},g);
+    bulbs.push({halo,rays,rayEls,glass,fil});
+  });
+  let shown=0; // smoothed brightness for warm-up/cool-down
+
+  // battery cells
+  const cells=[];
+  for(let i=0;i<MAX;i++){
+    const y=BOTTOM-(i+1)*STEP_H+2;
+    const g=mk("g",{},$("cells"));
+    const r=mk("rect",{x:52,y:y,width:96,height:24,rx:4,"stroke-width":2},g);
+    const nub=mk("rect",{x:92,y:y-3,width:16,height:4,rx:1},g);
+    const t=mk("text",{x:100,y:y+17,"text-anchor":"middle",style:"font-size:13px"},g);
+    t.textContent="1.5 V";
+    cells.push({r,nub,t});
+  }
+  // charges along wire
+  const wire=$("wire"), wireLen=wire.getTotalLength(), N=28, charges=[];
+  for(let i=0;i<N;i++){
+    const trail=[0.45,0.25,0.12].map((o,k)=>mk("circle",{r:4-k*0.5,fill:"var(--flow)",opacity:o},$("charges")));
+    charges.push({dot:mk("circle",{r:4.5,fill:"var(--flow)"},$("charges")),trail});
+  }
+  for(let i=0;i<=4;i++){
+    const a=Math.PI+i*Math.PI/4, c=Math.cos(a), s=Math.sin(a);
+    mk("line",{x1:310+20*c,y1:258+20*s,x2:310+16*c,y2:258+16*s},$("meterTicks"));
+  }
+  let meterShown=0;
+
+  let level=+slider.value, angle=0, offset=0, dash=0, last=performance.now();
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const sayings=[
+    "No push. Nothing flows. The wheel stops. No current. The bulbs are off.",
+    "Small push. Slow flow. The wheel turns slowly. Low current. The bulbs are dim.",
+    "Medium push. Medium flow. The wheel turns. More current. The bulbs glow.",
+    "Big push! Fast flow! The wheel spins fast. High current! The bulbs are bright!"
+  ];
+
+  function update(){
+    level=+slider.value;
+    const V=level*1.5, I=V/R;
+    $("levelRead").textContent=level+" of "+MAX;
+    $("vRead").textContent=V.toFixed(1)+" V";
+    $("iRead").textContent=I.toFixed(2)+" A";
+    $("say").textContent=sayings[level===0?0:level<=2?1:level<=5?2:3];
+    // water
+    const h=level*STEP_H;
+    $("water").setAttribute("y",BOTTOM-h);
+    $("water").setAttribute("height",h);
+    const on=level>0;
+    $("pipeWater").style.opacity=on?1:0;
+    $("fall").style.opacity=on?1:0;
+    $("fall").setAttribute("stroke-width",(2+level*0.9).toFixed(1));
+    // cells
+    cells.forEach((c,i)=>{
+      const full=i<level;
+      c.r.setAttribute("fill",full?"var(--battery)":"none");
+      c.r.setAttribute("stroke",full?"var(--battery)":"var(--line)");
+      c.r.setAttribute("stroke-dasharray",full?"":"5 4");
+      c.nub.setAttribute("fill",full?"var(--metal)":"none");
+      c.t.style.opacity=full?1:0;
+    });
+    // bulb (brightness follows power, V x I)
+        if(reduce) draw(0);
+  }
+
+  function drawBulbs(dt,t){
+    const target=Math.pow(level/MAX,2); // brightness follows power
+    shown = dt>0 ? shown+(target-shown)*Math.min(1,dt*4) : target;
+    const b=shown, flick=b>0.01?1+0.06*Math.sin(t*9)+0.03*Math.sin(t*23):1;
+    const lit=Math.min(1,b*flick);
+    bulbs.forEach(o=>{
+      o.halo.setAttribute("opacity",(lit*0.95).toFixed(3));
+      o.halo.setAttribute("r",(28+lit*44).toFixed(1));
+      o.glass.setAttribute("fill",b>0.01?"var(--glow)":"var(--panel)");
+      o.glass.setAttribute("fill-opacity",b>0.01?(0.2+lit*0.8).toFixed(3):1);
+      o.fil.setAttribute("stroke",b>0.01?(b>0.3?"#fff6c2":"var(--narrow)"):"var(--metal)");
+      o.rays.setAttribute("opacity",b>0.06?Math.min(1,lit*1.2).toFixed(3):0);
+      const spin=t*0.4, len=6+lit*14;
+      o.rayEls.forEach((r,i)=>{
+        const a=spin+i*Math.PI/5, pulse=1+0.25*Math.sin(t*4+i), r0=30, r1=r0+len*pulse;
+        r.setAttribute("x1",(370+r0*Math.cos(a)).toFixed(1));r.setAttribute("y1",(92+r0*Math.sin(a)).toFixed(1));
+        r.setAttribute("x2",(370+r1*Math.cos(a)).toFixed(1));r.setAttribute("y2",(92+r1*Math.sin(a)).toFixed(1));
+      });
+    });
+  }
+
+  function draw(dt){
+    drawBulbs(dt, reduce?0:performance.now()/1000);
+    const speed=level/MAX; // flow follows current
+    angle-=speed*360*dt*0.9;
+    const rot="translate(310 252) rotate("+angle.toFixed(1)+")";
+    $("wheelW").setAttribute("transform",rot);
+    dash-=speed*90*dt;
+    $("pipeWater").setAttribute("stroke-dashoffset",dash.toFixed(1));
+    $("fall").setAttribute("stroke-dashoffset",dash.toFixed(1));
+    offset=(offset+speed*120*dt)%wireLen;
+    charges.forEach((c,i)=>{
+      const pos=offset+i*wireLen/N;
+      const pt=wire.getPointAtLength(pos%wireLen);
+      c.dot.setAttribute("cx",pt.x);c.dot.setAttribute("cy",pt.y);
+      c.trail.forEach((t,k)=>{
+        const q=wire.getPointAtLength(((pos-(k+1)*speed*9)%wireLen+wireLen)%wireLen);
+        t.setAttribute("cx",q.x);t.setAttribute("cy",q.y);
+        t.style.display=speed>0?"":"none";
+      });
+    });
+    // wire glow and current meter (needle swings smoothly)
+    $("wireGlow").style.opacity=(speed*0.3).toFixed(3);
+    const I=level*1.5/R, Imax=MAX*1.5/R;
+    meterShown = dt>0 ? meterShown+(I-meterShown)*Math.min(1,dt*3) : I;
+    const f=meterShown/Imax, a=Math.PI+f*Math.PI;
+    $("needle").setAttribute("x2",(310+24*Math.cos(a)).toFixed(1));
+    $("needle").setAttribute("y2",(258+24*Math.sin(a)).toFixed(1));
+    $("meterArc").setAttribute("stroke-dasharray",(f*100).toFixed(1)+" 100");
+    $("meterText").textContent=meterShown.toFixed(2)+" A";
+  }
+
+  function loop(now){
+    const dt=Math.min(0.05,(now-last)/1000); last=now;
+    draw(dt);
+    requestAnimationFrame(loop);
+  }
+
+  slider.addEventListener("input",update);
+  $("down").addEventListener("click",()=>{slider.value=Math.max(0,level-1);update();});
+  $("up").addEventListener("click",()=>{slider.value=Math.min(MAX,level+1);update();});
+
+  update();
+  draw(0);
+  if(!reduce) requestAnimationFrame(loop);
+})();
+</script>
+
+</body></html>
