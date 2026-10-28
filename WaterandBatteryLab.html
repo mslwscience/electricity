@@ -90,6 +90,11 @@ th{font-size:13px;color:var(--muted)}
 .check{color:var(--good);font-weight:700}
 input.ans{font:inherit;width:90px;padding:5px 8px;border:2px solid var(--line);border-radius:8px}
 nav.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:8px 10px;z-index:5}
+/* Embedded in Canvas (or any page): blend with the page, keep the slide buttons right under the slide */
+html.embed body{background:#fff}
+html.embed main{padding-bottom:12px}
+html.embed nav.bar{position:sticky;border:2px solid var(--line);border-radius:12px;margin:0 16px 8px;max-width:928px;margin-inline:auto}
+
 .dots{display:flex;gap:6px}
 .dots button{width:15px;height:15px;border-radius:50%;border:2px solid var(--accent);background:transparent;padding:0}
 .dots button[aria-current="step"]{background:var(--accent)}
@@ -218,7 +223,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 <section class="slide" data-title="What did you find?">
   <h2>What did you find?</h2>
   <div class="work">
-    <div class="card"><h3>Your results</h3><table><thead><tr><th>Cells</th><th>Switch</th><th>Where</th><th>Reading</th></tr></thead><tbody id="saved2"></tbody></table></div>
+    <div class="card"><h3>Your results</h3><div style="max-height:250px;overflow-y:auto"><table><thead><tr><th>Cells</th><th>Switch</th><th>Where</th><th>Reading</th></tr></thead><tbody id="saved2"></tbody></table></div></div>
     <div class="card" id="findQs"></div>
   </div>
 </section>
@@ -238,6 +243,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
   <button class="btn" id="next">Next</button>
 </nav>
 
+<script>try{if(window.self!==window.top||/[?&]embed\b/.test(location.search))document.documentElement.classList.add("embed");}catch(e){document.documentElement.classList.add("embed");}</script>
 <script>
 (function(){
 "use strict";
