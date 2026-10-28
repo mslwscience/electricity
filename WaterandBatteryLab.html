@@ -1,377 +1,620 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Water and Battery Lab</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Measure Voltage with a Multimeter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-/* Layout: one big slider on top, two matching pictures side by side, then simple readouts and a match-up key */
 :root{
-  --bg:#eef3f6; --panel:#ffffff; --ink:#1d2a33; --muted:#52626e; --line:#c9d5dd;
-  --water:#2f7fd6; --water-soft:#bcd9f5; --battery:#e0a019; --battery-soft:#fbe7b8;
-  --narrow:#d6453b; --flow:#1f9e74; --glow:#ffd23f; --glow-ink:#a87800; --metal:#7b8a95; --wire:#3a4650;
-  --font:"Lexend", "Verdana", "Segoe UI", sans-serif;
+  --bench:#E8EFF4; --panel:#FFFFFF; --panel2:#F2F6F9; --ink:#16293B; --muted:#4A5E70; --line:#B9C8D5;
+  --accent:#1B5FC1; --accent-ink:#FFFFFF; --good:#0B6B52; --goodbg:#DDF3EA; --warn:#7A4800; --warnbg:#FFF0D1;
+  --danger:#A3211A; --dangerbg:#FDE4E1;
+  --font-body:"Atkinson Hyperlegible", Verdana, "Segoe UI", system-ui, sans-serif;
+  --font-head:"Bricolage Grotesque", "Atkinson Hyperlegible", Verdana, system-ui, sans-serif;
+  --font-lcd:"Share Tech Mono", "Courier New", monospace;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#121a20; --panel:#1b252d; --ink:#eef3f6; --muted:#a9b8c3; --line:#33424d;
-  --water:#5aa6f0; --water-soft:#1f3a55; --battery:#f2b53a; --battery-soft:#4a3a17;
-  --narrow:#f06a5f; --flow:#3cc796; --glow:#ffdc5c; --glow-ink:#ffdc5c; --metal:#8d9ca7; --wire:#b9c6cf; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#121a20; --panel:#1b252d; --ink:#eef3f6; --muted:#a9b8c3; --line:#33424d;
-  --water:#5aa6f0; --water-soft:#1f3a55; --battery:#f2b53a; --battery-soft:#4a3a17;
-  --narrow:#f06a5f; --flow:#3cc796; --glow:#ffdc5c; --glow-ink:#ffdc5c; --metal:#8d9ca7; --wire:#b9c6cf; color-scheme:dark}
-
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.5}
-.wrap{max-width:1100px;margin:0 auto;padding-block:28px 48px;
-  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
-  display:grid;gap:22px}
-h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;margin:0;text-wrap:balance;letter-spacing:-.01em}
-h2{font-size:1.3rem;margin:0 0 10px;font-weight:700}
-.intro{margin:4px 0 0;font-size:1.15rem;color:var(--muted)}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-
-/* control */
-.control{display:grid;gap:12px}
-.control-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
-.control label{font-size:1.25rem;font-weight:700}
-.control label .w{color:var(--water)} .control label .b{color:var(--battery)}
-.level-read{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}
-.slider-row{display:flex;align-items:center;gap:12px}
-.step{flex:none;width:52px;height:52px;border-radius:50%;border:2px solid var(--line);background:var(--bg);
-  color:var(--ink);font:700 1.8rem/1 var(--font);cursor:pointer}
-.step:hover{border-color:var(--water)}
-.step:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--water);outline-offset:3px}
-input[type=range]{flex:1;min-width:0;height:44px;accent-color:var(--water);cursor:pointer}
-.ends{display:flex;justify-content:space-between;color:var(--muted);font-size:.95rem;padding-inline:64px}
-
-/* pictures */
-.pics{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.pic{display:grid;gap:8px;min-width:0}
-.pic h2{display:flex;align-items:center;gap:10px}
-.tag{font-size:.85rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:99px}
-.tag.w{background:var(--water-soft);color:var(--ink)} .tag.b{background:var(--battery-soft);color:var(--ink)}
-svg{width:100%;height:auto;display:block}
-svg text{font-family:var(--font);fill:var(--ink);font-size:14px;font-weight:700}
-
-/* readouts */
-.say{font-size:1.3rem;font-weight:700;text-align:center;margin:0;min-height:2em;text-wrap:balance}
-.reads{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.read{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:2px;border-top:6px solid var(--c)}
-.read .k{font-weight:700;font-size:1.05rem}
-.read .k small{display:block;font-weight:400;color:var(--muted);font-size:.9rem}
-.read .v{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums}
-.read .note{color:var(--muted);font-size:.9rem}
-
-/* key */
-.key{width:100%;border-collapse:collapse;font-size:1.02rem}
-.key th,.key td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-.key th{font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--c);margin-right:8px;vertical-align:-1px}
-.table-scroll{overflow-x:auto}
-.try ul{margin:0;padding-left:1.2em;display:grid;gap:6px}
-
-@media (max-width:600px){
-  .pics{grid-template-columns:1fr}
-  .reads{grid-template-columns:1fr}
-  .ends{padding-inline:0}
-}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bench);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.45}
+main{max-width:960px;margin:0 auto;padding:16px 16px 96px}
+h1,h2{font-family:var(--font-head);margin:0 0 8px;line-height:1.1}
+h1{font-size:clamp(28px,4.6vw,40px);font-weight:800}
+h2{font-size:clamp(21px,3vw,26px);font-weight:800}
+h3{font-size:16px;margin:0 0 6px}
+p{margin:0 0 10px}
+.lead{color:var(--ink);max-width:62ch}
+.small{font-size:13px;color:var(--muted)}
+.slide{display:none}
+.slide.on{display:block}
+.intro{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:center;margin-top:8px}
+.intro svg{max-width:220px;width:100%;justify-self:center}
+.work{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:10px}
+@media (max-width:780px){.work,.intro{grid-template-columns:1fr}.intro svg{max-width:170px}}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.card.tight{padding:9px 12px}
+.def{border-left:6px solid var(--accent)}
+.def.load{border-left-color:#C77B30}
+.safety{background:var(--dangerbg);border:0;border-left:6px solid var(--danger);border-radius:6px}
+.svgwrap{background:transparent}
+.svgwrap svg{width:100%;height:auto;display:block}
+.status{border:2px solid var(--line);border-radius:10px;background:var(--panel);padding:9px 12px;min-height:46px;margin-top:8px;font-size:15px}
+.status.good{background:var(--goodbg);border-color:var(--good)}
+.status.warn{background:var(--warnbg);border-color:#C88A1A}
+.status.danger{background:var(--dangerbg);border-color:var(--danger)}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--accent);color:var(--accent-ink);border:2px solid var(--accent);border-radius:8px;padding:8px 16px;font-weight:700}
+.btn.ghost{background:var(--panel);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:700;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.red[aria-pressed="true"]{background:#C62828;border-color:#C62828}
+.chip.black[aria-pressed="true"]{background:#16293B;border-color:#16293B}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:6px 12px;font-weight:700;font-size:14px;color:var(--ink)}
+.seg button+button{border-left:2px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:4px 0}
+.ctrl b{font-size:14px}
+.parts{display:grid;gap:7px}
+.part{display:block;width:100%;text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px;color:var(--ink)}
+.part > b{display:block;font-size:15px}
+.part span{font-size:14px;color:var(--muted)}
+.part[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,95,193,.18)}
+ol.steps{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+ol.steps li{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px;font-size:15px}
+ol.steps li .n{flex:0 0 26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px}
+ol.steps li.done{border-color:var(--good);background:var(--goodbg)}
+ol.steps li.done .n{background:var(--good);border-color:var(--good);color:#fff}
+details{margin-top:8px;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px}
+details summary{font-weight:700;cursor:pointer;font-size:14px}
+details .chips{margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--muted)}
+.q{margin:10px 0}
+.q > b{display:block;margin-bottom:6px}
+.opt{display:block;width:100%;text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:7px 11px;margin:6px 0;font-weight:700;font-size:14px;color:var(--ink)}
+.opt.right{border-color:var(--good);background:var(--goodbg)}
+.opt.wrong{border-color:var(--danger);background:var(--dangerbg)}
+.fb{font-size:14px;border-radius:8px;padding:7px 10px;margin-top:4px}
+.fb.good{background:var(--goodbg)}
+.fb.warn{background:var(--warnbg)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare svg{width:100%;height:auto}
+.compare .tag{font-weight:700;font-size:14px}
+.tag.ok{color:var(--good)} .tag.no{color:var(--danger)}
+.check{color:var(--good);font-weight:700}
+input.ans{font:inherit;width:90px;padding:5px 8px;border:2px solid var(--line);border-radius:8px}
+nav.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:8px 10px;z-index:5}
+.dots{display:flex;gap:6px}
+.dots button{width:15px;height:15px;border-radius:50%;border:2px solid var(--accent);background:transparent;padding:0}
+.dots button[aria-current="step"]{background:var(--accent)}
+svg .tap{cursor:pointer}
+svg .tap:focus{outline:none}
+svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-width:3}
+.flow{animation:flow linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
 </style>
+</head>
+<body>
+<main id="app">
 
-<div class="wrap">
-  <header>
-    <h1>Water and Battery Lab</h1>
-    <p class="intro">Move the slider. Watch both pictures change.</p>
-  </header>
-
-  <section class="panel control">
-    <div class="control-top">
-      <label for="level"><span class="w">Water level</span> = <span class="b">Voltage</span></label>
-      <span class="level-read" id="levelRead">4 of 8</span>
+<!-- 0 INTRO -->
+<section class="slide on" data-title="Start">
+  <div class="intro">
+    <div>
+      <h1>Measure voltage with a multimeter</h1>
+      <p class="lead">Voltage is the push that moves charges through a circuit. A multimeter can measure it. You will learn how to set up the meter, what <b>“across the load”</b> means, and then measure parts of a real circuit.</p>
+      <h3>When you finish, you can:</h3>
+      <ul>
+        <li>Set up a multimeter to measure voltage.</li>
+        <li>Measure <b>across</b> a battery, a load and a wire.</li>
+        <li>Explain why the meter goes <b>beside</b> a part, not inside the loop.</li>
+      </ul>
+      <p><button class="btn" data-go="1">Start</button></p>
+      <p class="small">Have a real multimeter? Follow along with it. Use the virtual one on these slides to practice. Readings are simulated so every class sees the same numbers.</p>
     </div>
-    <div class="slider-row">
-      <button class="step" id="down" type="button" aria-label="Lower the water and remove a battery">−</button>
-      <input type="range" id="level" min="0" max="8" step="1" value="4" aria-describedby="levelRead">
-      <button class="step" id="up" type="button" aria-label="Raise the water and add a battery">+</button>
-    </div>
-    <div class="ends"><span>Less push</span><span>More push</span></div>
-  </section>
+    <svg viewBox="0 0 152 262" role="img" aria-label="A yellow multimeter with the dial turned to V. The display reads 3.00 V." id="introMeter"></svg>
+  </div>
+</section>
 
-  <section class="pics">
-    <div class="panel pic">
-      <h2><span class="tag w">Water</span> The water tank</h2>
-      <svg viewBox="0 0 440 320" role="img" aria-label="A water tank. Water flows out a narrow hole and turns a water wheel. The wheel lights a bulb.">
-        <!-- level ticks -->
-        <g id="ticks"></g>
-        <!-- tank -->
-        <rect x="40" y="30" width="120" height="240" rx="6" fill="var(--panel)" stroke="var(--metal)" stroke-width="4"/>
-        <rect id="water" x="44" y="266" width="112" height="0" fill="var(--water)" opacity=".85"/>
-        <text x="100" y="20" text-anchor="middle">Water tank</text>
-        <!-- pipe -->
-        <rect x="158" y="242" width="106" height="16" fill="var(--panel)" stroke="var(--metal)" stroke-width="3"/>
-        <line id="pipeWater" x1="156" y1="250" x2="263" y2="250" stroke="var(--water)" stroke-width="6" stroke-dasharray="10 6"/>
-        <!-- narrow hole -->
-        <rect x="185" y="240" width="30" height="7" fill="var(--narrow)"/>
-        <rect x="185" y="253" width="30" height="7" fill="var(--narrow)"/>
-        <text x="200" y="232" text-anchor="middle" style="fill:var(--narrow)">Narrow hole</text>
-        <!-- falling water -->
-        <path id="fall" d="M263,250 q10,2 10,46" fill="none" stroke="var(--water)" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 6"/>
-        <!-- wires from wheel to bulb -->
-        <path d="M330,262 H370 V138 M330,244 H394 V124 H384" fill="none" stroke="var(--wire)" stroke-width="3"/>
-        <!-- wheel -->
-        <g id="wheelW" transform="translate(310 252)">
-          <circle r="34" fill="var(--panel)" stroke="var(--metal)" stroke-width="4"/>
-          <g class="paddles" stroke="var(--metal)" stroke-width="4" stroke-linecap="round"></g>
-          <circle r="6" fill="var(--metal)"/>
-        </g>
-        <text x="310" y="204" text-anchor="middle" style="fill:var(--flow)">Water wheel</text>
-        <!-- bulb -->
-        <g class="bulb"></g>
-        <text x="342" y="96" text-anchor="end" style="fill:var(--glow-ink)">Light bulb</text>
-        <!-- basin -->
-        <rect x="250" y="298" width="120" height="14" rx="4" fill="var(--water-soft)" stroke="var(--metal)" stroke-width="2"/>
-      </svg>
+<!-- 1 MEET -->
+<section class="slide" data-title="Meet the multimeter">
+  <h2>1. Meet the multimeter</h2>
+  <p class="lead">You used a multimeter to measure resistance. Today you will use the <b>same tool</b> to measure <b>voltage</b>. Only one thing is very different: for voltage, the circuit has power.</p>
+  <div class="work">
+    <div><div class="svgwrap" id="meetBench"></div></div>
+    <div>
+      <p><b>Tap a part name.</b> The part lights up on the meter.</p>
+      <div class="parts" id="meetParts">
+        <button class="part" data-hl="display" aria-pressed="false"><b>Display</b><span>Shows the number. Voltage is in <b>V</b> (volts).</span></button>
+        <button class="part" data-hl="dial" aria-pressed="false"><b>Dial</b><span>Picks what you measure. For voltage, turn it to <b>V</b>.</span></button>
+        <button class="part" data-hl="COM" aria-pressed="false"><b>COM port</b><span>COM means common. The black lead always goes here.</span></button>
+        <button class="part" data-hl="VΩ" aria-pressed="false"><b>VΩ port</b><span>The red lead goes here for voltage (V) and resistance (Ω).</span></button>
+        <button class="part" data-hl="10A" aria-pressed="false"><b>10A port</b><span>Only for measuring big current. Do not use it for voltage.</span></button>
+        <button class="part" data-hl="probes" aria-pressed="false"><b>Probes</b><span>The metal tips. Touch one to <b>each side</b> of the part you test.</span></button>
+      </div>
     </div>
+  </div>
+</section>
 
-    <div class="panel pic">
-      <h2><span class="tag b">Battery</span> The circuit</h2>
-      <svg viewBox="0 0 440 320" role="img" aria-label="A stack of batteries. Electricity flows through a resistor and a current meter, and lights a bulb.">
-        <!-- wire loop -->
-        <path id="wire" d="M160,250 H185 l3,-8 l6,16 l6,-16 l6,16 l6,-16 l3,8 H370 V136 L384,124 H394 V14 H100 V30" fill="none" stroke="var(--wire)" stroke-width="4" stroke-linejoin="round"/>
-        <!-- resistor highlight -->
-        <path d="M185,250 l3,-8 l6,16 l6,-16 l6,16 l6,-16 l3,8" fill="none" stroke="var(--narrow)" stroke-width="5" stroke-linejoin="round"/>
-        <text x="200" y="232" text-anchor="middle" style="fill:var(--narrow)">Resistor</text>
-        <!-- holder -->
-        <rect x="40" y="30" width="120" height="240" rx="6" fill="var(--panel)" stroke="var(--metal)" stroke-width="4"/>
-        <g id="cells"></g>
-        <text x="100" y="292" text-anchor="middle" style="fill:var(--battery)">Batteries</text>
-        <!-- wire glow shows how much current -->
-        <use id="wireGlow" href="#wire" style="stroke:var(--flow);stroke-width:12;opacity:0"/>
-        <!-- moving charges -->
-        <g id="charges"></g>
-        <!-- current meter -->
-        <g id="meter">
-          <rect x="270" y="216" width="80" height="70" rx="10" fill="var(--panel)" stroke="var(--metal)" stroke-width="3"/>
-          <path d="M284,258 A26,26 0 0 1 336,258" fill="none" stroke="var(--line)" stroke-width="6"/>
-          <path id="meterArc" d="M284,258 A26,26 0 0 1 336,258" fill="none" stroke="var(--flow)" stroke-width="6" pathLength="100" stroke-dasharray="0 100"/>
-          <g id="meterTicks" stroke="var(--metal)" stroke-width="1.6"></g>
-          <line id="needle" x1="310" y1="258" x2="286" y2="258" stroke="var(--narrow)" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="310" cy="258" r="4" fill="var(--wire)"/>
-          <text id="meterText" x="310" y="279" text-anchor="middle" style="font-size:12px">0.00 A</text>
-        </g>
-        <text x="310" y="204" text-anchor="middle" style="fill:var(--flow)">Current meter</text>
-        <!-- bulb on the wire -->
-        <g class="bulb"></g>
-        <text x="342" y="96" text-anchor="end" style="fill:var(--glow-ink)">Light bulb</text>
-      </svg>
+<!-- 2 ACROSS -->
+<section class="slide" data-title="What does across mean?">
+  <h2>2. What does “across the load” mean?</h2>
+  <p class="lead">Voltage is always a <b>difference between two points</b>, like the height at the top and the bottom of a slide. So you never touch just one spot. You put the two probes on <b>two sides</b> of something.</p>
+  <div class="work">
+    <div>
+      <div class="svgwrap" id="acrossBench"></div>
+      <div class="chips" id="acrossBtns" role="group" aria-label="Where to measure">
+        <button class="chip" data-across="AD" aria-pressed="false">Across the battery</button>
+        <button class="chip" data-across="BC" aria-pressed="false">Across the load</button>
+        <button class="chip" data-across="CD" aria-pressed="false">Across a wire</button>
+      </div>
     </div>
-  </section>
-
-  <p class="say" id="say" aria-live="polite"></p>
-
-  <section class="reads">
-    <div class="read" style="--c:var(--water)">
-      <span class="k">Push <small>Voltage</small></span>
-      <span class="v" id="vRead">6.0 V</span>
-      <span class="note">You change this.</span>
+    <div>
+      <div class="card def load tight"><h3>Load</h3><p style="margin:0">The part that <b>uses</b> the energy. A light bulb, motor, buzzer or speaker is a load. In this circuit, the load is the light bulb.</p></div>
+      <div class="card def tight"><h3>Across</h3><p style="margin:0">One probe on <b>each side</b> of a part. <b>Across the load</b> means the red probe on one side of the bulb and the black probe on the other side.</p></div>
+      <div class="card tight">
+        <h3>The meter goes beside the part</h3>
+        <div class="compare">
+          <div><svg viewBox="0 0 170 120" aria-label="Right way: the voltmeter sits beside the bulb, with one lead on each side. The bulb is lit." role="img" id="rightWay"></svg><div class="tag ok">✔ Right: beside the bulb</div><div class="small">The loop is not broken. The bulb stays on. This is called hooking it up in <b>parallel</b>.</div></div>
+          <div><svg viewBox="0 0 170 120" aria-label="Wrong way: the wire is cut and the voltmeter is put inside the loop. The bulb is dark." role="img" id="wrongWay"></svg><div class="tag no">✘ Wrong: inside the loop</div><div class="small">Do not cut the loop and put the meter in the line. The bulb goes out.</div></div>
+        </div>
+      </div>
     </div>
-    <div class="read" style="--c:var(--flow)">
-      <span class="k">Flow <small>Current</small></span>
-      <span class="v" id="iRead">0.60 A</span>
-      <span class="note">This changes by itself.</span>
-    </div>
-    <div class="read" style="--c:var(--narrow)">
-      <span class="k">Narrow spot <small>Resistance</small></span>
-      <span class="v">10 Ω</span>
-      <span class="note">This stays the same.</span>
-    </div>
-  </section>
+  </div>
+</section>
 
+<!-- 3 SETUP -->
+<section class="slide" data-title="Set up the meter">
+  <h2>3. Set up the meter and measure a battery</h2>
+  <div class="work">
+    <div>
+      <div class="svgwrap" id="setupBench"></div>
+    </div>
+    <div>
+      <div class="card safety tight"><h3>Safety rule</h3><p style="margin:0">Voltage is measured with the power <b>on</b>. Always check the dial is on <b>V</b> before you touch the probes to a circuit.</p></div>
+      <ol class="steps" id="setupSteps">
+        <li data-s="0"><span class="n">1</span><span>Drag the <b>black plug</b> into the <b>COM</b> port.</span></li>
+        <li data-s="1"><span class="n">2</span><span>Drag the <b>red plug</b> into the <b>VΩ</b> port.</span></li>
+        <li data-s="2"><span class="n">3</span><span>Turn the dial to <b>V</b>. (Tap the V on the meter.)</span></li>
+        <li data-s="3"><span class="n">4</span><span>Drag the <b>red probe</b> tip to the <b>+</b> end of the battery (point A).</span></li>
+        <li data-s="4"><span class="n">5</span><span>Drag the <b>black probe</b> tip to the <b>−</b> end of the battery (point D).</span></li>
+        <li data-s="5"><span class="n">6</span><span>Read the number and units: <input class="ans" id="setupAns" inputmode="decimal" aria-label="Your reading in volts"> V <button class="btn ghost" id="setupCheck" style="padding:4px 10px">Check</button> <span id="setupFb"></span></span></li>
+      </ol>
+    </div>
+  </div>
+</section>
 
-  <section class="panel try">
-    <h2>Try this</h2>
-    <ul>
-      <li>Make the water go up. What happens to the flow?</li>
-      <li>Add batteries. Watch the green dots and the current meter. What happens?</li>
-      <li>Take all the water out. What stops?</li>
-    </ul>
-    <p style="margin:12px 0 0"><b>Big idea:</b> More push = more flow.</p>
-  </section>
-</div>
+<!-- 4 MISSION -->
+<section class="slide" data-title="Measure a circuit">
+  <h2>4. Measure across parts of a circuit</h2>
+  <p class="lead">Set the dial to <b>V</b>. Drag each probe tip to a point (A, B, C or D), or pick a probe and tap a point. Do each mission. Tap <b>Save this reading</b> after each one.</p>
+  <div class="work">
+    <div>
+      <div class="svgwrap" id="missionBench"></div>
+    </div>
+    <div>
+      <ol class="steps" id="missionSteps">
+        <li data-m="0"><span class="n">1</span><span>Switch <b>closed</b>. Measure <b>across the battery</b> (A and D).</span></li>
+        <li data-m="1"><span class="n">2</span><span>Switch <b>closed</b>. Measure <b>across the load</b> (B and C).</span></li>
+        <li data-m="2"><span class="n">3</span><span>Measure <b>across a wire</b> (C and D).</span></li>
+        <li data-m="3"><span class="n">4</span><span><b>Open</b> the switch. Measure across the load again.</span></li>
+        <li data-m="4"><span class="n">5</span><span>Switch still <b>open</b>. Measure <b>across the switch</b> (A and B).</span></li>
+        <li data-m="5"><span class="n">6</span><span>Use <b>3 cells</b>. Measure across the battery.</span></li>
+      </ol>
+      <div class="ctrl" style="margin-top:10px"><button class="btn" id="saveBtn">Save this reading</button><button class="btn ghost" id="clearBtn">Clear table</button></div>
+      <div class="card tight" style="margin-top:8px"><table><thead><tr><th>Cells</th><th>Switch</th><th>Where</th><th>Reading</th></tr></thead><tbody id="saved"><tr><td colspan="4" class="small">No readings saved yet.</td></tr></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 FIND -->
+<section class="slide" data-title="What did you find?">
+  <h2>What did you find?</h2>
+  <div class="work">
+    <div class="card"><h3>Your results</h3><table><thead><tr><th>Cells</th><th>Switch</th><th>Where</th><th>Reading</th></tr></thead><tbody id="saved2"></tbody></table></div>
+    <div class="card" id="findQs"></div>
+  </div>
+</section>
+
+<!-- 6 QUIZ -->
+<section class="slide" data-title="Check yourself">
+  <h2>5. Check yourself</h2>
+  <p>Answer 7 questions. You get one try on each.</p>
+  <div id="quiz"></div>
+</section>
+
+</main>
+
+<nav class="bar" aria-label="Slides">
+  <button class="btn ghost" id="back">Back</button>
+  <div class="dots" id="dots"></div>
+  <button class="btn" id="next">Next</button>
+</nav>
 
 <script>
 (function(){
-  const NS="http://www.w3.org/2000/svg";
-  const MAX=8, STEP_H=28, BOTTOM=266, R=10;
-  const $=id=>document.getElementById(id);
-  const slider=$("level");
-  const mk=(tag,attrs,parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent.appendChild(e);return e;};
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const INK="#16293B", RED="#C62828", ACC="#1B5FC1";
 
-  // ticks beside tank
-  for(let i=1;i<=MAX;i++){
-    const y=BOTTOM-i*STEP_H;
-    mk("line",{x1:28,x2:40,y1:y,y2:y,stroke:"var(--metal)","stroke-width":2},$("ticks"));
-    mk("text",{x:22,y:y+5,"text-anchor":"end",style:"font-size:12px;fill:var(--muted)"},$("ticks")).textContent=i;
+/* ---------------- METER ---------------- */
+// meter drawn at local coords 0..140 x 0..240
+const DIALPOS={OFF:[22,150],V:[28,96],A:[112,96],"Ω":[118,150]};
+const PORTS={"10A":30,"COM":70,"VΩ":110}; const PORT_Y=214;
+function meterSVG(st,o){
+  o=o||{}; const tap=!!o.tap;
+  const r=o.read||{display:"",unit:""};
+  let s=`<rect x="0" y="0" width="140" height="240" rx="16" fill="#F5B301" stroke="${INK}" stroke-width="3"/>`;
+  s+=`<rect x="13" y="13" width="114" height="50" rx="6" fill="${st.dial==="OFF"?"#AFBE97":"#C9D8A8"}" stroke="${INK}" stroke-width="3"/>`;
+  s+=`<text x="19" y="24" font-size="6" fill="${INK}" font-family="Arial">AUTO</text>`;
+  s+=`<text x="${r.unit?101:120}" y="52" text-anchor="end" font-size="25" fill="${INK}" font-family="Share Tech Mono, Courier New, monospace">${esc(r.display)}</text>`;
+  if(r.unit) s+=`<text x="104" y="52" font-size="12" fill="${INK}" font-family="Share Tech Mono, Courier New, monospace">${esc(r.unit)}</text>`;
+  s+=`<text x="70" y="77" text-anchor="middle" font-size="7" font-weight="700" letter-spacing="1.2" fill="${INK}" font-family="Arial">MULTIMETER</text>`;
+  const [px,py]=DIALPOS[st.dial]; const ang=Math.atan2(py-122,px-70);
+  s+=`<circle cx="70" cy="122" r="27" fill="#3A4A5C" stroke="${INK}" stroke-width="3"/>`;
+  const tx=70+Math.cos(ang)*22, ty=122+Math.sin(ang)*22, bx=Math.cos(ang+Math.PI/2)*5, by=Math.sin(ang+Math.PI/2)*5, mx=70+Math.cos(ang)*12, my=122+Math.sin(ang)*12;
+  s+=`<line x1="${70+Math.cos(ang)*4}" y1="${122+Math.sin(ang)*4}" x2="${tx}" y2="${ty}" stroke="#fff" stroke-width="5" stroke-linecap="round"/><circle cx="70" cy="122" r="5" fill="#fff"/>`;
+  for(const k in DIALPOS){const [x,y]=DIALPOS[k]; const on=st.dial===k;
+    s+=`<g ${tap?`class="tap" role="button" tabindex="0" aria-label="Turn dial to ${k==="Ω"?"ohms":k==="V"?"volts":k==="A"?"amps":"off"}" data-dial="${k}"`:""}><circle class="ring" cx="${x}" cy="${y}" r="${k==="OFF"?11:10}" fill="${on?INK:"#F5B301"}" stroke="${INK}" stroke-width="2"/><text x="${x}" y="${y+(k==="OFF"?2.5:4)}" text-anchor="middle" font-size="${k==="OFF"?7:11}" font-weight="700" fill="${on?"#fff":INK}" font-family="Arial">${k}</text></g>`;}
+  for(const k in PORTS){const x=PORTS[k];
+    s+=`<text x="${x}" y="196" text-anchor="middle" font-size="8" font-weight="700" fill="${INK}" font-family="Arial">${k}</text>`;
+    const ringC=k==="VΩ"?RED:(k==="COM"?"#fff":"#55606b");
+    s+=`<g ${tap?`class="tap" role="button" tabindex="0" aria-label="${k} port" data-port="${k}"`:""}><circle class="ring" cx="${x}" cy="${PORT_Y}" r="11" fill="${INK}" stroke="${INK}" stroke-width="1"/><circle cx="${x}" cy="${PORT_Y}" r="6" fill="#111" stroke="${ringC}" stroke-width="2.5"/></g>`;}
+  // highlights
+  const hl=o.hl; const H=(sh)=>`<g fill="none" stroke="${ACC}" stroke-width="4" stroke-dasharray="6 4">${sh}</g>`;
+  if(hl==="display") s+=H(`<rect x="6" y="6" width="128" height="64" rx="9"/>`);
+  if(hl==="dial") s+=H(`<circle cx="70" cy="122" r="37"/>`);
+  if(PORTS[hl]!==undefined) s+=H(`<circle cx="${PORTS[hl]}" cy="${PORT_Y}" r="17"/>`);
+  return s;
+}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+/* ---------------- CIRCUIT / BENCH ---------------- */
+const MX=6, MY=14; // meter offset inside bench svg
+const REST={black:{plug:[180,150],tip:[180,200]},red:{plug:[404,150],tip:[404,200]}}; // where loose leads sit on the bench
+function pts(mode){
+  if(mode==="battery") return {A:{x:290,y:80,d:[-1,-.45],lx:306,ly:78,name:"the + end"},D:{x:290,y:176,d:[-1,.45],lx:306,ly:192,name:"the − end"}};
+  return {A:{x:205,y:80,d:[-1,-.45],lx:220,ly:76,name:"the + end of the battery"},B:{x:375,y:90,d:[1,-.45],lx:360,ly:86,name:"the top of the bulb"},C:{x:375,y:170,d:[1,.45],lx:360,ly:180,name:"the bottom of the bulb"},D:{x:205,y:176,d:[-1,.45],lx:220,ly:192,name:"the − end of the battery"}};
+}
+function potentials(st){const Vb=1.5*st.cells;
+  if(st.mode==="battery") return {A:Vb,D:0};
+  return st.closed?{A:Vb,B:Vb,C:0,D:0}:{A:Vb,B:0,C:0,D:0};}
+function pairKey(a,b){return [a,b].sort().join("");}
+function fmt(v){const t=Math.abs(v).toFixed(2); return (v<-0.004?"-":"")+t;}
+
+function reading(st){
+  const placed=st.probe.red&&st.probe.black;
+  if(st.dial==="OFF") return {display:"",unit:"",msg:"The meter is OFF. Turn the dial to V.",tone:""};
+  const du=st.dial==="V"?["0.00","V"]:st.dial==="A"?["0.00","A"]:["OL","Ω"];
+  if(!st.port.black||!st.port.red) return {display:du[0],unit:du[1],msg:"Plug in both leads: black goes in COM, red goes in VΩ.",tone:""};
+  if(st.port.black==="10A"||st.port.red==="10A") return {display:"---",unit:"",msg:"The 10A port is only for big current. Black goes in COM. Red goes in VΩ.",tone:"warn"};
+  const sign=st.port.red==="VΩ"?1:-1; const swapNote=sign<0?" Your leads are in the wrong ports: black goes in COM, red goes in VΩ.":"";
+  const P=potentials(st);
+  if(st.dial==="Ω"){
+    if(placed) return {display:"Err",unit:"",msg:"Stop! Never measure resistance on a part that has power. Turn the dial to V.",tone:"danger"};
+    return {display:"OL",unit:"Ω",msg:"The dial is on Ω (resistance). To measure voltage, turn it to V.",tone:"warn"};}
+  if(st.dial==="A"){
+    if(placed&&Math.abs(P[st.probe.red]-P[st.probe.black])>0) return {display:"---",unit:"",msg:"Stop! On A, the meter acts like a wire. Across a battery or bulb, that makes a short circuit. Turn the dial to V.",tone:"danger"};
+    return {display:"0.00",unit:"A",msg:"The A setting measures current, not voltage. Turn the dial to V.",tone:"warn"};}
+  if(!placed) return {display:"0.00",unit:"V",msg:"Touch one probe to each side of a part.",tone:""};
+  const r=st.probe.red,b=st.probe.black; const v=sign*(P[r]-P[b]); const a=Math.abs(v).toFixed(2);
+  let msg; const k=pairKey(r,b);
+  if(r===b) msg="Both probes are on the same spot. There is no difference, so the meter reads 0 V.";
+  else if(k==="AD") msg=st.mode==="battery"?`Across the battery: ${a} V. That is the push this battery gives.`:`Across the battery: ${a} V. This is the push the battery gives the charges.`;
+  else if(k==="BC") msg=st.closed?`Across the load (the bulb): ${a} V. The bulb uses the energy the battery gave the charges.`:`Across the load: 0.00 V. The switch is open, so no charges flow and the bulb uses no energy.`;
+  else if(k==="CD") msg=`Across a wire: ${a} V. Charges lose almost no energy in a wire, so there is no difference.`;
+  else if(k==="AB") msg=st.closed?`Across the closed switch: ${a} V. A closed switch acts like a wire.`:`Across the open switch: ${a} V. The whole push is stuck at the gap, so no charges flow.`;
+  else msg=`Between points ${r} and ${b}: ${a} V.`;
+  let tone="good";
+  if(v<-0.004){msg+=" The minus sign means the probes are swapped. Put the red probe on the + side."; tone="warn";}
+  if(swapNote){msg+=swapNote; tone="warn";}
+  return {display:fmt(v),unit:"V",msg,tone,value:v,pair:k,red:r,black:b};
+}
+
+function benchSVG(st,o){
+  o=o||{}; const P=pts(st.mode); const tap=!!o.tap; const Vb=1.5*st.cells;
+  let s=`<rect x="158" y="8" width="266" height="254" rx="12" fill="#F2F6F9" stroke="#B9C8D5" stroke-width="2"/>`;
+  const W=`stroke="${INK}" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"`;
+  const bx=st.mode==="battery"?290:205;
+  if(st.mode!=="battery"){
+    s+=`<path d="M205,80 V40 H268" ${W}/><path d="M312,40 H375 V106" ${W}/><path d="M375,154 V215 H205 V176" ${W}/>`;
+    if(st.closed && Vb>0) s+=`<path class="flow" d="M205,176 V215 H375 V40 H205 V80" stroke="#1E9E6A" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 12" fill="none" style="animation-duration:${(2.4/st.cells).toFixed(2)}s"/>`;
+    // switch
+    s+=`<g ${tap&&o.switchTap?`class="tap" role="button" tabindex="0" aria-label="Switch is ${st.closed?"closed":"open"}. Tap to ${st.closed?"open":"close"} it." data-sw="1"`:""}><rect x="262" y="12" width="56" height="40" fill="transparent"/>`;
+    s+=`<circle cx="270" cy="40" r="3.5" fill="${INK}"/><circle cx="310" cy="40" r="3.5" fill="${INK}"/>`;
+    s+=st.closed?`<line x1="270" y1="40" x2="310" y2="38" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`:`<line x1="270" y1="40" x2="302" y2="16" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<text x="290" y="60" text-anchor="middle" font-size="10" font-weight="700" fill="${INK}" font-family="Arial">Switch (${st.closed?"closed":"open"})</text></g>`;
+    // bulb
+    const lit=st.closed; const glow=lit?Math.min(.85,.25+.2*st.cells):0;
+    if(lit) s+=`<circle cx="375" cy="124" r="${22+st.cells*4}" fill="#FFD54F" opacity="${glow}"/>`;
+    s+=`<circle cx="375" cy="124" r="18" fill="${lit?"#FFE58A":"#FAFCFD"}" stroke="${INK}" stroke-width="2.5"/>`;
+    s+=`<path d="M369,141 V130 Q375,116 381,130 V141" stroke="#8A5A2B" stroke-width="2" fill="none"/>`;
+    s+=`<rect x="366" y="140" width="18" height="14" rx="2" fill="#9AA5B1" stroke="${INK}" stroke-width="2"/>`;
+    s+=`<g font-family="Arial" font-size="10" font-weight="700" text-anchor="end" stroke="#F2F6F9" stroke-width="3" paint-order="stroke"><text x="340" y="156" fill="${INK}">Light bulb</text><text x="340" y="168" fill="#7A4A12">(the load)</text></g>`;
+    s+=`<text x="290" y="232" text-anchor="middle" font-size="10" font-weight="700" fill="${INK}" font-family="Arial">Wire</text>`;
   }
-  // wheel paddles
-  document.querySelectorAll(".paddles").forEach(g=>{
-    for(let i=0;i<8;i++){
-      const a=i*Math.PI/4, c=Math.cos(a), s=Math.sin(a);
-      mk("line",{x1:6*c,y1:6*s,x2:42*c,y2:42*s},g);
+  // battery
+  const h=96/st.cells;
+  s+=`<rect x="${bx-6}" y="74" width="12" height="7" rx="1.5" fill="#C77B30" stroke="${INK}" stroke-width="1.5"/>`;
+  for(let i=0;i<st.cells;i++){const y=80+i*h;
+    s+=`<rect x="${bx-16}" y="${y}" width="32" height="${h}" rx="3" fill="#23303D" stroke="${INK}" stroke-width="2"/><rect x="${bx-16}" y="${y}" width="32" height="${Math.max(5,h*.2)}" rx="3" fill="#C77B30"/>`;
+    s+=`<text x="${bx}" y="${y+h*.62+3}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fff" font-family="Arial">1.5 V</text>`;}
+  s+=`<text x="${bx-30}" y="94" text-anchor="middle" font-size="15" font-weight="700" fill="${INK}" font-family="Arial">+</text><text x="${bx-30}" y="176" text-anchor="middle" font-size="16" font-weight="700" fill="${INK}" font-family="Arial">−</text>`;
+  const lbx=st.mode==="battery"?bx+26:bx+24;
+  s+=`<text x="${lbx}" y="124" font-size="10" font-weight="700" fill="${INK}" font-family="Arial">Battery</text><text x="${lbx}" y="137" font-size="10" fill="${INK}" font-family="Arial">${st.cells} cell${st.cells>1?"s":""} = ${Vb.toFixed(1)} V</text>`;
+  // test points
+  for(const k in P){const p=P[k];
+    s+=`<g ${tap?`class="tap" role="button" tabindex="0" aria-label="Point ${k}, ${p.name}" data-pt="${k}"`:""}><circle cx="${p.x}" cy="${p.y}" r="14" fill="transparent"/><circle class="ring" cx="${p.x}" cy="${p.y}" r="6.5" fill="#fff" stroke="${ACC}" stroke-width="2.5"/></g>`;
+    s+=`<text x="${p.lx}" y="${p.ly}" text-anchor="${p.lx<p.x?"end":"start"}" font-size="13" font-weight="800" fill="${ACC}" font-family="Arial" stroke="#F2F6F9" stroke-width="3" paint-order="stroke">${k}</text>`;}
+  // meter
+  s+=`<g transform="translate(${MX},${MY})">${meterSVG(st,{tap,read:o.read,hl:o.hl})}</g>`;
+  // leads + probes (always drawn; loose leads rest on the bench; drag the plug or the probe)
+  const same=st.probe.red&&st.probe.red===st.probe.black;
+  const canDrag=tap&&!o.noDrag;
+  ["black","red"].forEach(c=>{
+    const port=st.port[c]; const dr=st.drag&&st.drag.c===c?st.drag:null;
+    let sx,sy;
+    if(dr&&dr.kind==="plug"){sx=dr.x;sy=dr.y;}
+    else if(port){sx=MX+PORTS[port];sy=MY+PORT_Y;}
+    else {sx=REST[c].plug[0];sy=REST[c].plug[1];}
+    let tip,d;
+    if(dr&&dr.kind==="tip"){tip=[dr.x,dr.y];d=[0,1];}
+    else if(st.probe[c]){const p=P[st.probe[c]]; tip=[p.x,p.y]; d=p.d; if(same){const off=c==="red"?7:-7; tip=[p.x-d[1]*off,p.y+d[0]*off];}}
+    else {tip=REST[c].tip; d=[0,1];}
+    const n=Math.hypot(d[0],d[1]); const ux=d[0]/n, uy=d[1]/n;
+    const e=[tip[0]+ux*30,tip[1]+uy*30]; const col=c==="red"?RED:"#1b1f24";
+    const grab=canDrag?` style="cursor:grab;touch-action:none"`:"";
+    const k2=st.probe[c]&&!(dr&&dr.kind==="tip")?44:16;
+    s+=`<path d="M${sx},${sy} C${sx},${Math.min(sy+30,262)} ${e[0]+ux*k2},${e[1]+uy*k2} ${e[0]},${e[1]}" stroke="${col}" stroke-width="3.5" fill="none" stroke-linecap="round" pointer-events="none"/>`;
+    s+=`<g ${canDrag?`data-drag="tip:${c}" aria-label="${c==="red"?"Red":"Black"} probe. Drag the tip to a point."`:""}${grab}>`;
+    if(canDrag) s+=`<circle cx="${tip[0]+ux*18}" cy="${tip[1]+uy*18}" r="18" fill="transparent"/>`;
+    s+=`<line x1="${tip[0]}" y1="${tip[1]}" x2="${tip[0]+ux*8}" y2="${tip[1]+uy*8}" stroke="#8C99A6" stroke-width="2.5" stroke-linecap="round"/>`;
+    s+=`<line x1="${tip[0]+ux*9}" y1="${tip[1]+uy*9}" x2="${e[0]}" y2="${e[1]}" stroke="${col}" stroke-width="8" stroke-linecap="round"/></g>`;
+    const loose=!port||(dr&&dr.kind==="plug");
+    s+=`<g ${canDrag?`data-drag="plug:${c}" aria-label="${c==="red"?"Red":"Black"} lead plug. Drag it to a port."`:""}${grab}>`;
+    if(canDrag) s+=`<circle cx="${sx}" cy="${sy}" r="16" fill="transparent"/>`;
+    s+=`<circle cx="${sx}" cy="${sy}" r="${loose?9:7.5}" fill="${col}" stroke="${c==="black"?"#fff":INK}" stroke-width="1.5"/>`;
+    if(!port&&!dr) s+=`<text x="${sx}" y="${sy-14}" text-anchor="middle" font-size="9" font-weight="700" fill="${INK}" font-family="Arial" stroke="#F2F6F9" stroke-width="3" paint-order="stroke">${c==="red"?"Red plug":"Black plug"}</text>`;
+    s+=`</g>`;
+  });
+  if(o.hl==="probes"){for(const k in P){if(k==="A"||k==="D"){} } ["red","black"].forEach(c=>{const k=st.probe[c]; if(k){const p=P[k]; s+=`<circle cx="${p.x}" cy="${p.y}" r="16" fill="none" stroke="${ACC}" stroke-width="4" stroke-dasharray="6 4"/>`;}});}
+  return `<svg viewBox="0 0 430 270" role="img" aria-label="Multimeter and ${st.mode==="battery"?"a battery":"a circuit with a battery, a switch and a light bulb"}">${s}</svg>`;
+}
+
+/* Bench component */
+function Bench(el,init,o){
+  o=o||{};
+  const st=Object.assign({mode:"circuit",cells:2,closed:true,dial:"V",port:{black:"COM",red:"VΩ"},probe:{red:null,black:null},active:"red",held:null},init);
+  const api={st,render,set};
+  function set(fn){fn(st);render();}
+  function render(){
+    const r=reading(st); api.read=r;
+    const focusKey=document.activeElement&&el.contains(document.activeElement)?keyOf(document.activeElement):null;
+    let h=`<div>${benchSVG(st,{tap:o.tap!==false,read:r,hl:o.hl&&o.hl(),switchTap:o.switchTap})}</div>`;
+    h+=`<div class="status ${r.tone}" aria-live="polite">${esc(r.msg)}</div>`;
+    if(o.controls!==false){
+      h+=`<div class="ctrl" style="margin-top:8px">`;
+      if(o.leads){["black","red"].forEach(c=>{ if(!st.port[c]) h+=`<button class="chip ${c}" data-held="${c}" aria-pressed="${st.held===c}">${c==="red"?"Red":"Black"} lead${st.held===c?": now tap a port":""}</button>`;});}
+      if(st.port.red||st.port.black){h+=`<span><b>Next tap moves:</b> <span class="seg"><button data-act="red" aria-pressed="${st.active==="red"}">Red probe</button><button data-act="black" aria-pressed="${st.active==="black"}">Black probe</button></span></span>`;}
+      h+=`<button class="chip" data-clear="1">Lift probes</button></div>`;
+      if(o.cellsCtl||o.switchTap){h+=`<div class="ctrl">`;
+        if(o.cellsCtl) h+=`<span><b>Cells:</b> <span class="seg">${[1,2,3].map(n=>`<button data-cells="${n}" aria-pressed="${st.cells===n}">${n}</button>`).join("")}</span></span>`;
+        if(o.switchTap) h+=`<span><b>Switch:</b> <span class="seg"><button data-closed="1" aria-pressed="${st.closed}">Closed</button><button data-closed="0" aria-pressed="${!st.closed}">Open</button></span></span>`;
+        h+=`</div>`;}
+      const P=pts(st.mode);
+      h+=`<details><summary>Can't tap the meter or the dots? Use buttons</summary>`;
+      h+=`<div class="chips"><b style="align-self:center;font-size:14px">Dial:</b>${["OFF","V","A","Ω"].map(k=>`<button class="chip" data-dial="${k}" aria-pressed="${st.dial===k}">${k}</button>`).join("")}</div>`;
+      if(o.leads) h+=`<div class="chips"><b style="align-self:center;font-size:14px">Leads:</b><button class="chip" data-plug="black:COM">Black → COM</button><button class="chip" data-plug="red:VΩ">Red → VΩ</button><button class="chip" data-plug="red:10A">Red → 10A</button></div>`;
+      ["red","black"].forEach(c=>{h+=`<div class="chips"><b style="align-self:center;font-size:14px">${c==="red"?"Red":"Black"} probe on:</b>${Object.keys(P).map(k=>`<button class="chip" data-put="${c}:${k}">${k}</button>`).join("")}</div>`;});
+      h+=`</details>`;
     }
+    el.innerHTML=h;
+    if(focusKey){const f=el.querySelector(`[${focusKey}]`); if(f) f.focus();}
+    if(o.onChange) o.onChange(st,r);
+  }
+  function keyOf(e){for(const a of ["data-dial","data-port","data-pt","data-sw","data-held","data-act","data-cells","data-closed","data-plug","data-put","data-clear"]) if(e.hasAttribute(a)) return `${a}="${e.getAttribute(a)}"`; return null;}
+  function plug(c,port){ // c lead into port
+    for(const k of ["black","red"]) if(k!==c&&st.port[k]===port){st.port[k]=null;st.probe[k]=null;}
+    st.port[c]=port; st.held=null;
+    st.active=["red","black"].find(k=>st.port[k]&&!st.probe[k])||(st.port.red?"red":c);
+  }
+  function act(t){
+    if(t.dataset.dial){st.dial=t.dataset.dial;}
+    else if(t.dataset.port){const p=t.dataset.port;
+      if(st.held) plug(st.held,p);
+      else {const who=["black","red"].find(k=>st.port[k]===p); if(who){st.port[who]=null;st.probe[who]=null;st.held=who;}}}
+    else if(t.dataset.held){const c=t.dataset.held; st.held=st.held===c?null:c;}
+    else if(t.dataset.plug){const [c,p]=t.dataset.plug.split(":"); plug(c,p);}
+    else if(t.dataset.pt){const c=st.active; if(!st.port[c]) return; st.probe[c]=t.dataset.pt; const other=c==="red"?"black":"red"; if(!st.probe[other]&&st.port[other]) st.active=other;}
+    else if(t.dataset.put){const [c,k]=t.dataset.put.split(":"); if(!st.port[c]) return; st.probe[c]=k;}
+    else if(t.dataset.act){st.active=t.dataset.act;}
+    else if(t.dataset.clear){st.probe.red=null;st.probe.black=null;st.active="red";}
+    else if(t.dataset.cells){st.cells=+t.dataset.cells;}
+    else if(t.dataset.closed!==undefined){st.closed=t.dataset.closed==="1";}
+    else if(t.dataset.sw){st.closed=!st.closed;}
+    else return;
+    render();
+  }
+  let drag=null, justDragged=false;
+  el.addEventListener("click",e=>{if(justDragged) return; const t=e.target.closest("[data-dial],[data-port],[data-pt],[data-sw],[data-held],[data-act],[data-cells],[data-closed],[data-plug],[data-put],[data-clear]"); if(t&&el.contains(t)) act(t);});
+  /* drag a plug into a port, or drag a probe tip onto a point */
+  function svgPt(e){const svg=el.querySelector("svg"); const p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse());}
+  function curPos(kind,c){
+    if(kind==="plug") return st.port[c]?[MX+PORTS[st.port[c]],MY+PORT_Y]:REST[c].plug.slice();
+    const P=pts(st.mode); return st.probe[c]?[P[st.probe[c]].x,P[st.probe[c]].y]:REST[c].tip.slice();
+  }
+  function drawSvg(){const box=el.firstElementChild; if(box) box.innerHTML=benchSVG(st,{tap:o.tap!==false,read:reading(st),hl:o.hl&&o.hl(),switchTap:o.switchTap});}
+  el.addEventListener("pointerdown",e=>{
+    const g=e.target.closest("[data-drag]"); if(!g||!el.contains(g)) return;
+    e.preventDefault();
+    const [kind,c]=g.getAttribute("data-drag").split(":"); const p=svgPt(e); const cur=curPos(kind,c);
+    drag={kind,c,ox:cur[0]-p.x,oy:cur[1]-p.y,moved:false};
+    try{el.setPointerCapture(e.pointerId);}catch(x){}
+    st.drag={c,kind,x:cur[0],y:cur[1]}; drawSvg();
   });
-  // light bulbs
-  const bulbs=[];
-  document.querySelectorAll(".bulb").forEach((g,k)=>{
-    const svg=g.ownerSVGElement;
-    let defs=svg.querySelector("defs")||mk("defs",{},svg);
-    const gid="halo"+k;
-    const rg=mk("radialGradient",{id:gid},defs);
-    mk("stop",{offset:"0","stop-color":"var(--glow)","stop-opacity":"1"},rg);
-    mk("stop",{offset:"0.45","stop-color":"var(--glow)","stop-opacity":"0.55"},rg);
-    mk("stop",{offset:"1","stop-color":"var(--glow)","stop-opacity":"0"},rg);
-    const halo=mk("circle",{cx:370,cy:92,r:60,fill:"url(#"+gid+")",opacity:0},g);
-    const rays=mk("g",{stroke:"var(--glow)","stroke-width":4,"stroke-linecap":"round",opacity:0},g);
-    const rayEls=[];
-    for(let i=0;i<10;i++) rayEls.push(mk("line",{},rays));
-    const glass=mk("path",{d:"M361,118 C361,110 348,104 348,90 A22,22 0 1 1 392,90 C392,104 379,110 379,118 Z",
-      fill:"var(--panel)",stroke:"var(--metal)","stroke-width":3},g);
-    mk("path",{d:"M356,82 A15,15 0 0 1 366,72",fill:"none",stroke:"var(--panel)","stroke-width":3,"stroke-linecap":"round",opacity:.8},g);
-    mk("path",{d:"M366,118 L364,96 M374,118 L376,96",fill:"none",stroke:"var(--metal)","stroke-width":1.6},g);
-    const fil=mk("path",{d:"M364,96 q1.5,-6 3,0 q1.5,-6 3,0 q1.5,-6 3,0 q1.5,-6 3,0",fill:"none",stroke:"var(--metal)","stroke-width":2.4,"stroke-linecap":"round"},g);
-    mk("rect",{x:361,y:118,width:18,height:16,rx:2,fill:"var(--metal)"},g);
-    mk("path",{d:"M361,122 H379 M361,126.5 H379 M361,131 H379",stroke:"var(--panel)","stroke-width":1.6,opacity:.7},g);
-    mk("path",{d:"M365,134 H375 L372,139 H368 Z",fill:"var(--wire)"},g);
-    bulbs.push({halo,rays,rayEls,glass,fil});
+  el.addEventListener("pointermove",e=>{
+    if(!drag) return; const p=svgPt(e);
+    const x=Math.max(4,Math.min(426,p.x+drag.ox)), y=Math.max(4,Math.min(266,p.y+drag.oy));
+    if(Math.hypot(x-st.drag.x,y-st.drag.y)>2) drag.moved=true;
+    st.drag.x=x; st.drag.y=y; drawSvg();
   });
-  let shown=0; // smoothed brightness for warm-up/cool-down
-
-  // battery cells
-  const cells=[];
-  for(let i=0;i<MAX;i++){
-    const y=BOTTOM-(i+1)*STEP_H+2;
-    const g=mk("g",{},$("cells"));
-    const r=mk("rect",{x:52,y:y,width:96,height:24,rx:4,"stroke-width":2},g);
-    const nub=mk("rect",{x:92,y:y-3,width:16,height:4,rx:1},g);
-    const t=mk("text",{x:100,y:y+17,"text-anchor":"middle",style:"font-size:13px"},g);
-    t.textContent="1.5 V";
-    cells.push({r,nub,t});
+  function endDrag(){
+    if(!drag) return;
+    const {kind,c,moved}=drag; const x=st.drag.x, y=st.drag.y; st.drag=null; drag=null;
+    if(kind==="plug"){
+      let best=null,bd=24;
+      for(const k in PORTS){const dd=Math.hypot(x-(MX+PORTS[k]),y-(MY+PORT_Y)); if(dd<bd){bd=dd;best=k;}}
+      if(best) plug(c,best); else if(moved){st.port[c]=null; st.probe[c]=null;}
+    } else {
+      const P=pts(st.mode); let best=null,bd=26;
+      for(const k in P){const dd=Math.hypot(x-P[k].x,y-P[k].y); if(dd<bd){bd=dd;best=k;}}
+      if(best){st.probe[c]=best; const other=c==="red"?"black":"red"; st.active=st.probe[other]?c:other;}
+      else if(moved) st.probe[c]=null;
+    }
+    if(moved){justDragged=true; setTimeout(()=>{justDragged=false;},0);}
+    render();
   }
-  // charges along wire
-  const wire=$("wire"), wireLen=wire.getTotalLength(), N=28, charges=[];
-  for(let i=0;i<N;i++){
-    const trail=[0.45,0.25,0.12].map((o,k)=>mk("circle",{r:4-k*0.5,fill:"var(--flow)",opacity:o},$("charges")));
-    charges.push({dot:mk("circle",{r:4.5,fill:"var(--flow)"},$("charges")),trail});
+  el.addEventListener("pointerup",endDrag); el.addEventListener("pointercancel",endDrag);
+  el.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ") return; const t=e.target; if(t.tagName==="g"||t.namespaceURI==="http://www.w3.org/2000/svg"){e.preventDefault(); act(t);}});
+  render(); return api;
+}
+
+/* ---------------- INTRO ---------------- */
+$("#introMeter").innerHTML=`<g transform="translate(6,10)">${meterSVG({dial:"V"},{read:{display:"3.00",unit:"V"}})}<circle cx="70" cy="${PORT_Y}" r="7" fill="#1b1f24" stroke="#fff" stroke-width="1.5"/><circle cx="110" cy="${PORT_Y}" r="7" fill="${RED}" stroke="${INK}" stroke-width="1.5"/></g>`;
+
+/* ---------------- MEET ---------------- */
+let meetHL=null;
+const meet=Bench($("#meetBench"),{mode:"battery",cells:2,probe:{red:"A",black:"D"}},{tap:false,controls:false,hl:()=>meetHL});
+$("#meetParts").addEventListener("click",e=>{const b=e.target.closest(".part"); if(!b) return; meetHL=b.dataset.hl; $$(".part",$("#meetParts")).forEach(x=>x.setAttribute("aria-pressed",x===b)); meet.render();});
+
+/* ---------------- ACROSS ---------------- */
+const across=Bench($("#acrossBench"),{mode:"circuit",cells:2,closed:true},{controls:false,onChange:(st)=>{const k=st.probe.red&&st.probe.black?pairKey(st.probe.red,st.probe.black):""; $$("#acrossBtns .chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.across===k));}});
+$("#acrossBtns").addEventListener("click",e=>{const b=e.target.closest("[data-across]"); if(!b) return; const k=b.dataset.across; const map={AD:["A","D"],BC:["B","C"],CD:["D","C"]}[k]; across.set(st=>{st.probe.red=map[0];st.probe.black=map[1];});});
+function loopSVG(right){
+  let s=`<g stroke="${INK}" stroke-width="2.5" fill="none" stroke-linejoin="round">`;
+  if(right) s+=`<path d="M30,40 V20 H120 V48 M120,76 V100 H30 V68"/>`;
+  else s+=`<path d="M30,40 V20 H58 M92,20 H120 V48 M120,76 V100 H30 V68"/>`;
+  s+=`</g><rect x="22" y="40" width="16" height="28" rx="2" fill="#23303D" stroke="${INK}" stroke-width="2"/><rect x="22" y="40" width="16" height="6" fill="#C77B30"/>`;
+  if(right) s+=`<circle cx="120" cy="62" r="20" fill="#FFD54F" opacity=".6"/>`;
+  s+=`<circle cx="120" cy="60" r="12" fill="${right?"#FFE58A":"#FAFCFD"}" stroke="${INK}" stroke-width="2"/><rect x="114" y="70" width="12" height="8" fill="#9AA5B1" stroke="${INK}" stroke-width="1.5"/>`;
+  const meter=(x,y)=>`<rect x="${x}" y="${y}" width="30" height="22" rx="4" fill="#F5B301" stroke="${INK}" stroke-width="2"/><text x="${x+15}" y="${y+16}" text-anchor="middle" font-size="13" font-weight="700" fill="${INK}" font-family="Arial">V</text>`;
+  if(right){s+=`<path d="M120,34 H155 V50" stroke="${RED}" stroke-width="2.5" fill="none"/><path d="M120,86 H155 V72" stroke="#1b1f24" stroke-width="2.5" fill="none"/>`+meter(140,50);}
+  else {s+=meter(60,9)+`<text x="120" y="66" text-anchor="middle" font-size="18" fill="${RED}" font-weight="700" font-family="Arial">✘</text>`;}
+  return s;
+}
+$("#rightWay").innerHTML=loopSVG(true); $("#wrongWay").innerHTML=loopSVG(false);
+
+/* ---------------- SETUP ---------------- */
+let setupAnsOK=false;
+const setup=Bench($("#setupBench"),{mode:"battery",cells:2,dial:"OFF",port:{black:null,red:null},active:"red"},{leads:true,onChange:(st,r)=>{
+  const done=[st.port.black==="COM",st.port.red==="VΩ",st.dial==="V",st.probe.red==="A"&&st.port.red==="VΩ",st.probe.black==="D"&&st.port.black==="COM",setupAnsOK];
+  $$("#setupSteps li").forEach((li,i)=>li.classList.toggle("done",done[i]));
+}});
+$("#setupCheck").addEventListener("click",()=>{
+  const v=parseFloat($("#setupAns").value); const r=setup.read; const fb=$("#setupFb");
+  if(r.value===undefined||r.pair!=="AD"){fb.innerHTML=`<span class="small">First get a reading across the battery.</span>`;return;}
+  if(Math.abs(v-r.value)<0.03){setupAnsOK=r.value>0; fb.innerHTML=r.value>0?`<span class="check">✔ Yes! ${r.value.toFixed(2)} V. Two 1.5 V cells in a row = 3.0 V.</span>`:`<span class="small">That matches the screen, but it is negative. Swap the probes.</span>`;}
+  else {setupAnsOK=false; fb.innerHTML=`<span class="small">Look at the display again. Read the number and the units.</span>`;}
+  setup.render();
+});
+
+/* ---------------- MISSION ---------------- */
+const mdone=[false,false,false,false,false,false]; const saved=[];
+const mission=Bench($("#missionBench"),{mode:"circuit",cells:2,closed:true,dial:"OFF"},{cellsCtl:true,switchTap:true,onChange:(st,r)=>{
+  if(r.value!==undefined&&r.tone==="good"&&r.red!==r.black){
+    const k=r.pair;
+    if(k==="AD"&&st.closed&&st.cells!==3) mdone[0]=true;
+    if(k==="BC"&&st.closed) mdone[1]=true;
+    if(k==="CD") mdone[2]=true;
+    if(k==="BC"&&!st.closed) mdone[3]=true;
+    if(k==="AB"&&!st.closed) mdone[4]=true;
+    if(k==="AD"&&st.cells===3) mdone[5]=true;
   }
-  for(let i=0;i<=4;i++){
-    const a=Math.PI+i*Math.PI/4, c=Math.cos(a), s=Math.sin(a);
-    mk("line",{x1:310+20*c,y1:258+20*s,x2:310+16*c,y2:258+16*s},$("meterTicks"));
-  }
-  let meterShown=0;
+  $$("#missionSteps li").forEach((li,i)=>li.classList.toggle("done",mdone[i]));
+}});
+const where={AD:"Across the battery",BC:"Across the load",CD:"Across a wire",AB:"Across the switch"};
+function drawSaved(){
+  const rows=saved.length?saved.map(x=>`<tr><td>${x.cells}</td><td>${x.sw}</td><td>${x.where}</td><td><b>${x.v} V</b></td></tr>`).join(""):`<tr><td colspan="4" class="small">No readings saved yet.</td></tr>`;
+  $("#saved").innerHTML=rows; $("#saved2").innerHTML=rows;
+}
+$("#saveBtn").addEventListener("click",()=>{const r=mission.read, st=mission.st;
+  if(r.value===undefined){alert("Get a voltage reading first: dial on V, one probe on each side of a part."); return;}
+  saved.push({cells:st.cells,sw:st.closed?"Closed":"Open",where:r.red===r.black?"Same spot":(where[r.pair]||`${r.red} to ${r.black}`),v:fmt(r.value)}); drawSaved();});
+$("#clearBtn").addEventListener("click",()=>{saved.length=0;drawSaved();});
+drawSaved();
 
-  let level=+slider.value, angle=0, offset=0, dash=0, last=performance.now();
-  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* ---------------- FIND ---------------- */
+const FIND=[
+ {q:"With the switch closed, how did the reading across the load (bulb) compare to the reading across the battery?",o:["About the same","About 0 V","About double"],a:0,
+  y:"Right. The bulb uses the energy the battery gives the charges, so the voltage across the load matches the battery’s push.",n:"Look at your table. Compare “Across the battery” and “Across the load” with the switch closed."},
+ {q:"Across a wire, the meter read about 0 V. Why?",o:["The wire is broken","Charges lose almost no energy in a wire, so there is no difference between its two ends","The meter is broken"],a:1,
+  y:"Right. A wire carries the charges but does not use their energy. No difference means 0 V.",n:"The bulb still lit, so the wire is not broken. Think about where the energy is used."},
+ {q:"With the switch open, the load read 0 V and the switch read the full battery voltage. Why?",o:["No charges flow, so the bulb uses no energy. The whole push is stuck at the gap.","The battery died","Opening the switch makes more voltage"],a:0,
+  y:"Right. The battery still pushes, but the gap stops the charges. All of the voltage shows up across the gap.",n:"Measure across the battery with the switch open. Did the battery change?"},
+ {q:"You added more cells. What happened to the voltage across the battery?",o:["It went down","It went up: each cell adds 1.5 V","It stayed the same"],a:1,
+  y:"Right. Cells in a row add up: 1.5 + 1.5 + 1.5 = 4.5 V. More push makes the bulb brighter.",n:"Try 1, 2 and 3 cells and measure across the battery each time."}];
+/* one question at a time, with numbered tabs, so the slide stays short */
+let findCur=0; const findDone=FIND.map(()=>false);
+function drawFind(){
+  const tabs=FIND.map((f,i)=>`<button data-ft="${i}" aria-pressed="${i===findCur}" aria-label="Question ${i+1}${findDone[i]?", answered":""}">${i+1}${findDone[i]?" ✓":""}</button>`).join("");
+  let h=`<div class="findnav" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px"><b>Question ${findCur+1} of ${FIND.length}</b><span class="seg" role="group" aria-label="Pick a question">${tabs}</span></div>`;
+  h+=FIND.map((f,i)=>`<div class="q" data-f="${i}"${i===findCur?"":" hidden"}><b>${f.q}</b>${f.o.map((t,j)=>`<button class="opt" data-j="${j}">${t}</button>`).join("")}<div class="fbx"></div></div>`).join("");
+  h+=`<div style="display:flex;justify-content:space-between;margin-top:8px"><button class="btn ghost" data-fn="-1" style="padding:5px 12px"${findCur===0?" disabled":""}>Previous question</button><button class="btn" data-fn="1" style="padding:5px 12px"${findCur===FIND.length-1?" disabled":""}>Next question</button></div>`;
+  $("#findQs").innerHTML=h;
+}
+const findAnswers=FIND.map(()=>null);
+function showFind(){
+  drawFind();
+  FIND.forEach((f,i)=>{const j=findAnswers[i]; if(j===null) return; const q=$(`[data-f="${i}"]`,$("#findQs"));
+    $$(".opt",q)[j].classList.add(j===f.a?"right":"wrong");
+    $(".fbx",q).innerHTML=`<div class="fb ${j===f.a?"good":"warn"}">${j===f.a?f.y:f.n}</div>`;});
+}
+$("#findQs").addEventListener("click",e=>{
+  const t=e.target.closest("[data-ft]"); if(t){findCur=+t.dataset.ft; showFind(); return;}
+  const n=e.target.closest("[data-fn]"); if(n){findCur=Math.max(0,Math.min(FIND.length-1,findCur+ +n.dataset.fn)); showFind(); return;}
+  const b=e.target.closest(".opt"); if(!b) return; const q=b.closest(".q"), i=+q.dataset.f, f=FIND[i], j=+b.dataset.j;
+  findAnswers[i]=j; if(j===f.a) findDone[i]=true; showFind();});
+showFind();
 
-  const sayings=[
-    "No push. Nothing flows. The wheel stops. No current. The bulbs are off.",
-    "Small push. Slow flow. The wheel turns slowly. Low current. The bulbs are dim.",
-    "Medium push. Medium flow. The wheel turns. More current. The bulbs glow.",
-    "Big push! Fast flow! The wheel spins fast. High current! The bulbs are bright!"
-  ];
+/* ---------------- QUIZ ---------------- */
+const QUIZ=[
+ {q:"To measure voltage, where do you turn the dial?",o:["Ω","V","A"],a:1,w:"V stands for volts, the unit of voltage."},
+ {q:"Where does the black lead go?",o:["COM","VΩ","10A"],a:0,w:"COM means common. The black lead always goes in COM."},
+ {q:"What is a load?",o:["A part that uses electrical energy, like a bulb or motor","The wire","The battery"],a:0,w:"A load uses the energy. The battery gives energy. The wire carries the charges."},
+ {q:"What does it mean to measure “across the load”?",o:["Touch both probes to the same wire","Put one probe on each side of the load","Cut the wire and put the meter in the loop"],a:1,w:"Across means one probe on each side of the part."},
+ {q:"How is a voltmeter hooked up?",o:["Inside the loop, in line with the bulb","Beside the part, with one probe on each side","Only to one end of the battery"],a:1,w:"The meter goes beside the part. This is called hooking it up in parallel."},
+ {q:"Three 1.5 V cells are in a row. What is the total voltage?",o:["1.5 V","3.0 V","4.5 V"],a:2,w:"1.5 + 1.5 + 1.5 = 4.5 V. Cells in a row add up."},
+ {q:"The meter reads −3.00 V. What does the minus sign mean?",o:["The probes are swapped","The battery is broken","The bulb is off"],a:0,w:"Put the red probe on the + side to get a positive reading."}];
+const qz={i:0,score:0,picked:null};
+function drawQuiz(){
+  const el=$("#quiz");
+  if(qz.i>=QUIZ.length){el.innerHTML=`<div class="card"><h3>You got ${qz.score} out of ${QUIZ.length}.</h3><p>${qz.score>=6?"Great work! You are ready to measure voltage in the lab.":"Go back over the slides and try again."}</p><button class="btn" id="qAgain">Try again</button></div>`; $("#qAgain").onclick=()=>{qz.i=0;qz.score=0;qz.picked=null;drawQuiz();}; return;}
+  const q=QUIZ[qz.i];
+  el.innerHTML=`<h3>Question ${qz.i+1} of ${QUIZ.length}</h3><div class="card"><div class="q"><b>${qz.i+1}. ${q.q}</b>${q.o.map((t,j)=>{let c="";if(qz.picked!==null){if(j===q.a)c="right";else if(j===qz.picked)c="wrong";}return `<button class="opt ${c}" data-j="${j}" ${qz.picked!==null?"disabled":""}>${t}</button>`;}).join("")}${qz.picked!==null?`<div class="fb ${qz.picked===q.a?"good":"warn"}">${qz.picked===q.a?"Correct! ":"Not quite. "}${q.w}</div><p style="margin-top:10px"><button class="btn" id="qNext">${qz.i===QUIZ.length-1?"See my score":"Next question"}</button></p>`:""}</div></div>`;
+  if(qz.picked===null) $$(".opt",el).forEach(b=>b.onclick=()=>{qz.picked=+b.dataset.j; if(qz.picked===q.a) qz.score++; drawQuiz();});
+  else $("#qNext").onclick=()=>{qz.i++;qz.picked=null;drawQuiz();};
+}
+drawQuiz();
 
-  function update(){
-    level=+slider.value;
-    const V=level*1.5, I=V/R;
-    $("levelRead").textContent=level+" of "+MAX;
-    $("vRead").textContent=V.toFixed(1)+" V";
-    $("iRead").textContent=I.toFixed(2)+" A";
-    $("say").textContent=sayings[level===0?0:level<=2?1:level<=5?2:3];
-    // water
-    const h=level*STEP_H;
-    $("water").setAttribute("y",BOTTOM-h);
-    $("water").setAttribute("height",h);
-    const on=level>0;
-    $("pipeWater").style.opacity=on?1:0;
-    $("fall").style.opacity=on?1:0;
-    $("fall").setAttribute("stroke-width",(2+level*0.9).toFixed(1));
-    // cells
-    cells.forEach((c,i)=>{
-      const full=i<level;
-      c.r.setAttribute("fill",full?"var(--battery)":"none");
-      c.r.setAttribute("stroke",full?"var(--battery)":"var(--line)");
-      c.r.setAttribute("stroke-dasharray",full?"":"5 4");
-      c.nub.setAttribute("fill",full?"var(--metal)":"none");
-      c.t.style.opacity=full?1:0;
-    });
-    // bulb (brightness follows power, V x I)
-        if(reduce) draw(0);
-  }
-
-  function drawBulbs(dt,t){
-    const target=Math.pow(level/MAX,2); // brightness follows power
-    shown = dt>0 ? shown+(target-shown)*Math.min(1,dt*4) : target;
-    const b=shown, flick=b>0.01?1+0.06*Math.sin(t*9)+0.03*Math.sin(t*23):1;
-    const lit=Math.min(1,b*flick);
-    bulbs.forEach(o=>{
-      o.halo.setAttribute("opacity",(lit*0.95).toFixed(3));
-      o.halo.setAttribute("r",(28+lit*44).toFixed(1));
-      o.glass.setAttribute("fill",b>0.01?"var(--glow)":"var(--panel)");
-      o.glass.setAttribute("fill-opacity",b>0.01?(0.2+lit*0.8).toFixed(3):1);
-      o.fil.setAttribute("stroke",b>0.01?(b>0.3?"#fff6c2":"var(--narrow)"):"var(--metal)");
-      o.rays.setAttribute("opacity",b>0.06?Math.min(1,lit*1.2).toFixed(3):0);
-      const spin=t*0.4, len=6+lit*14;
-      o.rayEls.forEach((r,i)=>{
-        const a=spin+i*Math.PI/5, pulse=1+0.25*Math.sin(t*4+i), r0=30, r1=r0+len*pulse;
-        r.setAttribute("x1",(370+r0*Math.cos(a)).toFixed(1));r.setAttribute("y1",(92+r0*Math.sin(a)).toFixed(1));
-        r.setAttribute("x2",(370+r1*Math.cos(a)).toFixed(1));r.setAttribute("y2",(92+r1*Math.sin(a)).toFixed(1));
-      });
-    });
-  }
-
-  function draw(dt){
-    drawBulbs(dt, reduce?0:performance.now()/1000);
-    const speed=level/MAX; // flow follows current
-    angle-=speed*360*dt*0.9;
-    const rot="translate(310 252) rotate("+angle.toFixed(1)+")";
-    $("wheelW").setAttribute("transform",rot);
-    dash-=speed*90*dt;
-    $("pipeWater").setAttribute("stroke-dashoffset",dash.toFixed(1));
-    $("fall").setAttribute("stroke-dashoffset",dash.toFixed(1));
-    offset=(offset+speed*120*dt)%wireLen;
-    charges.forEach((c,i)=>{
-      const pos=offset+i*wireLen/N;
-      const pt=wire.getPointAtLength(pos%wireLen);
-      c.dot.setAttribute("cx",pt.x);c.dot.setAttribute("cy",pt.y);
-      c.trail.forEach((t,k)=>{
-        const q=wire.getPointAtLength(((pos-(k+1)*speed*9)%wireLen+wireLen)%wireLen);
-        t.setAttribute("cx",q.x);t.setAttribute("cy",q.y);
-        t.style.display=speed>0?"":"none";
-      });
-    });
-    // wire glow and current meter (needle swings smoothly)
-    $("wireGlow").style.opacity=(speed*0.3).toFixed(3);
-    const I=level*1.5/R, Imax=MAX*1.5/R;
-    meterShown = dt>0 ? meterShown+(I-meterShown)*Math.min(1,dt*3) : I;
-    const f=meterShown/Imax, a=Math.PI+f*Math.PI;
-    $("needle").setAttribute("x2",(310+24*Math.cos(a)).toFixed(1));
-    $("needle").setAttribute("y2",(258+24*Math.sin(a)).toFixed(1));
-    $("meterArc").setAttribute("stroke-dasharray",(f*100).toFixed(1)+" 100");
-    $("meterText").textContent=meterShown.toFixed(2)+" A";
-  }
-
-  function loop(now){
-    const dt=Math.min(0.05,(now-last)/1000); last=now;
-    draw(dt);
-    requestAnimationFrame(loop);
-  }
-
-  slider.addEventListener("input",update);
-  $("down").addEventListener("click",()=>{slider.value=Math.max(0,level-1);update();});
-  $("up").addEventListener("click",()=>{slider.value=Math.min(MAX,level+1);update();});
-
-  update();
-  draw(0);
-  if(!reduce) requestAnimationFrame(loop);
+/* ---------------- NAV ---------------- */
+const slides=$$(".slide"); let cur=0;
+$("#dots").innerHTML=slides.map((s,i)=>`<button aria-label="Slide ${i+1}: ${s.dataset.title}"></button>`).join("");
+function go(i){cur=Math.max(0,Math.min(slides.length-1,i)); slides.forEach((s,j)=>s.classList.toggle("on",j===cur));
+  $$("#dots button").forEach((b,j)=>b.toggleAttribute("aria-current",j===cur)||(j===cur&&b.setAttribute("aria-current","step")));
+  $$("#dots button").forEach((b,j)=>{if(j===cur)b.setAttribute("aria-current","step");else b.removeAttribute("aria-current");});
+  $("#back").disabled=cur===0; $("#next").disabled=cur===slides.length-1; window.scrollTo(0,0);}
+$("#back").onclick=()=>go(cur-1); $("#next").onclick=()=>go(cur+1);
+$("#dots").addEventListener("click",e=>{const i=$$("#dots button").indexOf(e.target); if(i>=0) go(i);});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(+b.dataset.go);});
+go(0);
 })();
 </script>
-
-</body></html>
+</body>
+</html>
