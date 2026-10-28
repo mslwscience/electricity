@@ -90,6 +90,11 @@ th{font-size:13px;color:var(--muted)}
 .check{color:var(--good);font-weight:700}
 input.ans{font:inherit;width:90px;padding:5px 8px;border:2px solid var(--line);border-radius:8px}
 nav.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:8px 10px;z-index:5}
+/* Embedded in Canvas (or any page): blend with the page, keep the slide buttons right under the slide */
+html.embed body{background:#fff}
+html.embed main{padding-bottom:12px}
+html.embed nav.bar{position:sticky;border:2px solid var(--line);border-radius:12px;margin:0 16px 8px;max-width:928px;margin-inline:auto}
+
 .dots{display:flex;gap:6px}
 .dots button{width:15px;height:15px;border-radius:50%;border:2px solid var(--accent);background:transparent;padding:0}
 .dots button[aria-current="step"]{background:var(--accent)}
@@ -218,7 +223,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 <section class="slide" data-title="What did you find?">
   <h2>What did you find?</h2>
   <div class="work">
-    <div class="card"><h3>Your results</h3><table><thead><tr><th>Cells</th><th>Switch</th><th>Where</th><th>Reading</th></tr></thead><tbody id="saved2"></tbody></table></div>
+    <div class="card"><h3>Your results</h3><div style="max-height:250px;overflow-y:auto"><table><thead><tr><th>Cells</th><th>Switch</th><th>Where</th><th>Reading</th></tr></thead><tbody id="saved2"></tbody></table></div></div>
     <div class="card" id="findQs"></div>
   </div>
 </section>
@@ -238,6 +243,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
   <button class="btn" id="next">Next</button>
 </nav>
 
+<script>try{if(window.self!==window.top||/[?&]embed\b/.test(location.search))document.documentElement.classList.add("embed");}catch(e){document.documentElement.classList.add("embed");}</script>
 <script>
 (function(){
 "use strict";
@@ -560,10 +566,28 @@ const FIND=[
   y:"Right. The battery still pushes, but the gap stops the charges. All of the voltage shows up across the gap.",n:"Measure across the battery with the switch open. Did the battery change?"},
  {q:"You added more cells. What happened to the voltage across the battery?",o:["It went down","It went up: each cell adds 1.5 V","It stayed the same"],a:1,
   y:"Right. Cells in a row add up: 1.5 + 1.5 + 1.5 = 4.5 V. More push makes the bulb brighter.",n:"Try 1, 2 and 3 cells and measure across the battery each time."}];
-$("#findQs").innerHTML=FIND.map((f,i)=>`<div class="q" data-f="${i}"><b>${i+1}. ${f.q}</b>${f.o.map((t,j)=>`<button class="opt" data-j="${j}">${t}</button>`).join("")}<div class="fbx"></div></div>`).join("");
-$("#findQs").addEventListener("click",e=>{const b=e.target.closest(".opt"); if(!b) return; const q=b.closest(".q"), f=FIND[+q.dataset.f], j=+b.dataset.j;
-  $$(".opt",q).forEach(x=>x.classList.remove("right","wrong")); b.classList.add(j===f.a?"right":"wrong");
-  $(".fbx",q).innerHTML=`<div class="fb ${j===f.a?"good":"warn"}">${j===f.a?f.y:f.n}</div>`;});
+/* one question at a time, with numbered tabs, so the slide stays short */
+let findCur=0; const findDone=FIND.map(()=>false);
+function drawFind(){
+  const tabs=FIND.map((f,i)=>`<button data-ft="${i}" aria-pressed="${i===findCur}" aria-label="Question ${i+1}${findDone[i]?", answered":""}">${i+1}${findDone[i]?" ✓":""}</button>`).join("");
+  let h=`<div class="findnav" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px"><b>Question ${findCur+1} of ${FIND.length}</b><span class="seg" role="group" aria-label="Pick a question">${tabs}</span></div>`;
+  h+=FIND.map((f,i)=>`<div class="q" data-f="${i}"${i===findCur?"":" hidden"}><b>${f.q}</b>${f.o.map((t,j)=>`<button class="opt" data-j="${j}">${t}</button>`).join("")}<div class="fbx"></div></div>`).join("");
+  h+=`<div style="display:flex;justify-content:space-between;margin-top:8px"><button class="btn ghost" data-fn="-1" style="padding:5px 12px"${findCur===0?" disabled":""}>Previous question</button><button class="btn" data-fn="1" style="padding:5px 12px"${findCur===FIND.length-1?" disabled":""}>Next question</button></div>`;
+  $("#findQs").innerHTML=h;
+}
+const findAnswers=FIND.map(()=>null);
+function showFind(){
+  drawFind();
+  FIND.forEach((f,i)=>{const j=findAnswers[i]; if(j===null) return; const q=$(`[data-f="${i}"]`,$("#findQs"));
+    $$(".opt",q)[j].classList.add(j===f.a?"right":"wrong");
+    $(".fbx",q).innerHTML=`<div class="fb ${j===f.a?"good":"warn"}">${j===f.a?f.y:f.n}</div>`;});
+}
+$("#findQs").addEventListener("click",e=>{
+  const t=e.target.closest("[data-ft]"); if(t){findCur=+t.dataset.ft; showFind(); return;}
+  const n=e.target.closest("[data-fn]"); if(n){findCur=Math.max(0,Math.min(FIND.length-1,findCur+ +n.dataset.fn)); showFind(); return;}
+  const b=e.target.closest(".opt"); if(!b) return; const q=b.closest(".q"), i=+q.dataset.f, f=FIND[i], j=+b.dataset.j;
+  findAnswers[i]=j; if(j===f.a) findDone[i]=true; showFind();});
+showFind();
 
 /* ---------------- QUIZ ---------------- */
 const QUIZ=[
