@@ -180,11 +180,11 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
     <div>
       <div class="card safety tight"><h3>Safety rule</h3><p style="margin:0">Voltage is measured with the power <b>on</b>. Always check the dial is on <b>V</b> before you touch the probes to a circuit.</p></div>
       <ol class="steps" id="setupSteps">
-        <li data-s="0"><span class="n">1</span><span>Tap the <b>black lead</b>, then tap the <b>COM</b> port.</span></li>
-        <li data-s="1"><span class="n">2</span><span>Tap the <b>red lead</b>, then tap the <b>VΩ</b> port.</span></li>
+        <li data-s="0"><span class="n">1</span><span>Drag the <b>black plug</b> into the <b>COM</b> port.</span></li>
+        <li data-s="1"><span class="n">2</span><span>Drag the <b>red plug</b> into the <b>VΩ</b> port.</span></li>
         <li data-s="2"><span class="n">3</span><span>Turn the dial to <b>V</b>. (Tap the V on the meter.)</span></li>
-        <li data-s="3"><span class="n">4</span><span>Touch the <b>red probe</b> to the <b>+</b> end of the battery (point A).</span></li>
-        <li data-s="4"><span class="n">5</span><span>Touch the <b>black probe</b> to the <b>−</b> end of the battery (point D).</span></li>
+        <li data-s="3"><span class="n">4</span><span>Drag the <b>red probe</b> tip to the <b>+</b> end of the battery (point A).</span></li>
+        <li data-s="4"><span class="n">5</span><span>Drag the <b>black probe</b> tip to the <b>−</b> end of the battery (point D).</span></li>
         <li data-s="5"><span class="n">6</span><span>Read the number and units: <input class="ans" id="setupAns" inputmode="decimal" aria-label="Your reading in volts"> V <button class="btn ghost" id="setupCheck" style="padding:4px 10px">Check</button> <span id="setupFb"></span></span></li>
       </ol>
     </div>
@@ -194,7 +194,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 <!-- 4 MISSION -->
 <section class="slide" data-title="Measure a circuit">
   <h2>4. Measure across parts of a circuit</h2>
-  <p class="lead">Set the dial to <b>V</b>. Pick a probe, then tap a point (A, B, C or D). Do each mission. Tap <b>Save this reading</b> after each one.</p>
+  <p class="lead">Set the dial to <b>V</b>. Drag each probe tip to a point (A, B, C or D), or pick a probe and tap a point. Do each mission. Tap <b>Save this reading</b> after each one.</p>
   <div class="work">
     <div>
       <div class="svgwrap" id="missionBench"></div>
@@ -278,6 +278,7 @@ function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;","
 
 /* ---------------- CIRCUIT / BENCH ---------------- */
 const MX=6, MY=14; // meter offset inside bench svg
+const REST={black:{plug:[180,150],tip:[180,200]},red:{plug:[404,150],tip:[404,200]}}; // where loose leads sit on the bench
 function pts(mode){
   if(mode==="battery") return {A:{x:290,y:80,d:[-1,-.45],lx:306,ly:78,name:"the + end"},D:{x:290,y:176,d:[-1,.45],lx:306,ly:192,name:"the − end"}};
   return {A:{x:205,y:80,d:[-1,-.45],lx:220,ly:76,name:"the + end of the battery"},B:{x:375,y:90,d:[1,-.45],lx:360,ly:86,name:"the top of the bulb"},C:{x:375,y:170,d:[1,.45],lx:360,ly:180,name:"the bottom of the bulb"},D:{x:205,y:176,d:[-1,.45],lx:220,ly:192,name:"the − end of the battery"}};
@@ -354,19 +355,34 @@ function benchSVG(st,o){
     s+=`<text x="${p.lx}" y="${p.ly}" text-anchor="${p.lx<p.x?"end":"start"}" font-size="13" font-weight="800" fill="${ACC}" font-family="Arial" stroke="#F2F6F9" stroke-width="3" paint-order="stroke">${k}</text>`;}
   // meter
   s+=`<g transform="translate(${MX},${MY})">${meterSVG(st,{tap,read:o.read,hl:o.hl})}</g>`;
-  // leads + probes
+  // leads + probes (always drawn; loose leads rest on the bench; drag the plug or the probe)
   const same=st.probe.red&&st.probe.red===st.probe.black;
+  const canDrag=tap&&!o.noDrag;
   ["black","red"].forEach(c=>{
-    const port=st.port[c]; if(!port) return;
-    const sx=MX+PORTS[port], sy=MY+PORT_Y; let tip,d;
-    if(st.probe[c]){const p=P[st.probe[c]]; tip=[p.x,p.y]; d=p.d; if(same){const off=c==="red"?7:-7; tip=[p.x-d[1]*off,p.y+d[0]*off];}}
-    else {tip=c==="black"?[176,226]:[410,226]; d=[0,1];}
+    const port=st.port[c]; const dr=st.drag&&st.drag.c===c?st.drag:null;
+    let sx,sy;
+    if(dr&&dr.kind==="plug"){sx=dr.x;sy=dr.y;}
+    else if(port){sx=MX+PORTS[port];sy=MY+PORT_Y;}
+    else {sx=REST[c].plug[0];sy=REST[c].plug[1];}
+    let tip,d;
+    if(dr&&dr.kind==="tip"){tip=[dr.x,dr.y];d=[0,1];}
+    else if(st.probe[c]){const p=P[st.probe[c]]; tip=[p.x,p.y]; d=p.d; if(same){const off=c==="red"?7:-7; tip=[p.x-d[1]*off,p.y+d[0]*off];}}
+    else {tip=REST[c].tip; d=[0,1];}
     const n=Math.hypot(d[0],d[1]); const ux=d[0]/n, uy=d[1]/n;
     const e=[tip[0]+ux*30,tip[1]+uy*30]; const col=c==="red"?RED:"#1b1f24";
-    s+=`<path d="M${sx},${sy} C${sx},${sy+44} ${e[0]+ux*44},${e[1]+uy*44} ${e[0]},${e[1]}" stroke="${col}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+    const grab=canDrag?` style="cursor:grab;touch-action:none"`:"";
+    const k2=st.probe[c]&&!(dr&&dr.kind==="tip")?44:16;
+    s+=`<path d="M${sx},${sy} C${sx},${Math.min(sy+30,262)} ${e[0]+ux*k2},${e[1]+uy*k2} ${e[0]},${e[1]}" stroke="${col}" stroke-width="3.5" fill="none" stroke-linecap="round" pointer-events="none"/>`;
+    s+=`<g ${canDrag?`data-drag="tip:${c}" aria-label="${c==="red"?"Red":"Black"} probe. Drag the tip to a point."`:""}${grab}>`;
+    if(canDrag) s+=`<circle cx="${tip[0]+ux*18}" cy="${tip[1]+uy*18}" r="18" fill="transparent"/>`;
     s+=`<line x1="${tip[0]}" y1="${tip[1]}" x2="${tip[0]+ux*8}" y2="${tip[1]+uy*8}" stroke="#8C99A6" stroke-width="2.5" stroke-linecap="round"/>`;
-    s+=`<line x1="${tip[0]+ux*9}" y1="${tip[1]+uy*9}" x2="${e[0]}" y2="${e[1]}" stroke="${col}" stroke-width="8" stroke-linecap="round"/>`;
-    s+=`<circle cx="${sx}" cy="${sy}" r="7.5" fill="${col}" stroke="${c==="black"?"#fff":INK}" stroke-width="1.5"/>`;
+    s+=`<line x1="${tip[0]+ux*9}" y1="${tip[1]+uy*9}" x2="${e[0]}" y2="${e[1]}" stroke="${col}" stroke-width="8" stroke-linecap="round"/></g>`;
+    const loose=!port||(dr&&dr.kind==="plug");
+    s+=`<g ${canDrag?`data-drag="plug:${c}" aria-label="${c==="red"?"Red":"Black"} lead plug. Drag it to a port."`:""}${grab}>`;
+    if(canDrag) s+=`<circle cx="${sx}" cy="${sy}" r="16" fill="transparent"/>`;
+    s+=`<circle cx="${sx}" cy="${sy}" r="${loose?9:7.5}" fill="${col}" stroke="${c==="black"?"#fff":INK}" stroke-width="1.5"/>`;
+    if(!port&&!dr) s+=`<text x="${sx}" y="${sy-14}" text-anchor="middle" font-size="9" font-weight="700" fill="${INK}" font-family="Arial" stroke="#F2F6F9" stroke-width="3" paint-order="stroke">${c==="red"?"Red plug":"Black plug"}</text>`;
+    s+=`</g>`;
   });
   if(o.hl==="probes"){for(const k in P){if(k==="A"||k==="D"){} } ["red","black"].forEach(c=>{const k=st.probe[c]; if(k){const p=P[k]; s+=`<circle cx="${p.x}" cy="${p.y}" r="16" fill="none" stroke="${ACC}" stroke-width="4" stroke-dasharray="6 4"/>`;}});}
   return `<svg viewBox="0 0 430 270" role="img" aria-label="Multimeter and ${st.mode==="battery"?"a battery":"a circuit with a battery, a switch and a light bulb"}">${s}</svg>`;
@@ -426,7 +442,46 @@ function Bench(el,init,o){
     else return;
     render();
   }
-  el.addEventListener("click",e=>{const t=e.target.closest("[data-dial],[data-port],[data-pt],[data-sw],[data-held],[data-act],[data-cells],[data-closed],[data-plug],[data-put],[data-clear]"); if(t&&el.contains(t)) act(t);});
+  let drag=null, justDragged=false;
+  el.addEventListener("click",e=>{if(justDragged) return; const t=e.target.closest("[data-dial],[data-port],[data-pt],[data-sw],[data-held],[data-act],[data-cells],[data-closed],[data-plug],[data-put],[data-clear]"); if(t&&el.contains(t)) act(t);});
+  /* drag a plug into a port, or drag a probe tip onto a point */
+  function svgPt(e){const svg=el.querySelector("svg"); const p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse());}
+  function curPos(kind,c){
+    if(kind==="plug") return st.port[c]?[MX+PORTS[st.port[c]],MY+PORT_Y]:REST[c].plug.slice();
+    const P=pts(st.mode); return st.probe[c]?[P[st.probe[c]].x,P[st.probe[c]].y]:REST[c].tip.slice();
+  }
+  function drawSvg(){const box=el.firstElementChild; if(box) box.innerHTML=benchSVG(st,{tap:o.tap!==false,read:reading(st),hl:o.hl&&o.hl(),switchTap:o.switchTap});}
+  el.addEventListener("pointerdown",e=>{
+    const g=e.target.closest("[data-drag]"); if(!g||!el.contains(g)) return;
+    e.preventDefault();
+    const [kind,c]=g.getAttribute("data-drag").split(":"); const p=svgPt(e); const cur=curPos(kind,c);
+    drag={kind,c,ox:cur[0]-p.x,oy:cur[1]-p.y,moved:false};
+    try{el.setPointerCapture(e.pointerId);}catch(x){}
+    st.drag={c,kind,x:cur[0],y:cur[1]}; drawSvg();
+  });
+  el.addEventListener("pointermove",e=>{
+    if(!drag) return; const p=svgPt(e);
+    const x=Math.max(4,Math.min(426,p.x+drag.ox)), y=Math.max(4,Math.min(266,p.y+drag.oy));
+    if(Math.hypot(x-st.drag.x,y-st.drag.y)>2) drag.moved=true;
+    st.drag.x=x; st.drag.y=y; drawSvg();
+  });
+  function endDrag(){
+    if(!drag) return;
+    const {kind,c,moved}=drag; const x=st.drag.x, y=st.drag.y; st.drag=null; drag=null;
+    if(kind==="plug"){
+      let best=null,bd=24;
+      for(const k in PORTS){const dd=Math.hypot(x-(MX+PORTS[k]),y-(MY+PORT_Y)); if(dd<bd){bd=dd;best=k;}}
+      if(best) plug(c,best); else if(moved){st.port[c]=null; st.probe[c]=null;}
+    } else {
+      const P=pts(st.mode); let best=null,bd=26;
+      for(const k in P){const dd=Math.hypot(x-P[k].x,y-P[k].y); if(dd<bd){bd=dd;best=k;}}
+      if(best){st.probe[c]=best; const other=c==="red"?"black":"red"; st.active=st.probe[other]?c:other;}
+      else if(moved) st.probe[c]=null;
+    }
+    if(moved){justDragged=true; setTimeout(()=>{justDragged=false;},0);}
+    render();
+  }
+  el.addEventListener("pointerup",endDrag); el.addEventListener("pointercancel",endDrag);
   el.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ") return; const t=e.target; if(t.tagName==="g"||t.namespaceURI==="http://www.w3.org/2000/svg"){e.preventDefault(); act(t);}});
   render(); return api;
 }
