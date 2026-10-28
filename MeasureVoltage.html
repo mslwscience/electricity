@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Measure Voltage with a Multimeter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bench:#E8EFF4; --panel:#FFFFFF; --panel2:#F2F6F9; --ink:#16293B; --muted:#4A5E70; --line:#B9C8D5;
+  --accent:#1B5FC1; --accent-ink:#FFFFFF; --good:#0B6B52; --goodbg:#DDF3EA; --warn:#7A4800; --warnbg:#FFF0D1;
+  --danger:#A3211A; --dangerbg:#FDE4E1;
+  --font-body:"Atkinson Hyperlegible", Verdana, "Segoe UI", system-ui, sans-serif;
+  --font-head:"Bricolage Grotesque", "Atkinson Hyperlegible", Verdana, system-ui, sans-serif;
+  --font-lcd:"Share Tech Mono", "Courier New", monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bench);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.45}
+main{max-width:960px;margin:0 auto;padding:16px 16px 96px}
+h1,h2{font-family:var(--font-head);margin:0 0 8px;line-height:1.1}
+h1{font-size:clamp(28px,4.6vw,40px);font-weight:800}
+h2{font-size:clamp(21px,3vw,26px);font-weight:800}
+h3{font-size:16px;margin:0 0 6px}
+p{margin:0 0 10px}
+.lead{color:var(--ink);max-width:62ch}
+.small{font-size:13px;color:var(--muted)}
+.slide{display:none}
+.slide.on{display:block}
+.intro{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:center;margin-top:8px}
+.intro svg{max-width:220px;width:100%;justify-self:center}
+.work{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:10px}
+@media (max-width:780px){.work,.intro{grid-template-columns:1fr}.intro svg{max-width:170px}}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.card.tight{padding:9px 12px}
+.def{border-left:6px solid var(--accent)}
+.def.load{border-left-color:#C77B30}
+.safety{background:var(--dangerbg);border:0;border-left:6px solid var(--danger);border-radius:6px}
+.svgwrap{background:transparent}
+.svgwrap svg{width:100%;height:auto;display:block}
+.status{border:2px solid var(--line);border-radius:10px;background:var(--panel);padding:9px 12px;min-height:46px;margin-top:8px;font-size:15px}
+.status.good{background:var(--goodbg);border-color:var(--good)}
+.status.warn{background:var(--warnbg);border-color:#C88A1A}
+.status.danger{background:var(--dangerbg);border-color:var(--danger)}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--accent);color:var(--accent-ink);border:2px solid var(--accent);border-radius:8px;padding:8px 16px;font-weight:700}
+.btn.ghost{background:var(--panel);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:700;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.red[aria-pressed="true"]{background:#C62828;border-color:#C62828}
+.chip.black[aria-pressed="true"]{background:#16293B;border-color:#16293B}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:6px 12px;font-weight:700;font-size:14px;color:var(--ink)}
+.seg button+button{border-left:2px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:4px 0}
+.ctrl b{font-size:14px}
+.parts{display:grid;gap:7px}
+.part{display:block;width:100%;text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px;color:var(--ink)}
+.part > b{display:block;font-size:15px}
+.part span{font-size:14px;color:var(--muted)}
+.part[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,95,193,.18)}
+ol.steps{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+ol.steps li{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px;font-size:15px}
+ol.steps li .n{flex:0 0 26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px}
+ol.steps li.done{border-color:var(--good);background:var(--goodbg)}
+ol.steps li.done .n{background:var(--good);border-color:var(--good);color:#fff}
+details{margin-top:8px;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px}
+details summary{font-weight:700;cursor:pointer;font-size:14px}
+details .chips{margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--muted)}
+.q{margin:10px 0}
+.q > b{display:block;margin-bottom:6px}
+.opt{display:block;width:100%;text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:7px 11px;margin:6px 0;font-weight:700;font-size:14px;color:var(--ink)}
+.opt.right{border-color:var(--good);background:var(--goodbg)}
+.opt.wrong{border-color:var(--danger);background:var(--dangerbg)}
+.fb{font-size:14px;border-radius:8px;padding:7px 10px;margin-top:4px}
+.fb.good{background:var(--goodbg)}
+.fb.warn{background:var(--warnbg)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare svg{width:100%;height:auto}
+.compare .tag{font-weight:700;font-size:14px}
+.tag.ok{color:var(--good)} .tag.no{color:var(--danger)}
+.check{color:var(--good);font-weight:700}
+input.ans{font:inherit;width:90px;padding:5px 8px;border:2px solid var(--line);border-radius:8px}
+nav.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:8px 10px;z-index:5}
+.dots{display:flex;gap:6px}
+.dots button{width:15px;height:15px;border-radius:50%;border:2px solid var(--accent);background:transparent;padding:0}
+.dots button[aria-current="step"]{background:var(--accent)}
+svg .tap{cursor:pointer}
+svg .tap:focus{outline:none}
+svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-width:3}
+.flow{animation:flow linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+</style>
+</head>
+<body>
+<main id="app">
+
+<!-- 0 INTRO -->
+<section class="slide on" data-title="Start">
+  <div class="intro">
+    <div>
+      <h1>Measure voltage with a multimeter</h1>
+      <p class="lead">Voltage is the push that moves charges through a circuit. A multimeter can measure it. You will learn how to set up the meter, what <b>“across the load”</b> means, and then measure parts of a real circuit.</p>
+      <h3>When you finish, you can:</h3>
+      <ul>
+        <li>Set up a multimeter to measure voltage.</li>
+        <li>Measure <b>across</b> a battery, a load and a wire.</li>
+        <li>Explain why the meter goes <b>beside</b> a part, not inside the loop.</li>
+      </ul>
+      <p><button class="btn" data-go="1">Start</button></p>
+      <p class="small">Have a real multimeter? Follow along with it. Use the virtual one on these slides to practice. Readings are simulated so every class sees the same numbers.</p>
+    </div>
+    <svg viewBox="0 0 152 262" role="img" aria-label="A yellow multimeter with the dial turned to V. The display reads 3.00 V." id="introMeter"></svg>
+  </div>
+</section>
+
+<!-- 1 MEET -->
+<section class="slide" data-title="Meet the multimeter">
+  <h2>1. Meet the multimeter</h2>
+  <p class="lead">You used a multimeter to measure resistance. Today you will use the <b>same tool</b> to measure <b>voltage</b>. Only one thing is very different: for voltage, the circuit has power.</p>
+  <div class="work">
+    <div><div class="svgwrap" id="meetBench"></div></div>
+    <div>
+      <p><b>Tap a part name.</b> The part lights up on the meter.</p>
+      <div class="parts" id="meetParts">
+        <button class="part" data-hl="display" aria-pressed="false"><b>Display</b><span>Shows the number. Voltage is in <b>V</b> (volts).</span></button>
+        <button class="part" data-hl="dial" aria-pressed="false"><b>Dial</b><span>Picks what you measure. For voltage, turn it to <b>V</b>.</span></button>
+        <button class="part" data-hl="COM" aria-pressed="false"><b>COM port</b><span>COM means common. The black lead always goes here.</span></button>
+        <button class="part" data-hl="VΩ" aria-pressed="false"><b>VΩ port</b><span>The red lead goes here for voltage (V) and resistance (Ω).</span></button>
+        <button class="part" data-hl="10A" aria-pressed="false"><b>10A port</b><span>Only for measuring big current. Do not use it for voltage.</span></button>
+        <button class="part" data-hl="probes" aria-pressed="false"><b>Probes</b><span>The metal tips. Touch one to <b>each side</b> of the part you test.</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 ACROSS -->
+<section class="slide" data-title="What does across mean?">
+  <h2>2. What does “across the load” mean?</h2>
+  <p class="lead">Voltage is always a <b>difference between two points</b>, like the height at the top and the bottom of a slide. So you never touch just one spot. You put the two probes on <b>two sides</b> of something.</p>
+  <div class="work">
+    <div>
+      <div class="svgwrap" id="acrossBench"></div>
+      <div class="chips" id="acrossBtns" role="group" aria-label="Where to measure">
+        <button class="chip" data-across="AD" aria-pressed="false">Across the battery</button>
+        <button class="chip" data-across="BC" aria-pressed="false">Across the load</button>
+        <button class="chip" data-across="CD" aria-pressed="false">Across a wire</button>
+      </div>
+    </div>
+    <div>
+      <div class="card def load tight"><h3>Load</h3><p style="margin:0">The part that <b>uses</b> the energy. A light bulb, motor, buzzer or speaker is a load. In this circuit, the load is the light bulb.</p></div>
+      <div class="card def tight"><h3>Across</h3><p style="margin:0">One probe on <b>each side</b> of a part. <b>Across the load</b> means the red probe on one side of the bulb and the black probe on the other side.</p></div>
+      <div class="card tight">
+        <h3>The meter goes beside the part</h3>
+        <div class="compare">
+          <div><svg viewBox="0 0 170 120" aria-label="Right way: the voltmeter sits beside the bulb, with one lead on each side. The bulb is lit." role="img" id="rightWay"></svg><div class="tag ok">✔ Right: beside the bulb</div><div class="small">The loop is not broken. The bulb stays on. This is called hooking it up in <b>parallel</b>.</div></div>
+          <div><svg viewBox="0 0 170 120" aria-label="Wrong way: the wire is cut and the voltmeter is put inside the loop. The bulb is dark." role="img" id="wrongWay"></svg><div class="tag no">✘ Wrong: inside the loop</div><div class="small">Do not cut the loop and put the meter in the line. The bulb goes out.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 SETUP -->
+<section class="slide" data-title="Set up the meter">
+  <h2>3. Set up the meter and measure a battery</h2>
+  <div class="work">
+    <div>
+      <div class="svgwrap" id="setupBench"></div>
+    </div>
+    <div>
+      <div class="card safety tight"><h3>Safety rule</h3><p style="margin:0">Voltage is measured with the power <b>on</b>. Always check the dial is on <b>V</b> before you touch the probes to a circuit.</p></div>
+      <ol class="steps" id="setupSteps">
+        <li data-s="0"><span class="n">1</span><span>Tap the <b>black lead</b>, then tap the <b>COM</b> port.</span></li>
+        <li data-s="1"><span class="n">2</span><span>Tap the <b>red lead</b>, then tap the <b>VΩ</b> port.</span></li>
+        <li data-s="2"><span class="n">3</span><span>Turn the dial to <b>V</b>. (Tap the V on the meter.)</span></li>
+        <li data-s="3"><span class="n">4</span><span>Touch the <b>red probe</b> to the <b>+</b> end of the battery (point A).</span></li>
+        <li data-s="4"><span class="n">5</span><span>Touch the <b>black probe</b> to the <b>−</b> end of the battery (point D).</span></li>
+        <li data-s="5"><span class="n">6</span><span>Read the number and units: <input class="ans" id="setupAns" inputmode="decimal" aria-label="Your reading in volts"> V <button class="btn ghost" id="setupCheck" style="padding:4px 10px">Check</button> <span id="setupFb"></span></span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 4 MISSION -->
+<section class="slide" data-title="Measure a circuit">
+  <h2>4. Measure across parts of a circuit</h2>
+  <p class="lead">Set the dial to <b>V</b>. Pick a probe, then tap a point (A, B, C or D). Do each mission. Tap <b>Save this reading</b> after each one.</p>
+  <div class="work">
+    <div>
+      <div class="svgwrap" id="missionBench"></div>
+    </div>
+    <div>
+      <ol class="steps" id="missionSteps">
+        <li data-m="0"><span class="n">1</span><span>Switch <b>closed</b>. Measure <b>across the battery</b> (A and D).</span></li>
+        <li data-m="1"><span class="n">2</span><span>Switch <b>closed</b>. Measure <b>across the load</b> (B and C).</span></li>
+        <li data-m="2"><span class="n">3</span><span>Measure <b>across a wire</b> (C and D).</span></li>
+        <li data-m="3"><span class="n">4</span><span><b>Open</b> the switch. Measure across the load again.</span></li>
+        <li data-m="4"><span class="n">5</span><span>Switch still <b>open</b>. Measure <b>across the switch</b> (A and B).</span></li>
+        <li data-m="5"><span class="n">6</span><span>Use <b>3 cells</b>. Measure across the battery.</span></li>
+      </ol>
+      <div class="ctrl" style="margin-top:10px"><button class="btn" id="saveBtn">Save this reading</button><button class="btn ghost" id="clearBtn">Clear table</button></div>
+      <div class="card tight" style="margin-top:8px"><table><thead><tr><th>Cells</th><th>Switch</th><th>Where</th><th>Reading</th></tr></thead><tbody id="saved"><tr><td colspan="4" class="small">No readings saved yet.</td></tr></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 FIND -->
+<section class="slide" data-title="What did you find?">
+  <h2>What did you find?</h2>
+  <div class="work">
+    <div class="card"><h3>Your results</h3><table><thead><tr><th>Cells</th><th>Switch</th><th>Where</th><th>Reading</th></tr></thead><tbody id="saved2"></tbody></table></div>
+    <div class="card" id="findQs"></div>
+  </div>
+</section>
+
+<!-- 6 QUIZ -->
+<section class="slide" data-title="Check yourself">
+  <h2>5. Check yourself</h2>
+  <p>Answer 7 questions. You get one try on each.</p>
+  <div id="quiz"></div>
+</section>
+
+</main>
+
+<nav class="bar" aria-label="Slides">
+  <button class="btn ghost" id="back">Back</button>
+  <div class="dots" id="dots"></div>
+  <button class="btn" id="next">Next</button>
+</nav>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const INK="#16293B", RED="#C62828", ACC="#1B5FC1";
+
+/* ---------------- METER ---------------- */
+// meter drawn at local coords 0..140 x 0..240
+const DIALPOS={OFF:[22,150],V:[28,96],A:[112,96],"Ω":[118,150]};
+const PORTS={"10A":30,"COM":70,"VΩ":110}; const PORT_Y=214;
+function meterSVG(st,o){
+  o=o||{}; const tap=!!o.tap;
+  const r=o.read||{display:"",unit:""};
+  let s=`<rect x="0" y="0" width="140" height="240" rx="16" fill="#F5B301" stroke="${INK}" stroke-width="3"/>`;
+  s+=`<rect x="13" y="13" width="114" height="50" rx="6" fill="${st.dial==="OFF"?"#AFBE97":"#C9D8A8"}" stroke="${INK}" stroke-width="3"/>`;
+  s+=`<text x="19" y="24" font-size="6" fill="${INK}" font-family="Arial">AUTO</text>`;
+  s+=`<text x="${r.unit?101:120}" y="52" text-anchor="end" font-size="25" fill="${INK}" font-family="Share Tech Mono, Courier New, monospace">${esc(r.display)}</text>`;
+  if(r.unit) s+=`<text x="104" y="52" font-size="12" fill="${INK}" font-family="Share Tech Mono, Courier New, monospace">${esc(r.unit)}</text>`;
+  s+=`<text x="70" y="77" text-anchor="middle" font-size="7" font-weight="700" letter-spacing="1.2" fill="${INK}" font-family="Arial">MULTIMETER</text>`;
+  const [px,py]=DIALPOS[st.dial]; const ang=Math.atan2(py-122,px-70);
+  s+=`<circle cx="70" cy="122" r="27" fill="#3A4A5C" stroke="${INK}" stroke-width="3"/>`;
+  const tx=70+Math.cos(ang)*22, ty=122+Math.sin(ang)*22, bx=Math.cos(ang+Math.PI/2)*5, by=Math.sin(ang+Math.PI/2)*5, mx=70+Math.cos(ang)*12, my=122+Math.sin(ang)*12;
+  s+=`<line x1="${70+Math.cos(ang)*4}" y1="${122+Math.sin(ang)*4}" x2="${tx}" y2="${ty}" stroke="#fff" stroke-width="5" stroke-linecap="round"/><circle cx="70" cy="122" r="5" fill="#fff"/>`;
+  for(const k in DIALPOS){const [x,y]=DIALPOS[k]; const on=st.dial===k;
+    s+=`<g ${tap?`class="tap" role="button" tabindex="0" aria-label="Turn dial to ${k==="Ω"?"ohms":k==="V"?"volts":k==="A"?"amps":"off"}" data-dial="${k}"`:""}><circle class="ring" cx="${x}" cy="${y}" r="${k==="OFF"?11:10}" fill="${on?INK:"#F5B301"}" stroke="${INK}" stroke-width="2"/><text x="${x}" y="${y+(k==="OFF"?2.5:4)}" text-anchor="middle" font-size="${k==="OFF"?7:11}" font-weight="700" fill="${on?"#fff":INK}" font-family="Arial">${k}</text></g>`;}
+  for(const k in PORTS){const x=PORTS[k];
+    s+=`<text x="${x}" y="196" text-anchor="middle" font-size="8" font-weight="700" fill="${INK}" font-family="Arial">${k}</text>`;
+    const ringC=k==="VΩ"?RED:(k==="COM"?"#fff":"#55606b");
+    s+=`<g ${tap?`class="tap" role="button" tabindex="0" aria-label="${k} port" data-port="${k}"`:""}><circle class="ring" cx="${x}" cy="${PORT_Y}" r="11" fill="${INK}" stroke="${INK}" stroke-width="1"/><circle cx="${x}" cy="${PORT_Y}" r="6" fill="#111" stroke="${ringC}" stroke-width="2.5"/></g>`;}
+  // highlights
+  const hl=o.hl; const H=(sh)=>`<g fill="none" stroke="${ACC}" stroke-width="4" stroke-dasharray="6 4">${sh}</g>`;
+  if(hl==="display") s+=H(`<rect x="6" y="6" width="128" height="64" rx="9"/>`);
+  if(hl==="dial") s+=H(`<circle cx="70" cy="122" r="37"/>`);
+  if(PORTS[hl]!==undefined) s+=H(`<circle cx="${PORTS[hl]}" cy="${PORT_Y}" r="17"/>`);
+  return s;
+}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+/* ---------------- CIRCUIT / BENCH ---------------- */
+const MX=6, MY=14; // meter offset inside bench svg
+function pts(mode){
+  if(mode==="battery") return {A:{x:290,y:80,d:[-1,-.45],lx:306,ly:78,name:"the + end"},D:{x:290,y:176,d:[-1,.45],lx:306,ly:192,name:"the − end"}};
+  return {A:{x:205,y:80,d:[-1,-.45],lx:220,ly:76,name:"the + end of the battery"},B:{x:375,y:90,d:[1,-.45],lx:360,ly:86,name:"the top of the bulb"},C:{x:375,y:170,d:[1,.45],lx:360,ly:180,name:"the bottom of the bulb"},D:{x:205,y:176,d:[-1,.45],lx:220,ly:192,name:"the − end of the battery"}};
+}
+function potentials(st){const Vb=1.5*st.cells;
+  if(st.mode==="battery") return {A:Vb,D:0};
+  return st.closed?{A:Vb,B:Vb,C:0,D:0}:{A:Vb,B:0,C:0,D:0};}
+function pairKey(a,b){return [a,b].sort().join("");}
+function fmt(v){const t=Math.abs(v).toFixed(2); return (v<-0.004?"-":"")+t;}
+
+function reading(st){
+  const placed=st.probe.red&&st.probe.black;
+  if(st.dial==="OFF") return {display:"",unit:"",msg:"The meter is OFF. Turn the dial to V.",tone:""};
+  const du=st.dial==="V"?["0.00","V"]:st.dial==="A"?["0.00","A"]:["OL","Ω"];
+  if(!st.port.black||!st.port.red) return {display:du[0],unit:du[1],msg:"Plug in both leads: black goes in COM, red goes in VΩ.",tone:""};
+  if(st.port.black==="10A"||st.port.red==="10A") return {display:"---",unit:"",msg:"The 10A port is only for big current. Black goes in COM. Red goes in VΩ.",tone:"warn"};
+  const sign=st.port.red==="VΩ"?1:-1; const swapNote=sign<0?" Your leads are in the wrong ports: black goes in COM, red goes in VΩ.":"";
+  const P=potentials(st);
+  if(st.dial==="Ω"){
+    if(placed) return {display:"Err",unit:"",msg:"Stop! Never measure resistance on a part that has power. Turn the dial to V.",tone:"danger"};
+    return {display:"OL",unit:"Ω",msg:"The dial is on Ω (resistance). To measure voltage, turn it to V.",tone:"warn"};}
+  if(st.dial==="A"){
+    if(placed&&Math.abs(P[st.probe.red]-P[st.probe.black])>0) return {display:"---",unit:"",msg:"Stop! On A, the meter acts like a wire. Across a battery or bulb, that makes a short circuit. Turn the dial to V.",tone:"danger"};
+    return {display:"0.00",unit:"A",msg:"The A setting measures current, not voltage. Turn the dial to V.",tone:"warn"};}
+  if(!placed) return {display:"0.00",unit:"V",msg:"Touch one probe to each side of a part.",tone:""};
+  const r=st.probe.red,b=st.probe.black; const v=sign*(P[r]-P[b]); const a=Math.abs(v).toFixed(2);
+  let msg; const k=pairKey(r,b);
+  if(r===b) msg="Both probes are on the same spot. There is no difference, so the meter reads 0 V.";
+  else if(k==="AD") msg=st.mode==="battery"?`Across the battery: ${a} V. That is the push this battery gives.`:`Across the battery: ${a} V. This is the push the battery gives the charges.`;
+  else if(k==="BC") msg=st.closed?`Across the load (the bulb): ${a} V. The bulb uses the energy the battery gave the charges.`:`Across the load: 0.00 V. The switch is open, so no charges flow and the bulb uses no energy.`;
+  else if(k==="CD") msg=`Across a wire: ${a} V. Charges lose almost no energy in a wire, so there is no difference.`;
+  else if(k==="AB") msg=st.closed?`Across the closed switch: ${a} V. A closed switch acts like a wire.`:`Across the open switch: ${a} V. The whole push is stuck at the gap, so no charges flow.`;
+  else msg=`Between points ${r} and ${b}: ${a} V.`;
+  let tone="good";
+  if(v<-0.004){msg+=" The minus sign means the probes are swapped. Put the red probe on the + side."; tone="warn";}
+  if(swapNote){msg+=swapNote; tone="warn";}
+  return {display:fmt(v),unit:"V",msg,tone,value:v,pair:k,red:r,black:b};
+}
+
+function benchSVG(st,o){
+  o=o||{}; const P=pts(st.mode); const tap=!!o.tap; const Vb=1.5*st.cells;
+  let s=`<rect x="158" y="8" width="266" height="254" rx="12" fill="#F2F6F9" stroke="#B9C8D5" stroke-width="2"/>`;
+  const W=`stroke="${INK}" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"`;
+  const bx=st.mode==="battery"?290:205;
+  if(st.mode!=="battery"){
+    s+=`<path d="M205,80 V40 H268" ${W}/><path d="M312,40 H375 V106" ${W}/><path d="M375,154 V215 H205 V176" ${W}/>`;
+    if(st.closed && Vb>0) s+=`<path class="flow" d="M205,176 V215 H375 V40 H205 V80" stroke="#1E9E6A" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 12" fill="none" style="animation-duration:${(2.4/st.cells).toFixed(2)}s"/>`;
+    // switch
+    s+=`<g ${tap&&o.switchTap?`class="tap" role="button" tabindex="0" aria-label="Switch is ${st.closed?"closed":"open"}. Tap to ${st.closed?"open":"close"} it." data-sw="1"`:""}><rect x="262" y="12" width="56" height="40" fill="transparent"/>`;
+    s+=`<circle cx="270" cy="40" r="3.5" fill="${INK}"/><circle cx="310" cy="40" r="3.5" fill="${INK}"/>`;
+    s+=st.closed?`<line x1="270" y1="40" x2="310" y2="38" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`:`<line x1="270" y1="40" x2="302" y2="16" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<text x="290" y="60" text-anchor="middle" font-size="10" font-weight="700" fill="${INK}" font-family="Arial">Switch (${st.closed?"closed":"open"})</text></g>`;
+    // bulb
+    const lit=st.closed; const glow=lit?Math.min(.85,.25+.2*st.cells):0;
+    if(lit) s+=`<circle cx="375" cy="124" r="${22+st.cells*4}" fill="#FFD54F" opacity="${glow}"/>`;
+    s+=`<circle cx="375" cy="124" r="18" fill="${lit?"#FFE58A":"#FAFCFD"}" stroke="${INK}" stroke-width="2.5"/>`;
+    s+=`<path d="M369,141 V130 Q375,116 381,130 V141" stroke="#8A5A2B" stroke-width="2" fill="none"/>`;
+    s+=`<rect x="366" y="140" width="18" height="14" rx="2" fill="#9AA5B1" stroke="${INK}" stroke-width="2"/>`;
+    s+=`<g font-family="Arial" font-size="10" font-weight="700" text-anchor="end" stroke="#F2F6F9" stroke-width="3" paint-order="stroke"><text x="340" y="156" fill="${INK}">Light bulb</text><text x="340" y="168" fill="#7A4A12">(the load)</text></g>`;
+    s+=`<text x="290" y="232" text-anchor="middle" font-size="10" font-weight="700" fill="${INK}" font-family="Arial">Wire</text>`;
+  }
+  // battery
+  const h=96/st.cells;
+  s+=`<rect x="${bx-6}" y="74" width="12" height="7" rx="1.5" fill="#C77B30" stroke="${INK}" stroke-width="1.5"/>`;
+  for(let i=0;i<st.cells;i++){const y=80+i*h;
+    s+=`<rect x="${bx-16}" y="${y}" width="32" height="${h}" rx="3" fill="#23303D" stroke="${INK}" stroke-width="2"/><rect x="${bx-16}" y="${y}" width="32" height="${Math.max(5,h*.2)}" rx="3" fill="#C77B30"/>`;
+    s+=`<text x="${bx}" y="${y+h*.62+3}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fff" font-family="Arial">1.5 V</text>`;}
+  s+=`<text x="${bx-30}" y="94" text-anchor="middle" font-size="15" font-weight="700" fill="${INK}" font-family="Arial">+</text><text x="${bx-30}" y="176" text-anchor="middle" font-size="16" font-weight="700" fill="${INK}" font-family="Arial">−</text>`;
+  const lbx=st.mode==="battery"?bx+26:bx+24;
+  s+=`<text x="${lbx}" y="124" font-size="10" font-weight="700" fill="${INK}" font-family="Arial">Battery</text><text x="${lbx}" y="137" font-size="10" fill="${INK}" font-family="Arial">${st.cells} cell${st.cells>1?"s":""} = ${Vb.toFixed(1)} V</text>`;
+  // test points
+  for(const k in P){const p=P[k];
+    s+=`<g ${tap?`class="tap" role="button" tabindex="0" aria-label="Point ${k}, ${p.name}" data-pt="${k}"`:""}><circle cx="${p.x}" cy="${p.y}" r="14" fill="transparent"/><circle class="ring" cx="${p.x}" cy="${p.y}" r="6.5" fill="#fff" stroke="${ACC}" stroke-width="2.5"/></g>`;
+    s+=`<text x="${p.lx}" y="${p.ly}" text-anchor="${p.lx<p.x?"end":"start"}" font-size="13" font-weight="800" fill="${ACC}" font-family="Arial" stroke="#F2F6F9" stroke-width="3" paint-order="stroke">${k}</text>`;}
+  // meter
+  s+=`<g transform="translate(${MX},${MY})">${meterSVG(st,{tap,read:o.read,hl:o.hl})}</g>`;
+  // leads + probes
+  const same=st.probe.red&&st.probe.red===st.probe.black;
+  ["black","red"].forEach(c=>{
+    const port=st.port[c]; if(!port) return;
+    const sx=MX+PORTS[port], sy=MY+PORT_Y; let tip,d;
+    if(st.probe[c]){const p=P[st.probe[c]]; tip=[p.x,p.y]; d=p.d; if(same){const off=c==="red"?7:-7; tip=[p.x-d[1]*off,p.y+d[0]*off];}}
+    else {tip=c==="black"?[176,226]:[410,226]; d=[0,1];}
+    const n=Math.hypot(d[0],d[1]); const ux=d[0]/n, uy=d[1]/n;
+    const e=[tip[0]+ux*30,tip[1]+uy*30]; const col=c==="red"?RED:"#1b1f24";
+    s+=`<path d="M${sx},${sy} C${sx},${sy+44} ${e[0]+ux*44},${e[1]+uy*44} ${e[0]},${e[1]}" stroke="${col}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+    s+=`<line x1="${tip[0]}" y1="${tip[1]}" x2="${tip[0]+ux*8}" y2="${tip[1]+uy*8}" stroke="#8C99A6" stroke-width="2.5" stroke-linecap="round"/>`;
+    s+=`<line x1="${tip[0]+ux*9}" y1="${tip[1]+uy*9}" x2="${e[0]}" y2="${e[1]}" stroke="${col}" stroke-width="8" stroke-linecap="round"/>`;
+    s+=`<circle cx="${sx}" cy="${sy}" r="7.5" fill="${col}" stroke="${c==="black"?"#fff":INK}" stroke-width="1.5"/>`;
+  });
+  if(o.hl==="probes"){for(const k in P){if(k==="A"||k==="D"){} } ["red","black"].forEach(c=>{const k=st.probe[c]; if(k){const p=P[k]; s+=`<circle cx="${p.x}" cy="${p.y}" r="16" fill="none" stroke="${ACC}" stroke-width="4" stroke-dasharray="6 4"/>`;}});}
+  return `<svg viewBox="0 0 430 270" role="img" aria-label="Multimeter and ${st.mode==="battery"?"a battery":"a circuit with a battery, a switch and a light bulb"}">${s}</svg>`;
+}
+
+/* Bench component */
+function Bench(el,init,o){
+  o=o||{};
+  const st=Object.assign({mode:"circuit",cells:2,closed:true,dial:"V",port:{black:"COM",red:"VΩ"},probe:{red:null,black:null},active:"red",held:null},init);
+  const api={st,render,set};
+  function set(fn){fn(st);render();}
+  function render(){
+    const r=reading(st); api.read=r;
+    const focusKey=document.activeElement&&el.contains(document.activeElement)?keyOf(document.activeElement):null;
+    let h=`<div>${benchSVG(st,{tap:o.tap!==false,read:r,hl:o.hl&&o.hl(),switchTap:o.switchTap})}</div>`;
+    h+=`<div class="status ${r.tone}" aria-live="polite">${esc(r.msg)}</div>`;
+    if(o.controls!==false){
+      h+=`<div class="ctrl" style="margin-top:8px">`;
+      if(o.leads){["black","red"].forEach(c=>{ if(!st.port[c]) h+=`<button class="chip ${c}" data-held="${c}" aria-pressed="${st.held===c}">${c==="red"?"Red":"Black"} lead${st.held===c?": now tap a port":""}</button>`;});}
+      if(st.port.red||st.port.black){h+=`<span><b>Next tap moves:</b> <span class="seg"><button data-act="red" aria-pressed="${st.active==="red"}">Red probe</button><button data-act="black" aria-pressed="${st.active==="black"}">Black probe</button></span></span>`;}
+      h+=`<button class="chip" data-clear="1">Lift probes</button></div>`;
+      if(o.cellsCtl||o.switchTap){h+=`<div class="ctrl">`;
+        if(o.cellsCtl) h+=`<span><b>Cells:</b> <span class="seg">${[1,2,3].map(n=>`<button data-cells="${n}" aria-pressed="${st.cells===n}">${n}</button>`).join("")}</span></span>`;
+        if(o.switchTap) h+=`<span><b>Switch:</b> <span class="seg"><button data-closed="1" aria-pressed="${st.closed}">Closed</button><button data-closed="0" aria-pressed="${!st.closed}">Open</button></span></span>`;
+        h+=`</div>`;}
+      const P=pts(st.mode);
+      h+=`<details><summary>Can't tap the meter or the dots? Use buttons</summary>`;
+      h+=`<div class="chips"><b style="align-self:center;font-size:14px">Dial:</b>${["OFF","V","A","Ω"].map(k=>`<button class="chip" data-dial="${k}" aria-pressed="${st.dial===k}">${k}</button>`).join("")}</div>`;
+      if(o.leads) h+=`<div class="chips"><b style="align-self:center;font-size:14px">Leads:</b><button class="chip" data-plug="black:COM">Black → COM</button><button class="chip" data-plug="red:VΩ">Red → VΩ</button><button class="chip" data-plug="red:10A">Red → 10A</button></div>`;
+      ["red","black"].forEach(c=>{h+=`<div class="chips"><b style="align-self:center;font-size:14px">${c==="red"?"Red":"Black"} probe on:</b>${Object.keys(P).map(k=>`<button class="chip" data-put="${c}:${k}">${k}</button>`).join("")}</div>`;});
+      h+=`</details>`;
+    }
+    el.innerHTML=h;
+    if(focusKey){const f=el.querySelector(`[${focusKey}]`); if(f) f.focus();}
+    if(o.onChange) o.onChange(st,r);
+  }
+  function keyOf(e){for(const a of ["data-dial","data-port","data-pt","data-sw","data-held","data-act","data-cells","data-closed","data-plug","data-put","data-clear"]) if(e.hasAttribute(a)) return `${a}="${e.getAttribute(a)}"`; return null;}
+  function plug(c,port){ // c lead into port
+    for(const k of ["black","red"]) if(k!==c&&st.port[k]===port){st.port[k]=null;st.probe[k]=null;}
+    st.port[c]=port; st.held=null;
+    st.active=["red","black"].find(k=>st.port[k]&&!st.probe[k])||(st.port.red?"red":c);
+  }
+  function act(t){
+    if(t.dataset.dial){st.dial=t.dataset.dial;}
+    else if(t.dataset.port){const p=t.dataset.port;
+      if(st.held) plug(st.held,p);
+      else {const who=["black","red"].find(k=>st.port[k]===p); if(who){st.port[who]=null;st.probe[who]=null;st.held=who;}}}
+    else if(t.dataset.held){const c=t.dataset.held; st.held=st.held===c?null:c;}
+    else if(t.dataset.plug){const [c,p]=t.dataset.plug.split(":"); plug(c,p);}
+    else if(t.dataset.pt){const c=st.active; if(!st.port[c]) return; st.probe[c]=t.dataset.pt; const other=c==="red"?"black":"red"; if(!st.probe[other]&&st.port[other]) st.active=other;}
+    else if(t.dataset.put){const [c,k]=t.dataset.put.split(":"); if(!st.port[c]) return; st.probe[c]=k;}
+    else if(t.dataset.act){st.active=t.dataset.act;}
+    else if(t.dataset.clear){st.probe.red=null;st.probe.black=null;st.active="red";}
+    else if(t.dataset.cells){st.cells=+t.dataset.cells;}
+    else if(t.dataset.closed!==undefined){st.closed=t.dataset.closed==="1";}
+    else if(t.dataset.sw){st.closed=!st.closed;}
+    else return;
+    render();
+  }
+  el.addEventListener("click",e=>{const t=e.target.closest("[data-dial],[data-port],[data-pt],[data-sw],[data-held],[data-act],[data-cells],[data-closed],[data-plug],[data-put],[data-clear]"); if(t&&el.contains(t)) act(t);});
+  el.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ") return; const t=e.target; if(t.tagName==="g"||t.namespaceURI==="http://www.w3.org/2000/svg"){e.preventDefault(); act(t);}});
+  render(); return api;
+}
+
+/* ---------------- INTRO ---------------- */
+$("#introMeter").innerHTML=`<g transform="translate(6,10)">${meterSVG({dial:"V"},{read:{display:"3.00",unit:"V"}})}<circle cx="70" cy="${PORT_Y}" r="7" fill="#1b1f24" stroke="#fff" stroke-width="1.5"/><circle cx="110" cy="${PORT_Y}" r="7" fill="${RED}" stroke="${INK}" stroke-width="1.5"/></g>`;
+
+/* ---------------- MEET ---------------- */
+let meetHL=null;
+const meet=Bench($("#meetBench"),{mode:"battery",cells:2,probe:{red:"A",black:"D"}},{tap:false,controls:false,hl:()=>meetHL});
+$("#meetParts").addEventListener("click",e=>{const b=e.target.closest(".part"); if(!b) return; meetHL=b.dataset.hl; $$(".part",$("#meetParts")).forEach(x=>x.setAttribute("aria-pressed",x===b)); meet.render();});
+
+/* ---------------- ACROSS ---------------- */
+const across=Bench($("#acrossBench"),{mode:"circuit",cells:2,closed:true},{controls:false,onChange:(st)=>{const k=st.probe.red&&st.probe.black?pairKey(st.probe.red,st.probe.black):""; $$("#acrossBtns .chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.across===k));}});
+$("#acrossBtns").addEventListener("click",e=>{const b=e.target.closest("[data-across]"); if(!b) return; const k=b.dataset.across; const map={AD:["A","D"],BC:["B","C"],CD:["D","C"]}[k]; across.set(st=>{st.probe.red=map[0];st.probe.black=map[1];});});
+function loopSVG(right){
+  let s=`<g stroke="${INK}" stroke-width="2.5" fill="none" stroke-linejoin="round">`;
+  if(right) s+=`<path d="M30,40 V20 H120 V48 M120,76 V100 H30 V68"/>`;
+  else s+=`<path d="M30,40 V20 H58 M92,20 H120 V48 M120,76 V100 H30 V68"/>`;
+  s+=`</g><rect x="22" y="40" width="16" height="28" rx="2" fill="#23303D" stroke="${INK}" stroke-width="2"/><rect x="22" y="40" width="16" height="6" fill="#C77B30"/>`;
+  if(right) s+=`<circle cx="120" cy="62" r="20" fill="#FFD54F" opacity=".6"/>`;
+  s+=`<circle cx="120" cy="60" r="12" fill="${right?"#FFE58A":"#FAFCFD"}" stroke="${INK}" stroke-width="2"/><rect x="114" y="70" width="12" height="8" fill="#9AA5B1" stroke="${INK}" stroke-width="1.5"/>`;
+  const meter=(x,y)=>`<rect x="${x}" y="${y}" width="30" height="22" rx="4" fill="#F5B301" stroke="${INK}" stroke-width="2"/><text x="${x+15}" y="${y+16}" text-anchor="middle" font-size="13" font-weight="700" fill="${INK}" font-family="Arial">V</text>`;
+  if(right){s+=`<path d="M120,34 H155 V50" stroke="${RED}" stroke-width="2.5" fill="none"/><path d="M120,86 H155 V72" stroke="#1b1f24" stroke-width="2.5" fill="none"/>`+meter(140,50);}
+  else {s+=meter(60,9)+`<text x="120" y="66" text-anchor="middle" font-size="18" fill="${RED}" font-weight="700" font-family="Arial">✘</text>`;}
+  return s;
+}
+$("#rightWay").innerHTML=loopSVG(true); $("#wrongWay").innerHTML=loopSVG(false);
+
+/* ---------------- SETUP ---------------- */
+let setupAnsOK=false;
+const setup=Bench($("#setupBench"),{mode:"battery",cells:2,dial:"OFF",port:{black:null,red:null},active:"red"},{leads:true,onChange:(st,r)=>{
+  const done=[st.port.black==="COM",st.port.red==="VΩ",st.dial==="V",st.probe.red==="A"&&st.port.red==="VΩ",st.probe.black==="D"&&st.port.black==="COM",setupAnsOK];
+  $$("#setupSteps li").forEach((li,i)=>li.classList.toggle("done",done[i]));
+}});
+$("#setupCheck").addEventListener("click",()=>{
+  const v=parseFloat($("#setupAns").value); const r=setup.read; const fb=$("#setupFb");
+  if(r.value===undefined||r.pair!=="AD"){fb.innerHTML=`<span class="small">First get a reading across the battery.</span>`;return;}
+  if(Math.abs(v-r.value)<0.03){setupAnsOK=r.value>0; fb.innerHTML=r.value>0?`<span class="check">✔ Yes! ${r.value.toFixed(2)} V. Two 1.5 V cells in a row = 3.0 V.</span>`:`<span class="small">That matches the screen, but it is negative. Swap the probes.</span>`;}
+  else {setupAnsOK=false; fb.innerHTML=`<span class="small">Look at the display again. Read the number and the units.</span>`;}
+  setup.render();
+});
+
+/* ---------------- MISSION ---------------- */
+const mdone=[false,false,false,false,false,false]; const saved=[];
+const mission=Bench($("#missionBench"),{mode:"circuit",cells:2,closed:true,dial:"OFF"},{cellsCtl:true,switchTap:true,onChange:(st,r)=>{
+  if(r.value!==undefined&&r.tone==="good"&&r.red!==r.black){
+    const k=r.pair;
+    if(k==="AD"&&st.closed&&st.cells!==3) mdone[0]=true;
+    if(k==="BC"&&st.closed) mdone[1]=true;
+    if(k==="CD") mdone[2]=true;
+    if(k==="BC"&&!st.closed) mdone[3]=true;
+    if(k==="AB"&&!st.closed) mdone[4]=true;
+    if(k==="AD"&&st.cells===3) mdone[5]=true;
+  }
+  $$("#missionSteps li").forEach((li,i)=>li.classList.toggle("done",mdone[i]));
+}});
+const where={AD:"Across the battery",BC:"Across the load",CD:"Across a wire",AB:"Across the switch"};
+function drawSaved(){
+  const rows=saved.length?saved.map(x=>`<tr><td>${x.cells}</td><td>${x.sw}</td><td>${x.where}</td><td><b>${x.v} V</b></td></tr>`).join(""):`<tr><td colspan="4" class="small">No readings saved yet.</td></tr>`;
+  $("#saved").innerHTML=rows; $("#saved2").innerHTML=rows;
+}
+$("#saveBtn").addEventListener("click",()=>{const r=mission.read, st=mission.st;
+  if(r.value===undefined){alert("Get a voltage reading first: dial on V, one probe on each side of a part."); return;}
+  saved.push({cells:st.cells,sw:st.closed?"Closed":"Open",where:r.red===r.black?"Same spot":(where[r.pair]||`${r.red} to ${r.black}`),v:fmt(r.value)}); drawSaved();});
+$("#clearBtn").addEventListener("click",()=>{saved.length=0;drawSaved();});
+drawSaved();
+
+/* ---------------- FIND ---------------- */
+const FIND=[
+ {q:"With the switch closed, how did the reading across the load (bulb) compare to the reading across the battery?",o:["About the same","About 0 V","About double"],a:0,
+  y:"Right. The bulb uses the energy the battery gives the charges, so the voltage across the load matches the battery’s push.",n:"Look at your table. Compare “Across the battery” and “Across the load” with the switch closed."},
+ {q:"Across a wire, the meter read about 0 V. Why?",o:["The wire is broken","Charges lose almost no energy in a wire, so there is no difference between its two ends","The meter is broken"],a:1,
+  y:"Right. A wire carries the charges but does not use their energy. No difference means 0 V.",n:"The bulb still lit, so the wire is not broken. Think about where the energy is used."},
+ {q:"With the switch open, the load read 0 V and the switch read the full battery voltage. Why?",o:["No charges flow, so the bulb uses no energy. The whole push is stuck at the gap.","The battery died","Opening the switch makes more voltage"],a:0,
+  y:"Right. The battery still pushes, but the gap stops the charges. All of the voltage shows up across the gap.",n:"Measure across the battery with the switch open. Did the battery change?"},
+ {q:"You added more cells. What happened to the voltage across the battery?",o:["It went down","It went up: each cell adds 1.5 V","It stayed the same"],a:1,
+  y:"Right. Cells in a row add up: 1.5 + 1.5 + 1.5 = 4.5 V. More push makes the bulb brighter.",n:"Try 1, 2 and 3 cells and measure across the battery each time."}];
+$("#findQs").innerHTML=FIND.map((f,i)=>`<div class="q" data-f="${i}"><b>${i+1}. ${f.q}</b>${f.o.map((t,j)=>`<button class="opt" data-j="${j}">${t}</button>`).join("")}<div class="fbx"></div></div>`).join("");
+$("#findQs").addEventListener("click",e=>{const b=e.target.closest(".opt"); if(!b) return; const q=b.closest(".q"), f=FIND[+q.dataset.f], j=+b.dataset.j;
+  $$(".opt",q).forEach(x=>x.classList.remove("right","wrong")); b.classList.add(j===f.a?"right":"wrong");
+  $(".fbx",q).innerHTML=`<div class="fb ${j===f.a?"good":"warn"}">${j===f.a?f.y:f.n}</div>`;});
+
+/* ---------------- QUIZ ---------------- */
+const QUIZ=[
+ {q:"To measure voltage, where do you turn the dial?",o:["Ω","V","A"],a:1,w:"V stands for volts, the unit of voltage."},
+ {q:"Where does the black lead go?",o:["COM","VΩ","10A"],a:0,w:"COM means common. The black lead always goes in COM."},
+ {q:"What is a load?",o:["A part that uses electrical energy, like a bulb or motor","The wire","The battery"],a:0,w:"A load uses the energy. The battery gives energy. The wire carries the charges."},
+ {q:"What does it mean to measure “across the load”?",o:["Touch both probes to the same wire","Put one probe on each side of the load","Cut the wire and put the meter in the loop"],a:1,w:"Across means one probe on each side of the part."},
+ {q:"How is a voltmeter hooked up?",o:["Inside the loop, in line with the bulb","Beside the part, with one probe on each side","Only to one end of the battery"],a:1,w:"The meter goes beside the part. This is called hooking it up in parallel."},
+ {q:"Three 1.5 V cells are in a row. What is the total voltage?",o:["1.5 V","3.0 V","4.5 V"],a:2,w:"1.5 + 1.5 + 1.5 = 4.5 V. Cells in a row add up."},
+ {q:"The meter reads −3.00 V. What does the minus sign mean?",o:["The probes are swapped","The battery is broken","The bulb is off"],a:0,w:"Put the red probe on the + side to get a positive reading."}];
+const qz={i:0,score:0,picked:null};
+function drawQuiz(){
+  const el=$("#quiz");
+  if(qz.i>=QUIZ.length){el.innerHTML=`<div class="card"><h3>You got ${qz.score} out of ${QUIZ.length}.</h3><p>${qz.score>=6?"Great work! You are ready to measure voltage in the lab.":"Go back over the slides and try again."}</p><button class="btn" id="qAgain">Try again</button></div>`; $("#qAgain").onclick=()=>{qz.i=0;qz.score=0;qz.picked=null;drawQuiz();}; return;}
+  const q=QUIZ[qz.i];
+  el.innerHTML=`<h3>Question ${qz.i+1} of ${QUIZ.length}</h3><div class="card"><div class="q"><b>${qz.i+1}. ${q.q}</b>${q.o.map((t,j)=>{let c="";if(qz.picked!==null){if(j===q.a)c="right";else if(j===qz.picked)c="wrong";}return `<button class="opt ${c}" data-j="${j}" ${qz.picked!==null?"disabled":""}>${t}</button>`;}).join("")}${qz.picked!==null?`<div class="fb ${qz.picked===q.a?"good":"warn"}">${qz.picked===q.a?"Correct! ":"Not quite. "}${q.w}</div><p style="margin-top:10px"><button class="btn" id="qNext">${qz.i===QUIZ.length-1?"See my score":"Next question"}</button></p>`:""}</div></div>`;
+  if(qz.picked===null) $$(".opt",el).forEach(b=>b.onclick=()=>{qz.picked=+b.dataset.j; if(qz.picked===q.a) qz.score++; drawQuiz();});
+  else $("#qNext").onclick=()=>{qz.i++;qz.picked=null;drawQuiz();};
+}
+drawQuiz();
+
+/* ---------------- NAV ---------------- */
+const slides=$$(".slide"); let cur=0;
+$("#dots").innerHTML=slides.map((s,i)=>`<button aria-label="Slide ${i+1}: ${s.dataset.title}"></button>`).join("");
+function go(i){cur=Math.max(0,Math.min(slides.length-1,i)); slides.forEach((s,j)=>s.classList.toggle("on",j===cur));
+  $$("#dots button").forEach((b,j)=>b.toggleAttribute("aria-current",j===cur)||(j===cur&&b.setAttribute("aria-current","step")));
+  $$("#dots button").forEach((b,j)=>{if(j===cur)b.setAttribute("aria-current","step");else b.removeAttribute("aria-current");});
+  $("#back").disabled=cur===0; $("#next").disabled=cur===slides.length-1; window.scrollTo(0,0);}
+$("#back").onclick=()=>go(cur-1); $("#next").onclick=()=>go(cur+1);
+$("#dots").addEventListener("click",e=>{const i=$$("#dots button").indexOf(e.target); if(i>=0) go(i);});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(+b.dataset.go);});
+go(0);
+})();
+</script>
+</body>
+</html>
