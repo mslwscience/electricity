@@ -534,7 +534,7 @@ details.card{padding:6px 12px!important;margin-top:6px!important}
           <p>Pick <strong>copper</strong> and <strong>25 m</strong>. Switch between thin and wide. Compare the numbers.</p>
           <div id="mB"></div>
           <div class="fact" id="factB" hidden>
-            <div id="factBtext"><p>Wire shape also can impact resistance. Wide wires have lots of space for current. This means that wide wires have lower resistance. Skinnier wires don't have as much room for the current. They have higher resistance. This is why power lines that you see outside are much wider than the wires you see in your home. The power lines need to carry more current so more space is needed to prevent overheating.</p></div>
+            <div id="factBtext"><p>Wire shape also can impact resistance. Wide wires have lots of space for current. This means that wide wires have lower resistance. Skinnier wires don't have as much room for the current. They have higher resistance. This is one reason power lines that you see outside are much wider than the wires in your home. Wide wires keep the resistance low, so less energy is lost as heat.</p></div>
             <button class="listen" type="button" data-target="#factBtext" aria-pressed="false">Listen</button>
           </div>
         </div>
@@ -544,7 +544,7 @@ details.card{padding:6px 12px!important;margin-top:6px!important}
           <p>Pick <strong>copper</strong> and <strong>thin</strong>. Switch between 5 m, 25 m, and 100 m. Compare the numbers.</p>
           <div id="mC"></div>
           <div class="fact" id="factC" hidden>
-            <div id="factCtext"><p>Length also impacts resistance. Longer wires resist the flow of current more than shorter wires. This is another reason power lines need wide wires. Power lines are very long when compared to the wires in your home.</p></div>
+            <div id="factCtext"><p>Length also impacts resistance. Longer wires resist the flow of current more than shorter wires. Power lines are very long compared to the wires in your home. That adds a lot of resistance, so power lines need to be wide to keep their resistance low.</p></div>
             <button class="listen" type="button" data-target="#factCtext" aria-pressed="false">Listen</button>
           </div>
         </div>
@@ -578,6 +578,7 @@ details.card{padding:6px 12px!important;margin-top:6px!important}
   <div class="mid">
     <span id="slideLbl" aria-live="polite"></span>
     <div class="dots" id="dots"></div>
+    <button class="btn ghost" id="resetBtn" type="button" style="padding:4px 10px;font-size:13px;margin-top:4px" title="Erase your work and start this activity over">Start over</button>
   </div>
   <button class="btn" id="nextBtn" type="button">Next</button>
 </nav>
@@ -591,6 +592,11 @@ details.card{padding:6px 12px!important;margin-top:6px!important}
 function polar(cx,cy,r,deg){var a=deg*Math.PI/180;return [cx+r*Math.sin(a),cy-r*Math.cos(a)];}
 function $(s,r){return (r||document).querySelector(s);}
 function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+/* ---------- saved progress (this browser only) ---------- */
+var SAVEKEY='mslw-resistance-v1';
+var SV={};try{SV=JSON.parse(localStorage.getItem(SAVEKEY)||'{}',function(k,v){return v==='__INF__'?Infinity:v;})||{};}catch(e){SV={};}
+function persist(){try{localStorage.setItem(SAVEKEY,JSON.stringify(SV,function(k,v){return v===Infinity?'__INF__':v;}));}catch(e){}}
+function startOver(){if(!confirm('Start over? This erases your work in this activity.'))return;try{localStorage.removeItem(SAVEKEY);}catch(e){}SV={};location.reload();}
 
 /* ---------- reading logic ---------- */
 function fmtOhms(r){
@@ -887,6 +893,7 @@ function renderMC(mount,cfg){
     cfg.options.map(function(o,i){return '<button type="button" class="opt" data-i="'+i+'">'+o+'</button>';}).join('')+
     '</div><p class="mc-fb" role="status" aria-live="polite"></p>';
   var fb=$('.mc-fb',mount),done=false;
+  if(SV.mc&&SV.mc[cfg.id]){done=true;$$('.opt',mount)[cfg.correct].classList.add('right');fb.className='mc-fb good';fb.textContent='Yes! '+cfg.right;$$('.opt',mount).forEach(function(x){x.disabled=true;});if(cfg.onCorrect) setTimeout(cfg.onCorrect,0);}
   $$('.opt',mount).forEach(function(b){
     b.addEventListener('click',function(){
       if(done) return;
@@ -896,6 +903,7 @@ function renderMC(mount,cfg){
       if(i===cfg.correct){
         done=true;b.classList.add('right');fb.className='mc-fb good';fb.textContent='Yes! '+cfg.right;
         $$('.opt',mount).forEach(function(x){x.disabled=true;});
+        SV.mc=SV.mc||{};SV.mc[cfg.id]=true;persist();
         if(cfg.onCorrect) cfg.onCorrect();
       }else{
         b.classList.add('wrong');b.disabled=true;fb.className='mc-fb warn';fb.textContent=cfg.wrong;
@@ -934,13 +942,15 @@ $$('button',vocabEl).forEach(function(b){
 });
 
 /* ---------- Part 2: setup ---------- */
-var flags={short:false,part:false,read:false};
+var flags=SV.flags||{short:false,part:false,read:false};
 var MYSTERY={kind:'ohms',ohms:4700,name:'Mystery resistor',color:'#D8B98A',icon:'r2',id:'mystery'};
 var LOADS={air:{kind:'air'},short:{kind:'short'},part:MYSTERY};
-var setup=createMeter($('#setupMeter'),{dial:'OFF',black:null,red:null,leads:true,dynamicBench:true,showPorts:true,onChange:function(st,r){
+var SM=SV.setupM||{};
+var setup=createMeter($('#setupMeter'),{dial:SM.dial||'OFF',black:SM.black||null,red:SM.red||null,leads:true,dynamicBench:true,showPorts:true,onChange:function(st,r){
   var okLeads=st.black==='COM'&&st.red==='VΩ';
   if(okLeads&&st.dial==='Ω'&&st.load.kind==='short') flags.short=true;
   if(okLeads&&st.dial==='Ω'&&st.load.kind==='ohms') flags.part=true;
+  SV.flags=flags;SV.setupM={dial:st.dial,black:st.black,red:st.red};persist();
   var done={black:st.black==='COM',red:st.red==='VΩ',dial:st.dial==='Ω',short:flags.short,part:flags.part,read:flags.part};
   $$('#setupSteps li').forEach(function(li){li.classList.toggle('done',!!done[li.getAttribute('data-step')]);});
   $$('#setupLoad button').forEach(function(b){b.setAttribute('aria-pressed',String(st.load.kind===(b.getAttribute('data-l')==='part'?'ohms':b.getAttribute('data-l'))));});
@@ -967,12 +977,13 @@ var ITEMS=[
   {id:'bat',name:'AA battery',sub:'has power!',live:true,color:'#3AA16B'}
 ];
 var TOTAL=ITEMS.filter(function(i){return !i.live;}).length;
-var measured={},order=[],currentItem=null;
+var measured=SV.measured||{},order=SV.order||[],currentItem=null;
 function lc(it){return it.live?{kind:'live',name:it.name,color:it.color,id:it.id,icon:it.id}:{kind:'ohms',ohms:it.ohms,name:it.name,color:it.color,id:it.id,icon:it.id};}
-var parts=createMeter($('#partsMeter'),{dial:'OFF',leads:true,fixedPlugs:true,dynamicBench:true,onChange:function(st,r){
-  var L=st.load;
-  if(L.id&&r.ok&&L.kind==='ohms'&&!measured[L.id]){measured[L.id]=r;order.push(L.id);renderParts();}
+var parts=createMeter($('#partsMeter'),{dial:SV.partsDial||'OFF',leads:true,fixedPlugs:true,dynamicBench:true,onChange:function(st,r){
+  var L=st.load;SV.partsDial=st.dial;
+  if(L.id&&r.ok&&L.kind==='ohms'&&!measured[L.id]){measured[L.id]=r;order.push(L.id);SV.measured=measured;SV.order=order;renderParts();}
   else renderParts();
+  persist();
 }});
 function renderParts(){
   var n=order.length;
@@ -1024,17 +1035,18 @@ var MATS=[
 ];
 var WIDS=[{id:'thin',name:'Thin',area:1,sw:4},{id:'wide',name:'Wide',area:4,sw:14}];
 var LENS=[{id:'5',name:'5 m',m:5,frac:0.35},{id:'25',name:'25 m',m:25,frac:0.65},{id:'100',name:'100 m',m:100,frac:1}];
-var wire={mat:'cu',wid:'wide',len:'25'};
+var wire=SV.wire||{mat:'cu',wid:'wide',len:'25'};
 function pick(arr,id){return arr.filter(function(x){return x.id===id;})[0];}
 function wireOhms(){return 0.2*pick(MATS,wire.mat).rho*pick(LENS,wire.len).m/pick(WIDS,wire.wid).area;}
 function wireName(){return pick(MATS,wire.mat).name+', '+pick(WIDS,wire.wid).name.toLowerCase()+', '+pick(LENS,wire.len).name;}
-var wm=createMeter($('#wireMeter'),{dial:'OFF',leads:true,fixedPlugs:true,dynamicBench:true,hint1:'Build a wire with the controls.',hint2:'Drag a probe tip to each end.'});
+var wm=createMeter($('#wireMeter'),{dial:SV.wmDial||'OFF',onChange:function(st){SV.wmDial=st.dial;persist();},leads:true,fixedPlugs:true,dynamicBench:true,hint1:'Build a wire with the controls.',hint2:'Drag a probe tip to each end.'});
 function applyWire(){
   var m=pick(MATS,wire.mat),w=pick(WIDS,wire.wid),l=pick(LENS,wire.len);
   wm.setBench({kind:'ohms',ohms:wireOhms(),name:wireName(),color:m.color,icon:'wire',sw:w.sw,lenFrac:l.frac,id:'wire'},true);
   $$('#ctlMat button').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-v')===wire.mat));});
   $$('#ctlWid button').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-v')===wire.wid));});
   $$('#ctlLen button').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-v')===wire.len));});
+  SV.wire=wire;persist();
 }
 function buildSeg(sel,arr,key){
   var el=$(sel);
@@ -1044,7 +1056,7 @@ function buildSeg(sel,arr,key){
 buildSeg('#ctlMat',MATS,'mat');buildSeg('#ctlWid',WIDS,'wid');buildSeg('#ctlLen',LENS,'len');
 applyWire();
 
-var saved=[];
+var saved=SV.wsaved||[];
 function renderSaved(){
   var t=$('#wireTable');
   if(!saved.length){t.innerHTML='<p class="empty">Saved readings show here.</p>';return;}
@@ -1057,11 +1069,11 @@ $('#saveBtn').addEventListener('click',function(){
   if(!r.ok){msg.textContent='Set the meter first. Turn the dial to Ω and touch both ends of the wire.';return;}
   saved.unshift({m:pick(MATS,wire.mat).name,w:pick(WIDS,wire.wid).name,l:pick(LENS,wire.len).name,r:r.num+' '+r.unit});
   if(saved.length>12) saved.pop();
-  msg.textContent='Saved.';renderSaved();
+  msg.textContent='Saved.';renderSaved();SV.wsaved=saved;persist();
 });
 $('#wTouchBtn').addEventListener('click',function(){wm.touchBoth();});
 $('#wLiftBtn').addEventListener('click',function(){wm.setLoad({kind:'air'});});
-$('#clearBtn').addEventListener('click',function(){saved=[];$('#saveMsg').textContent='';renderSaved();});
+$('#clearBtn').addEventListener('click',function(){saved=[];$('#saveMsg').textContent='';renderSaved();SV.wsaved=saved;persist();});
 
 renderMC($('#mA'),{id:'mA',q:'Which metal had the HIGHEST resistance?',options:['Copper','Gold','Aluminum','Nichrome'],correct:3,
   guard:function(){return reading(wm.st).ok?null:'Turn the dial to Ω, touch both ends of the wire, and test the metals first.';},
@@ -1095,7 +1107,7 @@ var QUIZ=[
   {q:'When is it OK to measure resistance?',o:['When the part is connected to a battery','When the part has no power','When the part is plugged in the wall'],c:1,e:'Never measure resistance on a part with power. It can damage the meter.'},
   {q:'A rubber band reads OL. What kind of material is it?',o:['Conductor','Insulator','Copper'],c:1,e:'OL means the resistance is too big to measure. Insulators do not let current flow easily.'},
   {q:'Which wire has the LOWEST resistance?',o:['Thin, long copper','Wide, short copper','Thin, short copper','Wide, long copper'],c:1,e:'Wide and short is best. Wide wires have room for current. Short wires resist less.'},
-  {q:'Why are power lines so wide?',o:['They carry a lot of current, so they need more space to prevent overheating','They look better','They are cheaper'],c:0,e:'Power lines carry lots of current. Wide wires have lower resistance, so they stay cooler.'}
+  {q:'Why are power lines so wide?',o:['They are very long, so being wide keeps their resistance low and wastes less energy as heat','They look better','They are cheaper'],c:0,e:'Long wires have more resistance. Making power lines wide keeps their resistance low, so less energy turns into heat.'}
 ];
 var score=0,answered=0,qz=$('#quiz');
 function buildQuiz(){
@@ -1110,6 +1122,7 @@ function buildQuiz(){
     $$('.opt',box).forEach(function(b){
       b.addEventListener('click',function(){
         var i=+b.getAttribute('data-i'),fb=$('.expl',box);
+        SV.quizAns=SV.quizAns||[];SV.quizAns[qi]=i;persist();
         $$('.opt',box).forEach(function(x){x.disabled=true;});
         if(i===q.c){score++;b.classList.add('right');fb.className='expl mc-fb good';fb.textContent='Correct. '+q.e;}
         else{b.classList.add('wrong');$$('.opt',box)[q.c].classList.add('right');fb.className='expl mc-fb warn';fb.textContent='Not quite. '+q.e;}
@@ -1117,7 +1130,7 @@ function buildQuiz(){
         if(answered===QUIZ.length){showScore();}
         else{
           var nb=document.createElement('button');nb.type='button';nb.className='btn';nb.textContent='Next question';nb.style.marginTop='12px';
-          nb.addEventListener('click',function(){box.classList.remove('cur');$$('.q',qz)[qi+1].classList.add('cur');$('#qprog').textContent='Question '+(qi+2)+' of '+QUIZ.length;});
+          nb.addEventListener('click',function(){SV.quizCur=qi+1;persist();box.classList.remove('cur');$$('.q',qz)[qi+1].classList.add('cur');$('#qprog').textContent='Question '+(qi+2)+' of '+QUIZ.length;});
           box.appendChild(nb);nb.focus();
         }
       });
@@ -1129,10 +1142,11 @@ function showScore(){
   $('#quizResult').innerHTML='<div class="score"><div class="big">'+score+' out of '+QUIZ.length+'</div>'+
     '<p style="margin:.4em auto 1em">'+(pro?'Resistance Pro! You can set up a multimeter and explain what changes resistance.':'Good work. Go back to the parts you missed and try again.')+'</p>'+
     '<button class="btn" id="retry" type="button">Try the quiz again</button></div>';
-  $('#retry').addEventListener('click',function(){buildQuiz();qz.scrollIntoView();});
+  $('#retry').addEventListener('click',function(){SV.quizAns=[];SV.quizCur=0;persist();buildQuiz();qz.scrollIntoView();});
   $('#quizResult').scrollIntoView({block:'nearest'});
 }
 buildQuiz();
+(function(){var A=SV.quizAns||[],c=SV.quizCur||0,boxes=$$('.q',qz);for(var k=0;k<A.length&&k<boxes.length;k++){if(A[k]==null)break;var bt=$$('.opt',boxes[k])[A[k]];if(bt)bt.click();if(k<c){var nb=boxes[k].querySelector('button.btn');if(nb)nb.click();}}})();
 
 /* ---------- listen buttons ---------- */
 var speaking=null;
@@ -1171,6 +1185,7 @@ function go(i){
   $('#stage').scrollTop=0;
   try{if(window.speechSynthesis) window.speechSynthesis.cancel();}catch(e){}
   $$('.listen').forEach(function(x){x.setAttribute('aria-pressed','false');x.textContent='Listen';});
+  SV.slide=cur;persist();
 }
 $('#prevBtn').addEventListener('click',function(){go(cur-1);});
 $('#nextBtn').addEventListener('click',function(){go(cur+1);});
@@ -1180,7 +1195,8 @@ document.addEventListener('keydown',function(e){
   if(e.key==='ArrowRight') go(cur+1);
   else if(e.key==='ArrowLeft') go(cur-1);
 });
-go(0);
+$('#resetBtn').addEventListener('click',startOver);
+go(SV.slide||0);
 
 
 /* ---------- fit to the frame: design 900 x 620, scale down if the frame is smaller ---------- */

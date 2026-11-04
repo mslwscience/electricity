@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Measure Current with a Multimeter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bench:#E8EFF4; --panel:#FFFFFF; --panel2:#F2F6F9; --ink:#16293B; --muted:#4A5E70; --line:#B9C8D5;
+  --accent:#1B5FC1; --accent-ink:#FFFFFF; --good:#0B6B52; --goodbg:#DDF3EA; --warn:#7A4800; --warnbg:#FFF0D1;
+  --danger:#A3211A; --dangerbg:#FDE4E1;
+  --font-body:"Atkinson Hyperlegible", Verdana, "Segoe UI", system-ui, sans-serif;
+  --font-head:"Bricolage Grotesque", "Atkinson Hyperlegible", Verdana, system-ui, sans-serif;
+  --font-lcd:"Share Tech Mono", "Courier New", monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bench);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.45}
+main{max-width:960px;margin:0 auto;padding:16px 16px 96px}
+h1,h2{font-family:var(--font-head);margin:0 0 8px;line-height:1.1}
+h1{font-size:clamp(28px,4.6vw,40px);font-weight:800}
+h2{font-size:clamp(21px,3vw,26px);font-weight:800}
+h3{font-size:16px;margin:0 0 6px}
+p{margin:0 0 10px}
+.lead{color:var(--ink);max-width:62ch}
+.small{font-size:13px;color:var(--muted)}
+.slide{display:none}
+.slide.on{display:block}
+.intro{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:center;margin-top:8px}
+.intro svg{max-width:220px;width:100%;justify-self:center}
+.work{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:10px}
+@media (max-width:780px){.work,.intro{grid-template-columns:1fr}.intro svg{max-width:170px}}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.card.tight{padding:9px 12px}
+.def{border-left:6px solid var(--accent)}
+.def.load{border-left-color:#C77B30}
+.safety{background:var(--dangerbg);border:0;border-left:6px solid var(--danger);border-radius:6px}
+.svgwrap{background:transparent}
+.svgwrap svg{width:100%;height:auto;display:block}
+.status{border:2px solid var(--line);border-radius:10px;background:var(--panel);padding:9px 12px;min-height:46px;margin-top:8px;font-size:15px}
+.status.good{background:var(--goodbg);border-color:var(--good)}
+.status.warn{background:var(--warnbg);border-color:#C88A1A}
+.status.danger{background:var(--dangerbg);border-color:var(--danger)}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--accent);color:var(--accent-ink);border:2px solid var(--accent);border-radius:8px;padding:8px 16px;font-weight:700}
+.btn.ghost{background:var(--panel);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:700;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.red[aria-pressed="true"]{background:#C62828;border-color:#C62828}
+.chip.black[aria-pressed="true"]{background:#16293B;border-color:#16293B}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:6px 12px;font-weight:700;font-size:14px;color:var(--ink)}
+.seg button+button{border-left:2px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:4px 0}
+.ctrl b{font-size:14px}
+.parts{display:grid;gap:7px}
+.part{display:block;width:100%;text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px;color:var(--ink)}
+.part > b{display:block;font-size:15px}
+.part span{font-size:14px;color:var(--muted)}
+.part[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,95,193,.18)}
+ol.steps{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+ol.steps li{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px;font-size:15px}
+ol.steps li .n{flex:0 0 26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px}
+ol.steps li.done{border-color:var(--good);background:var(--goodbg)}
+ol.steps li.done .n{background:var(--good);border-color:var(--good);color:#fff}
+details{margin-top:8px;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px}
+details summary{font-weight:700;cursor:pointer;font-size:14px}
+details .chips{margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--muted)}
+.q{margin:10px 0}
+.q > b{display:block;margin-bottom:6px}
+.opt{display:block;width:100%;text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:7px 11px;margin:6px 0;font-weight:700;font-size:14px;color:var(--ink)}
+.opt.right{border-color:var(--good);background:var(--goodbg)}
+.opt.wrong{border-color:var(--danger);background:var(--dangerbg)}
+.fb{font-size:14px;border-radius:8px;padding:7px 10px;margin-top:4px}
+.fb.good{background:var(--goodbg)}
+.fb.warn{background:var(--warnbg)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare svg{width:100%;height:auto}
+.compare .tag{font-weight:700;font-size:14px}
+.tag.ok{color:var(--good)} .tag.no{color:var(--danger)}
+.check{color:var(--good);font-weight:700}
+input.ans{font:inherit;width:90px;padding:5px 8px;border:2px solid var(--line);border-radius:8px}
+nav.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:8px 10px;z-index:5}
+
+.dots{display:flex;gap:6px}
+.dots button{width:15px;height:15px;border-radius:50%;border:2px solid var(--accent);background:transparent;padding:0}
+.dots button[aria-current="step"]{background:var(--accent)}
+svg .tap{cursor:pointer}
+svg .tap:focus{outline:none}
+svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-width:3}
+.flow{animation:flow linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+</style>
+</head>
+<body>
+<main id="app">
+
+<!-- 0 INTRO -->
+<section class="slide on" data-title="Start">
+  <div class="intro">
+    <div>
+      <h1>Measure current with a multimeter</h1>
+      <p class="lead">Current is how much charge flows past a point each second. To measure it, the meter has to be <b>part of the loop</b>, so the charges flow right through it. You will set up a multimeter for current, drop an ammeter into a circuit, and see how PhET's ammeter works.</p>
+      <h3>When you finish, you can:</h3>
+      <ul>
+        <li>Set up a multimeter to measure current.</li>
+        <li>Put a meter <b>in the loop</b> to measure current.</li>
+        <li>Explain why an ammeter goes <b>inside</b> the loop but a voltmeter goes <b>directly on either side</b> of a part.</li>
+      </ul>
+      <p><button class="btn" data-go="1">Start</button></p>
+      <p class="small">Have a real multimeter? Follow along with it, but ask an adult before you measure current. Readings here are simulated so every class sees the same numbers.</p>
+    </div>
+    <svg viewBox="0 0 152 262" role="img" aria-label="A yellow multimeter with the dial turned to A. The display reads 0.30 A. The red lead is in the 10A port." id="introMeter"></svg>
+  </div>
+</section>
+
+<!-- 1 INSIDE vs BESIDE -->
+<section class="slide" data-title="Where does the meter go?">
+  <h2>1. Current goes through the meter</h2>
+  <p class="lead">A voltmeter goes <b>directly on either side</b> of a part. Current is different. To count the charges flowing, the meter has to be <b>in the loop</b>, so every charge passes through it.</p>
+  <div class="work">
+    <div class="card tight">
+      <h3>Where does the meter go?</h3>
+      <div class="compare">
+        <div><svg viewBox="0 0 170 120" role="img" aria-label="Voltage: the meter connects directly on either side of the bulb." id="besideWay"></svg><div class="tag ok">Voltage: on either side of the part</div><div class="small">One probe goes directly on each side of the bulb. This is called <b>parallel</b>.</div></div>
+        <div><svg viewBox="0 0 170 120" role="img" aria-label="Current: the loop is opened and the meter fills the gap, so it is part of the loop." id="insideWay"></svg><div class="tag ok">Current: inside the loop</div><div class="small">Open the loop and let the meter fill the gap. This is called <b>series</b>.</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="parts">
+        <div class="card def tight"><h3>Dial on A</h3><p style="margin:0">A stands for <b>amps</b>, the unit for current.</p></div>
+        <div class="card def tight"><h3>Red lead in 10A</h3><p style="margin:0">For current, the red lead moves to the <b>10A</b> port. The black lead stays in <b>COM</b>.</p></div>
+        <div class="card def load tight"><h3>Safety: never across a battery</h3><p style="margin:0">On A, the meter acts like a plain wire. Put it across a battery and you make a <b>short circuit</b>. It can blow the meter's fuse or get hot.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 SETUP -->
+<section class="slide" data-title="Set up for current">
+  <h2>2. Set up the meter and measure current</h2>
+  <div class="work">
+    <div><div class="svgwrap" id="setupBench"></div></div>
+    <div>
+      <div class="card safety tight"><h3>Before you start</h3><p style="margin:0">Someone just used this meter for voltage. The circuit is <b>open</b> at the gap between <b>P</b> and <b>Q</b>. The meter will close it.</p></div>
+      <ol class="steps" id="setupSteps">
+        <li><span class="n">1</span><span>Turn the dial to <b>A</b>. (Tap the A on the meter.)</span></li>
+        <li><span class="n">2</span><span>Drag the <b>red plug</b> out of VΩ and into the <b>10A</b> port. The black plug stays in <b>COM</b>.</span></li>
+        <li><span class="n">3</span><span>Drag the <b>red probe</b> tip to <b>P</b>, the end of the gap that leads back to the <b>+</b> end of the battery.</span></li>
+        <li><span class="n">4</span><span>Drag the <b>black probe</b> tip to <b>Q</b>, the other end of the gap. Watch the bulb.</span></li>
+        <li><span class="n">5</span><span>Read the number and units: <input class="ans" id="setupAns" inputmode="decimal" aria-label="Your reading in amps"> A <button class="btn ghost" id="setupCheck" style="padding:4px 10px">Check</button> <span id="setupFb"></span></span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 3 MISSION -->
+<section class="slide" data-title="Measure in the loop">
+  <h2>3. Measure current in different places</h2>
+  <p class="lead">Pick where to open the loop. Then put the probes on <b>P</b> and <b>Q</b>. Do each mission and tap <b>Save this reading</b> after each one.</p>
+  <div class="work">
+    <div><div class="svgwrap" id="missionBench"></div></div>
+    <div>
+      <ol class="steps" id="missionSteps">
+        <li><span class="n">1</span><span><b>1 bulb</b>, 2 cells. Open the <b>top wire</b> and measure.</span></li>
+        <li><span class="n">2</span><span><b>1 bulb</b>, 2 cells. Open the <b>bottom wire</b> and measure.</span></li>
+        <li><span class="n">3</span><span><b>2 bulbs</b>, 2 cells. Open the <b>top wire</b> and measure.</span></li>
+        <li><span class="n">4</span><span><b>2 bulbs</b>, 2 cells. Open the loop <b>between the bulbs</b> and measure.</span></li>
+        <li><span class="n">5</span><span><b>1 bulb</b>, <b>3 cells</b>. Measure anywhere.</span></li>
+      </ol>
+      <div class="ctrl" style="margin-top:10px"><button class="btn" id="saveBtn">Save this reading</button><button class="btn ghost" id="clearBtn">Clear table</button></div>
+      <div class="card tight" style="margin-top:8px"><div style="max-height:190px;overflow-y:auto"><table><thead><tr><th>Cells</th><th>Bulbs</th><th>Where</th><th>Current</th></tr></thead><tbody id="saved"></tbody></table></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 AMMETER ONLY -->
+<section class="slide" data-title="Drop in an ammeter">
+  <h2>4. Drop an ammeter into a circuit</h2>
+  <p class="lead">An <b>ammeter</b> is a meter that only measures current. Its symbol is a circle with an <b>A</b>. Drag it onto a wire to drop it into the loop.</p>
+  <div class="work">
+    <div><div class="svgwrap" id="amBench"></div></div>
+    <div>
+      <ol class="steps" id="amSteps">
+        <li><span class="n">1</span><span>Drop the ammeter onto the <b>top wire</b>. Read the current.</span></li>
+        <li><span class="n">2</span><span>Move it to the <b>bottom wire</b>. Did the reading change?</span></li>
+        <li><span class="n">3</span><span>Switch to <b>2 bulbs</b>. Drop the ammeter <b>between the bulbs</b>.</span></li>
+        <li><span class="n">4</span><span>Try the wrong way: drop it <b>across a bulb</b> (on the dashed spot next to the bulb). What happens?</span></li>
+      </ol>
+      <div class="card tight" style="margin-top:8px"><h3>Remember</h3><p style="margin:0">An ammeter acts like a plain wire. Put it <b>in</b> the loop, never on either side of a part.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 CLAMP / PHET -->
+<section class="slide" data-title="Clamp meters and PhET">
+  <h2>5. Measuring without opening the loop</h2>
+  <p class="lead">Electricians also use a <b>clamp meter</b>. Its jaws close <b>around</b> a wire and sense the current inside it, so they never have to open the loop. <b>PhET's Ammeter works like a clamp meter:</b> you put its circle on a wire.</p>
+  <div class="work">
+    <div><div class="svgwrap" id="clampBench"></div></div>
+    <div>
+      <div class="card tight"><h3>In the PhET Circuit Construction Kit</h3>
+        <ul style="margin:0;padding-left:1.2em">
+          <li>Drag the <b>Ammeter</b> from the box at the top right.</li>
+          <li>Put its circle on any wire. It reads the current in that wire.</li>
+          <li>You do not need to open the loop or move any plugs.</li>
+        </ul>
+      </div>
+      <div class="card def tight"><h3>Three ways, same answer</h3><p style="margin:0">A multimeter in the loop, an ammeter dropped in the loop, or a clamp around the wire: all three measure the same current.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 FIND -->
+<section class="slide" data-title="What did you find?">
+  <h2>What did you find?</h2>
+  <div class="work">
+    <div class="card"><h3>Your results</h3><div style="max-height:250px;overflow-y:auto"><table><thead><tr><th>Cells</th><th>Bulbs</th><th>Where</th><th>Current</th></tr></thead><tbody id="saved2"></tbody></table></div></div>
+    <div class="card" id="findQs"></div>
+  </div>
+</section>
+
+<!-- 7 QUIZ -->
+<section class="slide" data-title="Check yourself">
+  <h2>6. Check yourself</h2>
+  <p>Answer 7 questions. You get one try on each.</p>
+  <div id="quiz"></div>
+</section>
+
+</main>
+
+<nav class="bar" aria-label="Slides">
+  <button class="btn ghost" id="back">Back</button>
+  <div style="display:flex;align-items:center"><div class="dots" id="dots"></div><button class="btn ghost" id="resetBtn" type="button" style="padding:4px 10px;font-size:13px;margin-left:10px" title="Erase your work and start this activity over">Start over</button></div>
+  <button class="btn" id="next">Next</button>
+</nav>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const INK="#16293B", RED="#C62828", ACC="#1B5FC1", BENCH="#F2F6F9";
+const RB=10; // ohms per bulb
+/* ---------- saved progress (this browser only) ---------- */
+var SAVEKEY='mslw-current-v1';
+var SV={};try{SV=JSON.parse(localStorage.getItem(SAVEKEY)||'{}',function(k,v){return v==='__INF__'?Infinity:v;})||{};}catch(e){SV={};}
+function persist(){try{localStorage.setItem(SAVEKEY,JSON.stringify(SV,function(k,v){return v===Infinity?'__INF__':v;}));}catch(e){}}
+function startOver(){if(!confirm('Start over? This erases your work in this activity.'))return;try{localStorage.removeItem(SAVEKEY);}catch(e){}SV={};location.reload();}
+function snap(st){return {cells:st.cells,bulbs:st.bulbs,gap:st.gap,dial:st.dial,port:Object.assign({},st.port),probe:Object.assign({},st.probe),active:st.active};}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function fmt(v){const t=Math.abs(v).toFixed(2); return (v<-0.004?"-":"")+t;}
+
+/* ---------------- METER (same meter as the voltage tutorial) ---------------- */
+const DIALPOS={OFF:[22,150],V:[28,96],A:[112,96],"Ω":[118,150]};
+const PORTS={"10A":30,"COM":70,"VΩ":110}; const PORT_Y=214;
+function meterSVG(st,o){
+  o=o||{}; const tap=!!o.tap; const r=o.read||{display:"",unit:""};
+  let s=`<rect x="0" y="0" width="140" height="240" rx="16" fill="#F5B301" stroke="${INK}" stroke-width="3"/>`;
+  s+=`<rect x="13" y="13" width="114" height="50" rx="6" fill="${st.dial==="OFF"?"#AFBE97":"#C9D8A8"}" stroke="${INK}" stroke-width="3"/>`;
+  s+=`<text x="19" y="24" font-size="6" fill="${INK}" font-family="Arial">AUTO</text>`;
+  s+=`<text x="${r.unit?101:120}" y="52" text-anchor="end" font-size="25" fill="${INK}" font-family="Share Tech Mono, Courier New, monospace">${esc(r.display)}</text>`;
+  if(r.unit) s+=`<text x="104" y="52" font-size="12" fill="${INK}" font-family="Share Tech Mono, Courier New, monospace">${esc(r.unit)}</text>`;
+  s+=`<text x="70" y="77" text-anchor="middle" font-size="7" font-weight="700" letter-spacing="1.2" fill="${INK}" font-family="Arial">MULTIMETER</text>`;
+  const [px,py]=DIALPOS[st.dial]; const ang=Math.atan2(py-122,px-70);
+  s+=`<circle cx="70" cy="122" r="27" fill="#3A4A5C" stroke="${INK}" stroke-width="3"/>`;
+  s+=`<line x1="${70+Math.cos(ang)*4}" y1="${122+Math.sin(ang)*4}" x2="${70+Math.cos(ang)*22}" y2="${122+Math.sin(ang)*22}" stroke="#fff" stroke-width="5" stroke-linecap="round"/><circle cx="70" cy="122" r="5" fill="#fff"/>`;
+  for(const k in DIALPOS){const [x,y]=DIALPOS[k]; const on=st.dial===k;
+    s+=`<g ${tap?`class="tap" role="button" tabindex="0" aria-label="Turn dial to ${k==="Ω"?"ohms":k==="V"?"volts":k==="A"?"amps":"off"}" data-dial="${k}"`:""}><circle class="ring" cx="${x}" cy="${y}" r="${k==="OFF"?11:10}" fill="${on?INK:"#F5B301"}" stroke="${INK}" stroke-width="2"/><text x="${x}" y="${y+(k==="OFF"?2.5:4)}" text-anchor="middle" font-size="${k==="OFF"?7:11}" font-weight="700" fill="${on?"#fff":INK}" font-family="Arial">${k}</text></g>`;}
+  for(const k in PORTS){const x=PORTS[k];
+    s+=`<text x="${x}" y="196" text-anchor="middle" font-size="8" font-weight="700" fill="${INK}" font-family="Arial">${k}</text>`;
+    const ringC=k==="VΩ"?RED:(k==="COM"?"#fff":"#55606b");
+    s+=`<g ${tap?`class="tap" role="button" tabindex="0" aria-label="${k} port" data-port="${k}"`:""}><circle class="ring" cx="${x}" cy="${PORT_Y}" r="11" fill="${INK}" stroke="${INK}" stroke-width="1"/><circle cx="${x}" cy="${PORT_Y}" r="6" fill="#111" stroke="${ringC}" stroke-width="2.5"/></g>`;}
+  return s;
+}
+
+/* ---------------- CIRCUIT DRAWING ---------------- */
+// L = {bx: battery x, rx: right wire x}. Top wire y=40, bottom wire y=215, battery from y=80 to y=176.
+function bulbYs(n){return n===1?[124]:[74,166];}
+function bulbSVG(x,cy,I){
+  let s=""; const lit=I>0.001;
+  if(lit){const k=Math.min(1,I/0.45); s+=`<circle cx="${x}" cy="${cy}" r="${(20+k*14).toFixed(1)}" fill="#FFD54F" opacity="${(0.2+0.6*k).toFixed(2)}"/>`;}
+  s+=`<circle cx="${x}" cy="${cy}" r="18" fill="${lit?"#FFE58A":"#FAFCFD"}" stroke="${INK}" stroke-width="2.5"/>`;
+  s+=`<path d="M${x-6},${cy+17} V${cy+6} Q${x},${cy-8} ${x+6},${cy+6} V${cy+17}" stroke="#8A5A2B" stroke-width="2" fill="none"/>`;
+  s+=`<rect x="${x-9}" y="${cy+16}" width="18" height="14" rx="2" fill="#9AA5B1" stroke="${INK}" stroke-width="2"/>`;
+  return s;
+}
+function gapEnds(L,gap,bulbs){
+  const g1=Math.round(L.bx+(L.rx-L.bx)*.35), g2=g1+40;
+  if(gap==="top") return {P:{x:g1,y:40,d:[-.35,-1]},Q:{x:g2,y:40,d:[.35,-1]}};
+  if(gap==="bottom") return {P:{x:g2,y:215,d:[.35,1]},Q:{x:g1,y:215,d:[-.35,1]}};
+  return {P:{x:L.rx,y:112,d:[1,-.35]},Q:{x:L.rx,y:140,d:[1,.35]}}; // between the bulbs
+}
+function circuitSVG(L,st,o){
+  // o.gap: open the loop here (or null); o.bulbI: array of current through each bulb; o.flow: current for the moving dots
+  o=o||{}; const ys=bulbYs(st.bulbs); const W=`stroke="${INK}" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"`;
+  let s=`<path d="M${L.bx},80 V40 H${L.rx}" ${W}/><path d="M${L.rx},215 H${L.bx} V176" ${W}/>`;
+  let y=40; ys.forEach(cy=>{s+=`<line x1="${L.rx}" y1="${y}" x2="${L.rx}" y2="${cy-18}" ${W}/>`; y=cy+30;}); s+=`<line x1="${L.rx}" y1="${y}" x2="${L.rx}" y2="215" ${W}/>`;
+  if(o.flow>0.001) s+=`<path class="flow" d="M${L.bx},80 V40 H${L.rx} V215 H${L.bx} V176" stroke="#1E9E6A" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 12" fill="none" style="animation-duration:${(0.72/o.flow).toFixed(2)}s"/>`;
+  ys.forEach((cy,i)=>{s+=bulbSVG(L.rx,cy,(o.bulbI||[])[i]||0);});
+  if(o.gap){const G=gapEnds(L,o.gap,st.bulbs);
+    if(o.gap==="mid") s+=`<rect x="${L.rx-7}" y="${G.P.y+3}" width="14" height="${G.Q.y-G.P.y-6}" fill="${BENCH}"/>`;
+    else s+=`<rect x="${Math.min(G.P.x,G.Q.x)+3}" y="${G.P.y-7}" width="34" height="14" fill="${BENCH}"/>`;}
+  // battery
+  const h=96/st.cells, bx=L.bx;
+  s+=`<rect x="${bx-6}" y="74" width="12" height="7" rx="1.5" fill="#C77B30" stroke="${INK}" stroke-width="1.5"/>`;
+  for(let i=0;i<st.cells;i++){const yy=80+i*h;
+    s+=`<rect x="${bx-16}" y="${yy}" width="32" height="${h}" rx="3" fill="#23303D" stroke="${INK}" stroke-width="2"/><rect x="${bx-16}" y="${yy}" width="32" height="${Math.max(5,h*.2)}" rx="3" fill="#C77B30"/>`;
+    s+=`<text x="${bx}" y="${yy+h*.62+3}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fff" font-family="Arial">1.5 V</text>`;}
+  s+=`<text x="${bx-28}" y="94" text-anchor="middle" font-size="15" font-weight="700" fill="${INK}" font-family="Arial">+</text><text x="${bx-28}" y="176" text-anchor="middle" font-size="16" font-weight="700" fill="${INK}" font-family="Arial">−</text>`;
+  s+=`<text x="${bx+24}" y="124" font-size="10" font-weight="700" fill="${INK}" font-family="Arial">Battery</text><text x="${bx+24}" y="137" font-size="10" fill="${INK}" font-family="Arial">${st.cells} cell${st.cells>1?"s":""} = ${(1.5*st.cells).toFixed(1)} V</text>`;
+  s+=`<text x="${L.rx-26}" y="${st.bulbs>1?ys[0]+4:ys[0]+36}" text-anchor="end" font-size="10" font-weight="700" fill="${INK}" font-family="Arial" stroke="${BENCH}" stroke-width="3" paint-order="stroke">${st.bulbs>1?"Bulbs":"Light bulb"}</text>`;
+  return s;
+}
+
+/* ---------------- MULTIMETER IN THE LOOP ---------------- */
+const MX=6, MY=14, LM={bx:205,rx:345};
+const REST={black:{plug:[392,238],tip:[392,178]},red:{plug:[412,238],tip:[412,178]}};
+function pts(st){
+  const G=gapEnds(LM,st.gap,st.bulbs);
+  const p={A:{x:LM.bx,y:80,d:[-1,-.45],lx:LM.bx+14,ly:76,name:"the + end of the battery"},D:{x:LM.bx,y:176,d:[-1,.45],lx:LM.bx+14,ly:192,name:"the − end of the battery"},
+    P:Object.assign(G.P,{name:"end P of the gap, the + side"}),Q:Object.assign(G.Q,{name:"end Q of the gap"})};
+  if(st.gap==="mid"){p.P.lx=LM.rx-12;p.P.ly=G.P.y+2;p.Q.lx=LM.rx-12;p.Q.ly=G.Q.y+10;}
+  else if(st.gap==="top"){p.P.lx=G.P.x-4;p.P.ly=58;p.Q.lx=G.Q.x+4;p.Q.ly=58;}
+  else {p.P.lx=G.P.x+4;p.P.ly=206;p.Q.lx=G.Q.x-4;p.Q.ly=206;}
+  if(st.bulbs===1){p.B={x:LM.rx,y:92,d:[1,-.45],lx:LM.rx-12,ly:96,name:"above the bulb"};p.C={x:LM.rx,y:176,d:[1,.45],lx:LM.rx-12,ly:186,name:"below the bulb"};}
+  return p;
+}
+function reading(st){
+  const V=1.5*st.cells, I=V/(RB*st.bulbs);
+  if(st.dial==="OFF") return {display:"",unit:"",msg:"The meter is OFF. For current, turn the dial to A.",tone:""};
+  const du=st.dial==="A"?["0.00","A"]:st.dial==="V"?["0.00","V"]:["OL","Ω"];
+  if(!st.port.black||!st.port.red) return {display:du[0],unit:du[1],msg:"Plug in both leads. Black goes in COM. For current, red goes in 10A.",tone:""};
+  if(st.port.black!=="COM") return {display:du[0],unit:du[1],msg:"The black lead always goes in COM.",tone:"warn"};
+  const r=st.probe.red,b=st.probe.black,placed=r&&b,k=placed?[r,b].sort().join(""):"";
+  if(st.dial==="Ω"){
+    if(placed) return {display:"Err",unit:"",msg:"Stop! Never measure resistance on a circuit that has power. For current, turn the dial to A.",tone:"danger"};
+    return {display:"OL",unit:"Ω",msg:"The dial is on Ω (resistance). To measure current, turn it to A.",tone:"warn"};}
+  if(st.dial==="V"){
+    if(st.port.red!=="VΩ") return {display:"0.00",unit:"V",msg:"For voltage, red goes in VΩ. But you want current: turn the dial to A.",tone:"warn"};
+    if(k==="PQ"){const sg=r==="P"?1:-1; return {display:fmt(sg*V),unit:"V",msg:`On V, the meter reads the push across the gap (${V.toFixed(2)} V), but almost no current flows through it, so the bulb stays dark. Turn the dial to A to measure current.`,tone:"warn"};}
+    if(k==="AD") return {display:fmt((r==="A"?1:-1)*V),unit:"V",msg:"That is the battery's voltage, not current. Turn the dial to A and put the meter in the gap.",tone:"warn"};
+    return {display:"0.00",unit:"V",msg:"The dial is on V (voltage). To measure current, turn it to A.",tone:""};}
+  // dial A
+  if(st.port.red!=="10A") return {display:"0.00",unit:"A",msg:"On A, the red lead must be in the 10A port. In VΩ, the meter can't measure current.",tone:"warn"};
+  if(!placed) return {display:"0.00",unit:"A",msg:"Touch one probe to each end of the gap: P and Q.",tone:""};
+  if(k==="AD") return {display:"---",unit:"",msg:"Stop! On A, the meter acts like a wire. Across the battery, that makes a short circuit. It can blow the meter's fuse. Put the meter in the gap instead.",tone:"danger"};
+  if(k==="PQ"){const sg=r==="P"?1:-1, v=sg*I;
+    let msg=`The meter fills the gap and closes the loop. Current: ${I.toFixed(2)} A. The same current flows through the bulb${st.bulbs>1?"s":""}.`,tone="good";
+    if(sg<0){msg+=" The minus sign means the probes are swapped: put the red probe on P, the + side.";tone="warn";}
+    return {display:fmt(v),unit:"A",msg,tone,value:v,current:I,closed:true};}
+  if(k==="BC") return {display:"0.00",unit:"A",msg:"The probes are on either side of the bulb, but the loop is still open at the gap, so no current flows. The meter has to fill the gap.",tone:"warn"};
+  if(r===b) return {display:"0.00",unit:"A",msg:"Both probes are on the same spot. Put one probe on each end of the gap: P and Q.",tone:""};
+  return {display:"0.00",unit:"A",msg:"Put one probe on each end of the gap: P and Q.",tone:""};
+}
+function benchSVG(st,o){
+  o=o||{}; const P=pts(st); const tap=!!o.tap; const r=o.read||{};
+  const I=r.closed?r.current:0;
+  let s=`<rect x="158" y="8" width="266" height="254" rx="12" fill="${BENCH}" stroke="#B9C8D5" stroke-width="2"/>`;
+  s+=circuitSVG(LM,st,{gap:st.gap,bulbI:Array(st.bulbs).fill(I),flow:I});
+  for(const k in P){const p=P[k];
+    s+=`<g ${tap?`class="tap" role="button" tabindex="0" aria-label="Point ${k}, ${p.name}" data-pt="${k}"`:""}><circle cx="${p.x}" cy="${p.y}" r="14" fill="transparent"/><circle class="ring" cx="${p.x}" cy="${p.y}" r="6.5" fill="#fff" stroke="${ACC}" stroke-width="2.5"/></g>`;
+    s+=`<text x="${p.lx}" y="${p.ly}" text-anchor="${p.lx<p.x?"end":"start"}" font-size="13" font-weight="800" fill="${ACC}" font-family="Arial" stroke="${BENCH}" stroke-width="3" paint-order="stroke">${k}</text>`;}
+  s+=`<g transform="translate(${MX},${MY})">${meterSVG(st,{tap,read:r})}</g>`;
+  const same=st.probe.red&&st.probe.red===st.probe.black, canDrag=tap;
+  ["black","red"].forEach(c=>{
+    const port=st.port[c]; const dr=st.drag&&st.drag.c===c?st.drag:null;
+    let sx,sy;
+    if(dr&&dr.kind==="plug"){sx=dr.x;sy=dr.y;} else if(port){sx=MX+PORTS[port];sy=MY+PORT_Y;} else {sx=REST[c].plug[0];sy=REST[c].plug[1];}
+    let tip,d;
+    if(dr&&dr.kind==="tip"){tip=[dr.x,dr.y];d=[0,1];}
+    else if(st.probe[c]){const p=P[st.probe[c]]; tip=[p.x,p.y]; d=p.d; if(same){const off=c==="red"?7:-7; tip=[p.x-d[1]*off,p.y+d[0]*off];}}
+    else {tip=REST[c].tip; d=[0,1];}
+    const n=Math.hypot(d[0],d[1]), ux=d[0]/n, uy=d[1]/n, e=[tip[0]+ux*30,tip[1]+uy*30], col=c==="red"?RED:"#1b1f24";
+    const grab=canDrag?` style="cursor:grab;touch-action:none"`:"";
+    const k2=st.probe[c]&&!(dr&&dr.kind==="tip")?44:16;
+    s+=`<path d="M${sx},${sy} C${sx},${Math.min(sy+30,262)} ${e[0]+ux*k2},${e[1]+uy*k2} ${e[0]},${e[1]}" stroke="${col}" stroke-width="3.5" fill="none" stroke-linecap="round" pointer-events="none"/>`;
+    s+=`<g ${canDrag?`data-drag="tip:${c}" aria-label="${c==="red"?"Red":"Black"} probe. Drag the tip to a point."`:""}${grab}>`;
+    if(canDrag) s+=`<circle cx="${tip[0]+ux*18}" cy="${tip[1]+uy*18}" r="18" fill="transparent"/>`;
+    s+=`<line x1="${tip[0]}" y1="${tip[1]}" x2="${tip[0]+ux*8}" y2="${tip[1]+uy*8}" stroke="#8C99A6" stroke-width="2.5" stroke-linecap="round"/><line x1="${tip[0]+ux*9}" y1="${tip[1]+uy*9}" x2="${e[0]}" y2="${e[1]}" stroke="${col}" stroke-width="8" stroke-linecap="round"/></g>`;
+    const loose=!port||(dr&&dr.kind==="plug");
+    s+=`<g ${canDrag?`data-drag="plug:${c}" aria-label="${c==="red"?"Red":"Black"} lead plug. Drag it to a port."`:""}${grab}>`;
+    if(canDrag) s+=`<circle cx="${sx}" cy="${sy}" r="16" fill="transparent"/>`;
+    s+=`<circle cx="${sx}" cy="${sy}" r="${loose?9:7.5}" fill="${col}" stroke="${c==="black"?"#fff":INK}" stroke-width="1.5"/></g>`;
+  });
+  return `<svg viewBox="0 0 430 270" role="img" aria-label="Multimeter and a circuit with a battery and ${st.bulbs>1?"two bulbs":"a bulb"}, open at a gap">${s}</svg>`;
+}
+const GAPNAME={top:"Top wire",bottom:"Bottom wire",mid:"Between the bulbs"};
+function Bench(el,init,o){
+  o=o||{};
+  const st=Object.assign({cells:2,bulbs:1,gap:"top",dial:"A",port:{black:"COM",red:"10A"},probe:{red:null,black:null},active:"red",held:null},init);
+  const api={st,render};
+  function render(){
+    const r=reading(st); api.read=r;
+    let h=`<div>${benchSVG(st,{tap:true,read:r})}</div><div class="status ${r.tone}" aria-live="polite">${esc(r.msg)}</div>`;
+    h+=`<div class="ctrl" style="margin-top:8px"><span><b>Next tap moves:</b> <span class="seg"><button data-act="red" aria-pressed="${st.active==="red"}">Red probe</button><button data-act="black" aria-pressed="${st.active==="black"}">Black probe</button></span></span><button class="chip" data-clear="1">Lift probes</button></div>`;
+    if(o.controls){h+=`<div class="ctrl"><span><b>Cells:</b> <span class="seg">${[1,2,3].map(n=>`<button data-cells="${n}" aria-pressed="${st.cells===n}">${n}</button>`).join("")}</span></span><span><b>Bulbs:</b> <span class="seg">${[1,2].map(n=>`<button data-bulbs="${n}" aria-pressed="${st.bulbs===n}">${n}</button>`).join("")}</span></span></div>`;
+      h+=`<div class="ctrl"><span><b>Open the loop at:</b> <span class="seg">${["top","bottom","mid"].map(g=>`<button data-gap="${g}" aria-pressed="${st.gap===g}"${g==="mid"&&st.bulbs<2?" disabled":""}>${GAPNAME[g]}</button>`).join("")}</span></span></div>`;}
+    const P=pts(st);
+    h+=`<details><summary>Can't drag or tap? Use buttons</summary>`;
+    h+=`<div class="chips"><b style="align-self:center;font-size:14px">Dial:</b>${["OFF","V","A","Ω"].map(k=>`<button class="chip" data-dial="${k}" aria-pressed="${st.dial===k}">${k}</button>`).join("")}</div>`;
+    h+=`<div class="chips"><b style="align-self:center;font-size:14px">Leads:</b><button class="chip" data-plug="black:COM">Black → COM</button><button class="chip" data-plug="red:10A">Red → 10A</button><button class="chip" data-plug="red:VΩ">Red → VΩ</button></div>`;
+    ["red","black"].forEach(c=>{h+=`<div class="chips"><b style="align-self:center;font-size:14px">${c==="red"?"Red":"Black"} probe on:</b>${Object.keys(P).map(k=>`<button class="chip" data-put="${c}:${k}">${k}</button>`).join("")}</div>`;});
+    h+=`</details>`;
+    el.innerHTML=h;
+    if(o.onChange) o.onChange(st,r);
+  }
+  function plug(c,port){for(const k of ["black","red"]) if(k!==c&&st.port[k]===port){st.port[k]=null;} st.port[c]=port; st.held=null;}
+  function lift(){st.probe.red=null;st.probe.black=null;st.active="red";}
+  function act(t){
+    const D=t.dataset;
+    if(D.dial){st.dial=D.dial;}
+    else if(D.port){const p=D.port; if(st.held) plug(st.held,p); else {const who=["black","red"].find(k=>st.port[k]===p); if(who){st.port[who]=null;st.held=who;}}}
+    else if(D.plug){const [c,p]=D.plug.split(":"); plug(c,p);}
+    else if(D.pt){const c=st.active; st.probe[c]=D.pt; const other=c==="red"?"black":"red"; if(!st.probe[other]) st.active=other;}
+    else if(D.put){const [c,k]=D.put.split(":"); st.probe[c]=k;}
+    else if(D.act){st.active=D.act;}
+    else if(D.clear){lift();}
+    else if(D.cells){st.cells=+D.cells;}
+    else if(D.bulbs){st.bulbs=+D.bulbs; if(st.bulbs<2&&st.gap==="mid") st.gap="top"; lift();}
+    else if(D.gap){st.gap=D.gap; lift();}
+    else return;
+    render();
+  }
+  let drag=null, justDragged=false;
+  el.addEventListener("click",e=>{if(justDragged) return; const t=e.target.closest("[data-dial],[data-port],[data-pt],[data-act],[data-cells],[data-bulbs],[data-gap],[data-plug],[data-put],[data-clear]"); if(t&&el.contains(t)&&!t.disabled) act(t);});
+  el.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ") return; const t=e.target; if(t.namespaceURI==="http://www.w3.org/2000/svg"){e.preventDefault(); act(t);}});
+  function svgPt(e){const svg=el.querySelector("svg"); const p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse());}
+  function curPos(kind,c){
+    if(kind==="plug") return st.port[c]?[MX+PORTS[st.port[c]],MY+PORT_Y]:REST[c].plug.slice();
+    const P=pts(st); return st.probe[c]?[P[st.probe[c]].x,P[st.probe[c]].y]:REST[c].tip.slice();}
+  function drawSvg(){const box=el.firstElementChild; if(box) box.innerHTML=benchSVG(st,{tap:true,read:reading(st)});}
+  el.addEventListener("pointerdown",e=>{
+    const g=e.target.closest("[data-drag]"); if(!g||!el.contains(g)) return; e.preventDefault();
+    const [kind,c]=g.getAttribute("data-drag").split(":"); const p=svgPt(e); const cur=curPos(kind,c);
+    drag={kind,c,ox:cur[0]-p.x,oy:cur[1]-p.y,moved:false}; try{el.setPointerCapture(e.pointerId);}catch(x){}
+    st.drag={c,kind,x:cur[0],y:cur[1]}; drawSvg();});
+  el.addEventListener("pointermove",e=>{if(!drag) return; const p=svgPt(e);
+    const x=Math.max(4,Math.min(426,p.x+drag.ox)), y=Math.max(4,Math.min(266,p.y+drag.oy));
+    if(Math.hypot(x-st.drag.x,y-st.drag.y)>2) drag.moved=true; st.drag.x=x; st.drag.y=y; drawSvg();});
+  function endDrag(){
+    if(!drag) return; const {kind,c,moved}=drag; const x=st.drag.x, y=st.drag.y; st.drag=null; drag=null;
+    if(kind==="plug"){let best=null,bd=24; for(const k in PORTS){const dd=Math.hypot(x-(MX+PORTS[k]),y-(MY+PORT_Y)); if(dd<bd){bd=dd;best=k;}}
+      if(best) plug(c,best); else if(moved){st.port[c]=null;}}
+    else {const P=pts(st); let best=null,bd=26; for(const k in P){const dd=Math.hypot(x-P[k].x,y-P[k].y); if(dd<bd){bd=dd;best=k;}}
+      if(best){st.probe[c]=best; const other=c==="red"?"black":"red"; st.active=st.probe[other]?c:other;} else if(moved) st.probe[c]=null;}
+    if(moved){justDragged=true; setTimeout(()=>{justDragged=false;},0);}
+    render();}
+  el.addEventListener("pointerup",endDrag); el.addEventListener("pointercancel",endDrag);
+  render(); return api;
+}
+
+/* ---------------- AMMETER ONLY and CLAMP ---------------- */
+const LA={bx:110,rx:320};
+function amSpots(st,clamp){
+  const mx=Math.round((LA.bx+LA.rx)/2), ys=bulbYs(st.bulbs);
+  const t={top:{x:mx,y:40,label:"Top wire"},bottom:{x:mx,y:215,label:"Bottom wire"}};
+  if(st.bulbs===2) t.mid={x:LA.rx,y:126,label:"Between the bulbs"};
+  if(!clamp){
+    const cy=ys[0], up=st.bulbs===1?92:48, dn=st.bulbs===1?176:116;
+    t.bulb={x:LA.rx+52,y:Math.round((up+dn)/2),a:[LA.rx,up],b:[LA.rx,dn],label:st.bulbs===1?"Across the bulb":"Across bulb 1"};
+    t.battery={x:LA.bx-55,y:128,a:[LA.bx,58],b:[LA.bx,196],label:"Across the battery"};
+  }
+  return t;
+}
+function amRead(st){
+  const V=1.5*st.cells, I=V/(RB*st.bulbs), n=st.bulbs;
+  const pos=st.pos;
+  if(!pos) return {bulbI:Array(n).fill(I),flow:I,show:null,msg:st.clamp?"Tap a wire button, or drag the clamp onto a wire.":"Drag the ammeter onto a wire to drop it into the loop.",tone:""};
+  if(st.clamp) return {bulbI:Array(n).fill(I),flow:I,show:I.toFixed(2)+" A",msg:`The clamp reads ${I.toFixed(2)} A without opening the loop. Move it to another wire: the reading stays the same.`,tone:"good",value:I};
+  if(pos==="top"||pos==="bottom"||pos==="mid") return {bulbI:Array(n).fill(I),flow:I,show:I.toFixed(2)+" A",msg:`The ammeter is in the loop, in line with the bulb${n>1?"s":""}. Every charge passes through it. Current: ${I.toFixed(2)} A.`,tone:"good",value:I};
+  if(pos==="battery") return {bulbI:Array(n).fill(0),flow:0,show:"HIGH",msg:"Stop! An ammeter acts like a plain wire. Across the battery it makes a short circuit. Drop it onto a wire instead.",tone:"danger"};
+  // across a bulb
+  if(n===1) return {bulbI:[0],flow:0,show:"HIGH",msg:"Stop! The ammeter acts like a wire, so it made a shortcut around the bulb. The bulb went out and a huge current flows: a short circuit. An ammeter goes in the loop, not on either side of a part.",tone:"danger"};
+  const I2=V/RB; return {bulbI:[0,I2],flow:I2,show:I2.toFixed(2)+" A",msg:"The ammeter made a shortcut around bulb 1, so bulb 1 went out and bulb 2 got brighter. It changed the circuit instead of measuring it. An ammeter goes in the loop, not on either side of a part.",tone:"warn"};
+}
+function amDeviceSVG(x,y,txt,clamp,vertical){
+  let s="";
+  if(clamp){
+    s+=`<path d="M${x-15},${y+3} A15,15 0 1 1 ${x+15},${y+3}" fill="none" stroke="#F5B301" stroke-width="7" stroke-linecap="round"/><path d="M${x-15},${y+3} A15,15 0 1 1 ${x+15},${y+3}" fill="none" stroke="${INK}" stroke-width="1.5"/>`;
+    s+=`<rect x="${x-26}" y="${y-48}" width="52" height="24" rx="5" fill="#F5B301" stroke="${INK}" stroke-width="2"/><rect x="${x-22}" y="${y-44}" width="44" height="16" rx="3" fill="#C9D8A8" stroke="${INK}" stroke-width="1"/>`;
+    s+=`<text x="${x}" y="${y-32}" text-anchor="middle" font-size="10" font-family="Share Tech Mono, Courier New, monospace" fill="${INK}">${esc(txt||"")}</text>`;
+    return s;}
+  s+=`<circle cx="${x}" cy="${y}" r="16" fill="#fff" stroke="${INK}" stroke-width="2.5"/><text x="${x}" y="${y+6}" text-anchor="middle" font-size="17" font-weight="700" fill="${INK}" font-family="Arial">A</text>`;
+  if(vertical){s+=`<circle cx="${x}" cy="${y-16}" r="3" fill="${INK}"/><circle cx="${x}" cy="${y+16}" r="3" fill="${INK}"/>`;}
+  else {s+=`<circle cx="${x-16}" cy="${y}" r="3" fill="${INK}"/><circle cx="${x+16}" cy="${y}" r="3" fill="${INK}"/>`;}
+  if(txt){const lx=vertical?x+24:x-26, ly=vertical?y-10:y-44;
+    s+=`<rect x="${lx}" y="${ly}" width="52" height="20" rx="4" fill="#C9D8A8" stroke="${INK}" stroke-width="1.5"/><text x="${lx+26}" y="${ly+14}" text-anchor="middle" font-size="11" font-family="Share Tech Mono, Courier New, monospace" fill="${INK}">${esc(txt)}</text>`;}
+  return s;
+}
+function amSVG(st){
+  const R=amRead(st), S=amSpots(st,st.clamp);
+  let s=`<rect x="6" y="8" width="418" height="254" rx="12" fill="${BENCH}" stroke="#B9C8D5" stroke-width="2"/>`;
+  s+=circuitSVG(LA,st,{bulbI:R.bulbI,flow:R.flow});
+  // drop spots
+  for(const k in S){const p=S[k]; if(st.pos===k) continue;
+    s+=`<g class="tap" role="button" tabindex="0" data-spot="${k}" aria-label="Put the ${st.clamp?"clamp":"ammeter"}: ${p.label}"><circle cx="${p.x}" cy="${p.y}" r="13" fill="#fff" fill-opacity=".6" stroke="${ACC}" stroke-width="2" stroke-dasharray="4 3"/></g>`;
+    if(p.a) s+=`<path d="M${p.a[0]},${p.a[1]} H${p.x} V${p.y-13} M${p.b[0]},${p.b[1]} H${p.x} V${p.y+13}" stroke="${ACC}" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>`;}
+  // device
+  let x,y,vertical=false,leads="";
+  if(st.drag){x=st.drag.x;y=st.drag.y;}
+  else if(st.pos){const p=S[st.pos]; x=p.x;y=p.y; vertical=st.pos==="mid";
+    if(p.a&&!st.clamp) leads=`<path d="M${p.a[0]},${p.a[1]} H${p.x} V${p.y-16} M${p.b[0]},${p.b[1]} H${p.x} V${p.y+16}" stroke="${INK}" stroke-width="3" fill="none" stroke-linejoin="round"/>`;}
+  else {x=380;y=st.clamp?244:236;}
+  if(st.pos&&!st.drag&&!st.clamp&&(st.pos==="top"||st.pos==="bottom")) s+=`<rect x="${x-17}" y="${y-5}" width="34" height="10" fill="${BENCH}"/>`;
+  s+=leads;
+  s+=`<g data-amdrag="1" style="cursor:grab;touch-action:none" aria-label="${st.clamp?"Clamp meter":"Ammeter"}. Drag it onto a wire."><circle cx="${x}" cy="${y}" r="24" fill="transparent"/>${amDeviceSVG(x,y,st.pos&&!st.drag?R.show:"",st.clamp,vertical)}</g>`;
+  if(!st.pos&&!st.drag) s+=`<text x="${x}" y="${y+(st.clamp?28:30)}" text-anchor="middle" font-size="10" font-weight="700" fill="${INK}" font-family="Arial">${st.clamp?"Clamp meter":"Ammeter"}</text>`;
+  return {svg:`<svg viewBox="0 0 430 270" role="img" aria-label="A circuit with a battery and ${st.bulbs>1?"two bulbs":"a bulb"}, and ${st.clamp?"a clamp meter":"an ammeter"}">${s}</svg>`,R};
+}
+function AmBench(el,init,o){
+  o=o||{};
+  const st=Object.assign({cells:2,bulbs:1,pos:null,drag:null,clamp:false},init);
+  const api={st,render};
+  function render(){
+    const {svg,R}=amSVG(st); api.read=R;
+    const S=amSpots(st,st.clamp);
+    let h=`<div>${svg}</div><div class="status ${R.tone}" aria-live="polite">${esc(R.msg)}</div>`;
+    h+=`<div class="ctrl" style="margin-top:8px"><span><b>Bulbs:</b> <span class="seg">${[1,2].map(n=>`<button data-bulbs="${n}" aria-pressed="${st.bulbs===n}">${n}</button>`).join("")}</span></span><button class="chip" data-out="1">Take it out</button></div>`;
+    h+=`<details><summary>Can't drag? Use buttons</summary><div class="chips">${Object.keys(S).map(k=>`<button class="chip" data-spot="${k}" aria-pressed="${st.pos===k}">${S[k].label}</button>`).join("")}</div></details>`;
+    el.innerHTML=h; if(o.onChange) o.onChange(st,R);
+  }
+  function act(t){const D=t.dataset;
+    if(D.spot){st.pos=D.spot;} else if(D.out){st.pos=null;} else if(D.bulbs){st.bulbs=+D.bulbs; st.pos=null;} else return; render();}
+  let drag=null, justDragged=false;
+  el.addEventListener("click",e=>{if(justDragged) return; const t=e.target.closest("[data-spot],[data-out],[data-bulbs]"); if(t&&el.contains(t)) act(t);});
+  el.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ") return; const t=e.target; if(t.namespaceURI==="http://www.w3.org/2000/svg"&&t.dataset&&t.dataset.spot){e.preventDefault(); act(t);}});
+  function svgPt(e){const svg=el.querySelector("svg"); const p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse());}
+  function drawSvg(){const box=el.firstElementChild; if(box) box.innerHTML=amSVG(st).svg;}
+  el.addEventListener("pointerdown",e=>{const g=e.target.closest("[data-amdrag]"); if(!g||!el.contains(g)) return; e.preventDefault();
+    const S=amSpots(st,st.clamp); const cur=st.pos?[S[st.pos].x,S[st.pos].y]:[380,st.clamp?244:236]; const p=svgPt(e);
+    drag={ox:cur[0]-p.x,oy:cur[1]-p.y,moved:false}; try{el.setPointerCapture(e.pointerId);}catch(x){} st.drag={x:cur[0],y:cur[1]}; drawSvg();});
+  el.addEventListener("pointermove",e=>{if(!drag) return; const p=svgPt(e); const x=Math.max(20,Math.min(410,p.x+drag.ox)), y=Math.max(20,Math.min(250,p.y+drag.oy));
+    if(Math.hypot(x-st.drag.x,y-st.drag.y)>2) drag.moved=true; st.drag.x=x; st.drag.y=y; drawSvg();});
+  function endDrag(){if(!drag) return; const x=st.drag.x,y=st.drag.y,moved=drag.moved; st.drag=null; drag=null;
+    const S=amSpots(st,st.clamp); let best=null,bd=40; for(const k in S){const dd=Math.hypot(x-S[k].x,y-S[k].y); if(dd<bd){bd=dd;best=k;}}
+    if(best) st.pos=best; else if(moved) st.pos=null;
+    if(moved){justDragged=true; setTimeout(()=>{justDragged=false;},0);} render();}
+  el.addEventListener("pointerup",endDrag); el.addEventListener("pointercancel",endDrag);
+  render(); return api;
+}
+
+/* ---------------- SLIDE 0 and 1 ---------------- */
+$("#introMeter").innerHTML=`<g transform="translate(6,10)">${meterSVG({dial:"A"},{read:{display:"0.30",unit:"A"}})}<circle cx="70" cy="${PORT_Y}" r="7" fill="#1b1f24" stroke="#fff" stroke-width="1.5"/><circle cx="30" cy="${PORT_Y}" r="7" fill="${RED}" stroke="${INK}" stroke-width="1.5"/></g>`;
+function miniLoop(inside){
+  let s=`<g stroke="${INK}" stroke-width="2.5" fill="none" stroke-linejoin="round">`;
+  s+=inside?`<path d="M30,40 V20 H62 M92,20 H120 V48 M120,76 V100 H30 V68"/>`:`<path d="M30,40 V20 H120 V48 M120,76 V100 H30 V68"/>`;
+  s+=`</g><rect x="22" y="40" width="16" height="28" rx="2" fill="#23303D" stroke="${INK}" stroke-width="2"/><rect x="22" y="40" width="16" height="6" fill="#C77B30"/>`;
+  s+=`<circle cx="120" cy="62" r="20" fill="#FFD54F" opacity=".6"/><circle cx="120" cy="60" r="12" fill="#FFE58A" stroke="${INK}" stroke-width="2"/><rect x="114" y="70" width="12" height="8" fill="#9AA5B1" stroke="${INK}" stroke-width="1.5"/>`;
+  if(inside){s+=`<circle cx="77" cy="20" r="13" fill="#fff" stroke="${INK}" stroke-width="2.5"/><text x="77" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="${INK}" font-family="Arial">A</text>`;}
+  else {s+=`<path d="M120,34 H155 V50" stroke="${RED}" stroke-width="2.5" fill="none"/><path d="M120,86 H155 V72" stroke="#1b1f24" stroke-width="2.5" fill="none"/><circle cx="155" cy="61" r="12" fill="#fff" stroke="${INK}" stroke-width="2.5"/><text x="155" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="${INK}" font-family="Arial">V</text>`;}
+  return s;
+}
+$("#besideWay").innerHTML=miniLoop(false); $("#insideWay").innerHTML=miniLoop(true);
+
+/* ---------------- SLIDE 2: SETUP ---------------- */
+let setupAnsOK=!!SV.setupOK;
+const setup=Bench($("#setupBench"),Object.assign({cells:2,bulbs:1,gap:"top",dial:"V",port:{black:"COM",red:"VΩ"}},SV.setup||{}),{onChange:(st)=>{
+  SV.setup=snap(st); persist();
+  const done=[st.dial==="A",st.port.red==="10A"&&st.port.black==="COM",st.probe.red==="P",st.probe.black==="Q",setupAnsOK];
+  $$("#setupSteps li").forEach((li,i)=>li.classList.toggle("done",done[i]));}});
+$("#setupCheck").addEventListener("click",()=>{
+  const v=parseFloat($("#setupAns").value), r=setup.read, fb=$("#setupFb");
+  if(r.value===undefined){fb.innerHTML=`<span class="small">First get a current reading: dial on A, red in 10A, probes on P and Q.</span>`;return;}
+  if(Math.abs(v-r.value)<0.02){setupAnsOK=r.value>0; fb.innerHTML=r.value>0?`<span class="check">✔ Yes! ${r.value.toFixed(2)} A flows through the loop.</span>`:`<span class="small">That matches the screen, but it is negative. Swap the probes.</span>`;}
+  else {setupAnsOK=false; fb.innerHTML=`<span class="small">Look at the display again. Read the number and the units.</span>`;}
+  SV.setupOK=setupAnsOK; SV.setupAns=$("#setupAns").value; persist();
+  setup.render();});
+if(SV.setupAns){$("#setupAns").value=SV.setupAns; if(setupAnsOK) $("#setupFb").innerHTML=`<span class="check">✔ Yes! 0.30 A flows through the loop.</span>`;}
+
+/* ---------------- SLIDE 3: MISSIONS ---------------- */
+const mdone=SV.mdone||[false,false,false,false,false], saved=SV.saved||[];
+const mission=Bench($("#missionBench"),Object.assign({cells:2,bulbs:1,gap:"top",dial:"A",port:{black:"COM",red:"10A"}},SV.mission||{}),{controls:true,onChange:(st,r)=>{
+  if(r.closed&&r.value>0){
+    if(st.bulbs===1&&st.cells===2&&st.gap==="top") mdone[0]=true;
+    if(st.bulbs===1&&st.cells===2&&st.gap==="bottom") mdone[1]=true;
+    if(st.bulbs===2&&st.cells===2&&st.gap==="top") mdone[2]=true;
+    if(st.bulbs===2&&st.cells===2&&st.gap==="mid") mdone[3]=true;
+    if(st.bulbs===1&&st.cells===3) mdone[4]=true;}
+  $$("#missionSteps li").forEach((li,i)=>li.classList.toggle("done",mdone[i]));
+  SV.mission=snap(st); SV.mdone=mdone; persist();}});
+function drawSaved(){
+  const rows=saved.length?saved.map(x=>`<tr><td>${x.cells}</td><td>${x.bulbs}</td><td>${x.where}</td><td><b>${x.v} A</b></td></tr>`).join(""):`<tr><td colspan="4" class="small">No readings saved yet.</td></tr>`;
+  $("#saved").innerHTML=rows; $("#saved2").innerHTML=rows; SV.saved=saved; persist();}
+$("#saveBtn").addEventListener("click",()=>{const r=mission.read, st=mission.st;
+  if(!r.closed){alert("Get a current reading first: dial on A, red lead in 10A, one probe on P and one on Q."); return;}
+  saved.push({cells:st.cells,bulbs:st.bulbs,where:GAPNAME[st.gap],v:fmt(r.value)}); drawSaved();});
+$("#clearBtn").addEventListener("click",()=>{saved.length=0;drawSaved();});
+drawSaved();
+
+/* ---------------- SLIDE 4 and 5 ---------------- */
+const adone=SV.adone||[false,false,false,false];
+AmBench($("#amBench"),Object.assign({bulbs:1},SV.am||{}),{onChange:(st)=>{
+  SV.am={bulbs:st.bulbs,pos:st.pos};
+  if(st.pos==="top"&&st.bulbs===1) adone[0]=true;
+  if(st.pos==="bottom") adone[1]=true;
+  if(st.pos==="mid") adone[2]=true;
+  if(st.pos==="bulb") adone[3]=true;
+  $$("#amSteps li").forEach((li,i)=>li.classList.toggle("done",adone[i]));
+  SV.adone=adone; persist();}});
+AmBench($("#clampBench"),Object.assign({bulbs:1,clamp:true},SV.clamp||{}),{onChange:(st)=>{SV.clamp={bulbs:st.bulbs,pos:st.pos};persist();}});
+
+/* ---------------- FIND ---------------- */
+const FIND=[
+ {q:"With one bulb, how did the current in the top wire compare to the current in the bottom wire?",o:["About the same","Bigger in the top wire","Bigger in the bottom wire"],a:0,
+  y:"Right. In one loop, the same current flows everywhere. Charges are not used up by the bulb.",n:"Look at your table. Compare the top wire and bottom wire readings with 1 bulb."},
+ {q:"What happened to the current with two bulbs instead of one?",o:["It went down","It went up","It stayed the same"],a:0,
+  y:"Right. Two bulbs have more resistance, so less current flows through the whole loop. That is why both bulbs are dimmer.",n:"Compare your 1-bulb and 2-bulb readings with 2 cells."},
+ {q:"With two bulbs, how did the current between the bulbs compare to the current in the top wire?",o:["About the same","Less between the bulbs","Zero between the bulbs"],a:0,
+  y:"Right. Even between the bulbs, the current is the same. The first bulb uses some of the charges' energy, not the charges.",n:"Measure between the bulbs and in the top wire with 2 bulbs."},
+ {q:"What happened to the current with 3 cells?",o:["It went up","It went down","It stayed the same"],a:0,
+  y:"Right. More push (voltage) makes more current, so the bulb glows brighter.",n:"Try 1 bulb with 2 cells, then 3 cells."}];
+let findCur=SV.findCur||0; const findDone=SV.findDone||FIND.map(()=>false), findAns=SV.findAns||FIND.map(()=>null);
+function showFind(){
+  SV.findCur=findCur; SV.findDone=findDone; SV.findAns=findAns; persist();
+  const tabs=FIND.map((f,i)=>`<button data-ft="${i}" aria-pressed="${i===findCur}" aria-label="Question ${i+1}${findDone[i]?", answered":""}">${i+1}${findDone[i]?" ✓":""}</button>`).join("");
+  let h=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px"><b>Question ${findCur+1} of ${FIND.length}</b><span class="seg" role="group" aria-label="Pick a question">${tabs}</span></div>`;
+  h+=FIND.map((f,i)=>`<div class="q" data-f="${i}"${i===findCur?"":" hidden"}><b>${f.q}</b>${f.o.map((t,j)=>`<button class="opt${findAns[i]===j?(j===f.a?" right":" wrong"):""}" data-j="${j}">${t}</button>`).join("")}<div class="fbx">${findAns[i]===null?"":`<div class="fb ${findAns[i]===f.a?"good":"warn"}">${findAns[i]===f.a?f.y:f.n}</div>`}</div></div>`).join("");
+  h+=`<div style="display:flex;justify-content:space-between;margin-top:8px"><button class="btn ghost" data-fn="-1" style="padding:5px 12px"${findCur===0?" disabled":""}>Previous question</button><button class="btn" data-fn="1" style="padding:5px 12px"${findCur===FIND.length-1?" disabled":""}>Next question</button></div>`;
+  $("#findQs").innerHTML=h;}
+$("#findQs").addEventListener("click",e=>{
+  const t=e.target.closest("[data-ft]"); if(t){findCur=+t.dataset.ft; showFind(); return;}
+  const n=e.target.closest("[data-fn]"); if(n){findCur=Math.max(0,Math.min(FIND.length-1,findCur+ +n.dataset.fn)); showFind(); return;}
+  const b=e.target.closest(".opt"); if(!b) return; const i=+b.closest(".q").dataset.f, j=+b.dataset.j;
+  findAns[i]=j; if(j===FIND[i].a) findDone[i]=true; showFind();});
+showFind();
+
+/* ---------------- QUIZ ---------------- */
+const QUIZ=[
+ {q:"To measure current, where do you turn the dial?",o:["V","A","Ω"],a:1,w:"A stands for amps, the unit of current."},
+ {q:"For current, which port does the red lead go in?",o:["VΩ","COM","10A"],a:2,w:"For current, red moves to 10A. Black stays in COM."},
+ {q:"How is a meter hooked up to measure current?",o:["Directly on either side of the part","In the loop, so the charges flow through it","Touching only the + end of the battery"],a:1,w:"Current is measured in the loop. This is called series."},
+ {q:"What do you have to do before you put a multimeter in the loop?",o:["Open the loop and let the meter fill the gap","Turn the dial to V","Add another battery"],a:0,w:"Open the circuit, then let the meter close the gap."},
+ {q:"Why should you never put an ammeter across a battery?",o:["It reads too low","On A, the meter acts like a wire and makes a short circuit","The battery turns off"],a:1,w:"An ammeter acts like a wire. Across a battery, it makes a short circuit that can blow its fuse."},
+ {q:"A clamp meter, like PhET's ammeter, measures current by...",o:["going around the wire without cutting it","touching both ends of the battery","measuring the push across the bulb"],a:0,w:"The clamp senses the current inside the wire, so the loop stays closed."},
+ {q:"In one loop, how does the current before the bulb compare to the current after the bulb?",o:["More before the bulb","The same","Less before the bulb"],a:1,w:"In one loop, the current is the same everywhere. The bulb uses energy, not charges."}];
+const qz=SV.qz||{i:0,score:0,picked:null};
+function drawQuiz(){
+  SV.qz=qz; persist();
+  const el=$("#quiz");
+  if(qz.i>=QUIZ.length){el.innerHTML=`<div class="card"><h3>You got ${qz.score} out of ${QUIZ.length}.</h3><p>${qz.score>=6?"Great work! You are ready to measure current in the lab.":"Go back over the slides and try again."}</p><button class="btn" id="qAgain">Try again</button></div>`; $("#qAgain").onclick=()=>{qz.i=0;qz.score=0;qz.picked=null;drawQuiz();}; return;}
+  const q=QUIZ[qz.i];
+  el.innerHTML=`<h3>Question ${qz.i+1} of ${QUIZ.length}</h3><div class="card"><div class="q"><b>${qz.i+1}. ${q.q}</b>${q.o.map((t,j)=>{let c="";if(qz.picked!==null){if(j===q.a)c="right";else if(j===qz.picked)c="wrong";}return `<button class="opt ${c}" data-j="${j}" ${qz.picked!==null?"disabled":""}>${t}</button>`;}).join("")}${qz.picked!==null?`<div class="fb ${qz.picked===q.a?"good":"warn"}">${qz.picked===q.a?"Correct! ":"Not quite. "}${q.w}</div><p style="margin-top:10px"><button class="btn" id="qNext">${qz.i===QUIZ.length-1?"See my score":"Next question"}</button></p>`:""}</div></div>`;
+  if(qz.picked===null) $$(".opt",el).forEach(b=>b.onclick=()=>{qz.picked=+b.dataset.j; if(qz.picked===q.a) qz.score++; drawQuiz();});
+  else $("#qNext").onclick=()=>{qz.i++;qz.picked=null;drawQuiz();};
+}
+drawQuiz();
+
+/* ---------------- NAV ---------------- */
+const slides=$$(".slide"); let cur=0;
+$("#dots").innerHTML=slides.map((s,i)=>`<button aria-label="Slide ${i+1}: ${s.dataset.title}"></button>`).join("");
+function go(i){cur=Math.max(0,Math.min(slides.length-1,i)); slides.forEach((s,j)=>s.classList.toggle("on",j===cur));
+  $$("#dots button").forEach((b,j)=>{if(j===cur)b.setAttribute("aria-current","step");else b.removeAttribute("aria-current");});
+  $("#back").disabled=cur===0; $("#next").disabled=cur===slides.length-1; window.scrollTo(0,0); SV.slide=cur; persist();}
+$("#back").onclick=()=>go(cur-1); $("#next").onclick=()=>go(cur+1);
+$("#dots").addEventListener("click",e=>{const i=$$("#dots button").indexOf(e.target); if(i>=0) go(i);});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(+b.dataset.go);});
+$("#resetBtn").onclick=startOver;
+go(SV.slide||0);
+})();
+</script>
+</body>
+</html>

@@ -204,6 +204,8 @@ svg text{font-family:var(--font);fill:var(--ink);font-size:14px;font-weight:700}
   const MAX=8, STEP_H=28, BOTTOM=266, R=10;
   const $=id=>document.getElementById(id);
   const slider=$("level");
+  try{const v=localStorage.getItem("mslw-water-v1"); if(v!==null) slider.value=v;}catch(e){}
+  slider.addEventListener("input",()=>{try{localStorage.setItem("mslw-water-v1",slider.value);}catch(e){}});
   const mk=(tag,attrs,parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent.appendChild(e);return e;};
 
   // ticks beside tank

@@ -115,7 +115,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
       <ul>
         <li>Set up a multimeter to measure voltage.</li>
         <li>Measure <b>across</b> a battery, a load and a wire.</li>
-        <li>Explain why the meter goes <b>beside</b> a part, not inside the loop.</li>
+        <li>Explain why the meter goes <b>directly on either side</b> of a part, not inside the loop.</li>
       </ul>
       <p><button class="btn" data-go="1">Start</button></p>
       <p class="small">Have a real multimeter? Follow along with it. Use the virtual one on these slides to practice. Readings are simulated so every class sees the same numbers.</p>
@@ -127,7 +127,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 <!-- 1 MEET -->
 <section class="slide" data-title="Meet the multimeter">
   <h2>1. Meet the multimeter</h2>
-  <p class="lead">You used a multimeter to measure resistance. Today you will use the <b>same tool</b> to measure <b>voltage</b>. Only one thing is very different: for voltage, the circuit has power.</p>
+  <p class="lead">A multimeter can measure resistance, voltage and current. Here you will use it to measure <b>voltage</b>. To measure voltage, the circuit has its power on.</p>
   <div class="work">
     <div><div class="svgwrap" id="meetBench"></div></div>
     <div>
@@ -161,9 +161,9 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
       <div class="card def load tight"><h3>Load</h3><p style="margin:0">The part that <b>uses</b> the energy. A light bulb, motor, buzzer or speaker is a load. In this circuit, the load is the light bulb.</p></div>
       <div class="card def tight"><h3>Across</h3><p style="margin:0">One probe on <b>each side</b> of a part. <b>Across the load</b> means the red probe on one side of the bulb and the black probe on the other side.</p></div>
       <div class="card tight">
-        <h3>The meter goes beside the part</h3>
+        <h3>The meter goes directly on either side of the part</h3>
         <div class="compare">
-          <div><svg viewBox="0 0 170 120" aria-label="Right way: the voltmeter sits beside the bulb, with one lead on each side. The bulb is lit." role="img" id="rightWay"></svg><div class="tag ok">✔ Right: beside the bulb</div><div class="small">The loop is not broken. The bulb stays on. This is called hooking it up in <b>parallel</b>.</div></div>
+          <div><svg viewBox="0 0 170 120" aria-label="Right way: the voltmeter connects directly on either side of the bulb. The bulb is lit." role="img" id="rightWay"></svg><div class="tag ok">✔ Right: on either side of the bulb</div><div class="small">The loop is not broken. The bulb stays on. This is called hooking it up in <b>parallel</b>.</div></div>
           <div><svg viewBox="0 0 170 120" aria-label="Wrong way: the wire is cut and the voltmeter is put inside the loop. The bulb is dark." role="img" id="wrongWay"></svg><div class="tag no">✘ Wrong: inside the loop</div><div class="small">Do not cut the loop and put the meter in the line. The bulb goes out.</div></div>
         </div>
       </div>
@@ -235,7 +235,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 
 <nav class="bar" aria-label="Slides">
   <button class="btn ghost" id="back">Back</button>
-  <div class="dots" id="dots"></div>
+  <div style="display:flex;align-items:center"><div class="dots" id="dots"></div><button class="btn ghost" id="resetBtn" type="button" style="padding:4px 10px;font-size:13px;margin-left:10px" title="Erase your work and start this activity over">Start over</button></div>
   <button class="btn" id="next">Next</button>
 </nav>
 
@@ -244,6 +244,12 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 "use strict";
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const INK="#16293B", RED="#C62828", ACC="#1B5FC1";
+/* ---------- saved progress (this browser only) ---------- */
+var SAVEKEY='mslw-voltage-v1';
+var SV={};try{SV=JSON.parse(localStorage.getItem(SAVEKEY)||'{}',function(k,v){return v==='__INF__'?Infinity:v;})||{};}catch(e){SV={};}
+function persist(){try{localStorage.setItem(SAVEKEY,JSON.stringify(SV,function(k,v){return v===Infinity?'__INF__':v;}));}catch(e){}}
+function startOver(){if(!confirm('Start over? This erases your work in this activity.'))return;try{localStorage.removeItem(SAVEKEY);}catch(e){}SV={};location.reload();}
+function snap(st){return {cells:st.cells,closed:st.closed,dial:st.dial,port:Object.assign({},st.port),probe:Object.assign({},st.probe),active:st.active};}
 
 /* ---------------- METER ---------------- */
 // meter drawn at local coords 0..140 x 0..240
@@ -513,8 +519,9 @@ function loopSVG(right){
 $("#rightWay").innerHTML=loopSVG(true); $("#wrongWay").innerHTML=loopSVG(false);
 
 /* ---------------- SETUP ---------------- */
-let setupAnsOK=false;
-const setup=Bench($("#setupBench"),{mode:"battery",cells:2,dial:"OFF",port:{black:null,red:null},active:"red"},{leads:true,onChange:(st,r)=>{
+let setupAnsOK=!!SV.setupOK;
+const setup=Bench($("#setupBench"),Object.assign({mode:"battery",cells:2,dial:"OFF",port:{black:null,red:null},active:"red"},SV.setup||{}),{leads:true,onChange:(st,r)=>{
+  SV.setup=snap(st); persist();
   const done=[st.port.black==="COM",st.port.red==="VΩ",st.dial==="V",st.probe.red==="A"&&st.port.red==="VΩ",st.probe.black==="D"&&st.port.black==="COM",setupAnsOK];
   $$("#setupSteps li").forEach((li,i)=>li.classList.toggle("done",done[i]));
 }});
@@ -523,12 +530,14 @@ $("#setupCheck").addEventListener("click",()=>{
   if(r.value===undefined||r.pair!=="AD"){fb.innerHTML=`<span class="small">First get a reading across the battery.</span>`;return;}
   if(Math.abs(v-r.value)<0.03){setupAnsOK=r.value>0; fb.innerHTML=r.value>0?`<span class="check">✔ Yes! ${r.value.toFixed(2)} V. Two 1.5 V cells in a row = 3.0 V.</span>`:`<span class="small">That matches the screen, but it is negative. Swap the probes.</span>`;}
   else {setupAnsOK=false; fb.innerHTML=`<span class="small">Look at the display again. Read the number and the units.</span>`;}
+  SV.setupOK=setupAnsOK; SV.setupAns=$("#setupAns").value; persist();
   setup.render();
 });
+if(SV.setupAns){$("#setupAns").value=SV.setupAns; if(setupAnsOK) $("#setupFb").innerHTML=`<span class="check">✔ Yes! Two 1.5 V cells in a row = 3.0 V.</span>`;}
 
 /* ---------------- MISSION ---------------- */
-const mdone=[false,false,false,false,false,false]; const saved=[];
-const mission=Bench($("#missionBench"),{mode:"circuit",cells:2,closed:true,dial:"OFF"},{cellsCtl:true,switchTap:true,onChange:(st,r)=>{
+const mdone=SV.mdone||[false,false,false,false,false,false]; const saved=SV.saved||[];
+const mission=Bench($("#missionBench"),Object.assign({mode:"circuit",cells:2,closed:true,dial:"OFF"},SV.mission||{}),{cellsCtl:true,switchTap:true,onChange:(st,r)=>{
   if(r.value!==undefined&&r.tone==="good"&&r.red!==r.black){
     const k=r.pair;
     if(k==="AD"&&st.closed&&st.cells!==3) mdone[0]=true;
@@ -539,11 +548,13 @@ const mission=Bench($("#missionBench"),{mode:"circuit",cells:2,closed:true,dial:
     if(k==="AD"&&st.cells===3) mdone[5]=true;
   }
   $$("#missionSteps li").forEach((li,i)=>li.classList.toggle("done",mdone[i]));
+  SV.mission=snap(st); SV.mdone=mdone; persist();
 }});
 const where={AD:"Across the battery",BC:"Across the load",CD:"Across a wire",AB:"Across the switch"};
 function drawSaved(){
   const rows=saved.length?saved.map(x=>`<tr><td>${x.cells}</td><td>${x.sw}</td><td>${x.where}</td><td><b>${x.v} V</b></td></tr>`).join(""):`<tr><td colspan="4" class="small">No readings saved yet.</td></tr>`;
   $("#saved").innerHTML=rows; $("#saved2").innerHTML=rows;
+  SV.saved=saved; persist();
 }
 $("#saveBtn").addEventListener("click",()=>{const r=mission.read, st=mission.st;
   if(r.value===undefined){alert("Get a voltage reading first: dial on V, one probe on each side of a part."); return;}
@@ -562,7 +573,7 @@ const FIND=[
  {q:"You added more cells. What happened to the voltage across the battery?",o:["It went down","It went up: each cell adds 1.5 V","It stayed the same"],a:1,
   y:"Right. Cells in a row add up: 1.5 + 1.5 + 1.5 = 4.5 V. More push makes the bulb brighter.",n:"Try 1, 2 and 3 cells and measure across the battery each time."}];
 /* one question at a time, with numbered tabs, so the slide stays short */
-let findCur=0; const findDone=FIND.map(()=>false);
+let findCur=SV.findCur||0; const findDone=SV.findDone||FIND.map(()=>false);
 function drawFind(){
   const tabs=FIND.map((f,i)=>`<button data-ft="${i}" aria-pressed="${i===findCur}" aria-label="Question ${i+1}${findDone[i]?", answered":""}">${i+1}${findDone[i]?" ✓":""}</button>`).join("");
   let h=`<div class="findnav" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px"><b>Question ${findCur+1} of ${FIND.length}</b><span class="seg" role="group" aria-label="Pick a question">${tabs}</span></div>`;
@@ -570,8 +581,9 @@ function drawFind(){
   h+=`<div style="display:flex;justify-content:space-between;margin-top:8px"><button class="btn ghost" data-fn="-1" style="padding:5px 12px"${findCur===0?" disabled":""}>Previous question</button><button class="btn" data-fn="1" style="padding:5px 12px"${findCur===FIND.length-1?" disabled":""}>Next question</button></div>`;
   $("#findQs").innerHTML=h;
 }
-const findAnswers=FIND.map(()=>null);
+const findAnswers=SV.findAns||FIND.map(()=>null);
 function showFind(){
+  SV.findCur=findCur; SV.findDone=findDone; SV.findAns=findAnswers; persist();
   drawFind();
   FIND.forEach((f,i)=>{const j=findAnswers[i]; if(j===null) return; const q=$(`[data-f="${i}"]`,$("#findQs"));
     $$(".opt",q)[j].classList.add(j===f.a?"right":"wrong");
@@ -590,11 +602,12 @@ const QUIZ=[
  {q:"Where does the black lead go?",o:["COM","VΩ","10A"],a:0,w:"COM means common. The black lead always goes in COM."},
  {q:"What is a load?",o:["A part that uses electrical energy, like a bulb or motor","The wire","The battery"],a:0,w:"A load uses the energy. The battery gives energy. The wire carries the charges."},
  {q:"What does it mean to measure “across the load”?",o:["Touch both probes to the same wire","Put one probe on each side of the load","Cut the wire and put the meter in the loop"],a:1,w:"Across means one probe on each side of the part."},
- {q:"How is a voltmeter hooked up?",o:["Inside the loop, in line with the bulb","Beside the part, with one probe on each side","Only to one end of the battery"],a:1,w:"The meter goes beside the part. This is called hooking it up in parallel."},
+ {q:"How is a voltmeter hooked up?",o:["Inside the loop, in line with the bulb","Directly on either side of the part","Only to one end of the battery"],a:1,w:"The meter goes directly on either side of the part. This is called hooking it up in parallel."},
  {q:"Three 1.5 V cells are in a row. What is the total voltage?",o:["1.5 V","3.0 V","4.5 V"],a:2,w:"1.5 + 1.5 + 1.5 = 4.5 V. Cells in a row add up."},
  {q:"The meter reads −3.00 V. What does the minus sign mean?",o:["The probes are swapped","The battery is broken","The bulb is off"],a:0,w:"Put the red probe on the + side to get a positive reading."}];
-const qz={i:0,score:0,picked:null};
+const qz=SV.qz||{i:0,score:0,picked:null};
 function drawQuiz(){
+  SV.qz=qz; persist();
   const el=$("#quiz");
   if(qz.i>=QUIZ.length){el.innerHTML=`<div class="card"><h3>You got ${qz.score} out of ${QUIZ.length}.</h3><p>${qz.score>=6?"Great work! You are ready to measure voltage in the lab.":"Go back over the slides and try again."}</p><button class="btn" id="qAgain">Try again</button></div>`; $("#qAgain").onclick=()=>{qz.i=0;qz.score=0;qz.picked=null;drawQuiz();}; return;}
   const q=QUIZ[qz.i];
@@ -610,11 +623,12 @@ $("#dots").innerHTML=slides.map((s,i)=>`<button aria-label="Slide ${i+1}: ${s.da
 function go(i){cur=Math.max(0,Math.min(slides.length-1,i)); slides.forEach((s,j)=>s.classList.toggle("on",j===cur));
   $$("#dots button").forEach((b,j)=>b.toggleAttribute("aria-current",j===cur)||(j===cur&&b.setAttribute("aria-current","step")));
   $$("#dots button").forEach((b,j)=>{if(j===cur)b.setAttribute("aria-current","step");else b.removeAttribute("aria-current");});
-  $("#back").disabled=cur===0; $("#next").disabled=cur===slides.length-1; window.scrollTo(0,0);}
+  $("#back").disabled=cur===0; $("#next").disabled=cur===slides.length-1; window.scrollTo(0,0); SV.slide=cur; persist();}
 $("#back").onclick=()=>go(cur-1); $("#next").onclick=()=>go(cur+1);
 $("#dots").addEventListener("click",e=>{const i=$$("#dots button").indexOf(e.target); if(i>=0) go(i);});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(+b.dataset.go);});
-go(0);
+$("#resetBtn").onclick=startOver;
+go(SV.slide||0);
 })();
 </script>
 </body>
