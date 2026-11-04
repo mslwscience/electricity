@@ -100,6 +100,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 .flow{animation:flow linear infinite}
 @keyframes flow{to{stroke-dashoffset:-24}}
 @media (prefers-reduced-motion:reduce){.flow{animation:none}}
+.svgwrap,.svgwrap *{-webkit-user-select:none;user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
 </style>
 </head>
 <body>
@@ -242,6 +243,8 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 <script>
 (function(){
 "use strict";
+document.addEventListener("dragstart",e=>e.preventDefault());
+document.addEventListener("selectstart",e=>{if(e.target.closest&&e.target.closest(".svgwrap"))e.preventDefault();});
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const INK="#16293B", RED="#C62828", ACC="#1B5FC1";
 /* ---------- saved progress (this browser only) ---------- */
@@ -460,7 +463,7 @@ function Bench(el,init,o){
   function drawSvg(){const box=el.firstElementChild; if(box) box.innerHTML=benchSVG(st,{tap:o.tap!==false,read:reading(st),hl:o.hl&&o.hl(),switchTap:o.switchTap});}
   el.addEventListener("pointerdown",e=>{
     const g=e.target.closest("[data-drag]"); if(!g||!el.contains(g)) return;
-    e.preventDefault();
+    e.preventDefault(); try{window.getSelection().removeAllRanges();}catch(x){}
     const [kind,c]=g.getAttribute("data-drag").split(":"); const p=svgPt(e); const cur=curPos(kind,c);
     drag={kind,c,ox:cur[0]-p.x,oy:cur[1]-p.y,moved:false};
     try{el.setPointerCapture(e.pointerId);}catch(x){}

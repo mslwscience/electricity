@@ -100,6 +100,7 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 .flow{animation:flow linear infinite}
 @keyframes flow{to{stroke-dashoffset:-24}}
 @media (prefers-reduced-motion:reduce){.flow{animation:none}}
+.svgwrap,.svgwrap *{-webkit-user-select:none;user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
 </style>
 </head>
 <body>
@@ -167,16 +168,16 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 <!-- 3 MISSION -->
 <section class="slide" data-title="Measure in the loop">
   <h2>3. Measure current in different places</h2>
-  <p class="lead">Pick where to open the loop. Then put the probes on <b>P</b> and <b>Q</b>. Do each mission and tap <b>Save this reading</b> after each one.</p>
+  <p class="lead">Look for the box with buttons <b>right above the meter</b>. Click the buttons there to pick the bulbs, the cells and where to open the loop. A gap opens with two ends, <b>P</b> and <b>Q</b>. Drag the <b>red probe to P</b> and the <b>black probe to Q</b>. When the bulb lights, read the meter and tap <b>Save this reading</b>.</p>
   <div class="work">
     <div><div class="svgwrap" id="missionBench"></div></div>
     <div>
       <ol class="steps" id="missionSteps">
-        <li><span class="n">1</span><span><b>1 bulb</b>, 2 cells. Open the <b>top wire</b> and measure.</span></li>
-        <li><span class="n">2</span><span><b>1 bulb</b>, 2 cells. Open the <b>bottom wire</b> and measure.</span></li>
-        <li><span class="n">3</span><span><b>2 bulbs</b>, 2 cells. Open the <b>top wire</b> and measure.</span></li>
-        <li><span class="n">4</span><span><b>2 bulbs</b>, 2 cells. Open the loop <b>between the bulbs</b> and measure.</span></li>
-        <li><span class="n">5</span><span><b>1 bulb</b>, <b>3 cells</b>. Measure anywhere.</span></li>
+        <li><span class="n">1</span><span>In the box above the meter, click <b>1</b> next to Bulbs and <b>2</b> next to Cells. Click <b>Top wire</b>. Put the red probe on P and the black probe on Q. Save the reading.</span></li>
+        <li><span class="n">2</span><span>Click <b>Bottom wire</b>. The gap moves, so put the probes back on the new P and Q. Save the reading.</span></li>
+        <li><span class="n">3</span><span>Click <b>2</b> next to Bulbs. Click <b>Top wire</b>. Probes on P and Q. Save the reading.</span></li>
+        <li><span class="n">4</span><span>Click <b>Between the bulbs</b>. Probes on P and Q. Save the reading.</span></li>
+        <li><span class="n">5</span><span>Click <b>1</b> next to Bulbs and <b>3</b> next to Cells. Probes on P and Q. Save the reading.</span></li>
       </ol>
       <div class="ctrl" style="margin-top:10px"><button class="btn" id="saveBtn">Save this reading</button><button class="btn ghost" id="clearBtn">Clear table</button></div>
       <div class="card tight" style="margin-top:8px"><div style="max-height:190px;overflow-y:auto"><table><thead><tr><th>Cells</th><th>Bulbs</th><th>Where</th><th>Current</th></tr></thead><tbody id="saved"></tbody></table></div></div>
@@ -248,6 +249,8 @@ svg .tap:focus-visible .ring, svg .tap:hover .ring{stroke:var(--accent);stroke-w
 <script>
 (function(){
 "use strict";
+document.addEventListener("dragstart",e=>e.preventDefault());
+document.addEventListener("selectstart",e=>{if(e.target.closest&&e.target.closest(".svgwrap"))e.preventDefault();});
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const INK="#16293B", RED="#C62828", ACC="#1B5FC1", BENCH="#F2F6F9";
 const RB=10; // ohms per bulb
@@ -401,10 +404,11 @@ function Bench(el,init,o){
   const api={st,render};
   function render(){
     const r=reading(st); api.read=r;
-    let h=`<div>${benchSVG(st,{tap:true,read:r})}</div><div class="status ${r.tone}" aria-live="polite">${esc(r.msg)}</div>`;
+    let top="";
+    if(o.controls){top=`<div class="card tight" style="margin-bottom:8px"><div class="ctrl"><span><b>Bulbs:</b> <span class="seg">${[1,2].map(n=>`<button data-bulbs="${n}" aria-pressed="${st.bulbs===n}">${n}</button>`).join("")}</span></span><span><b>Cells:</b> <span class="seg">${[1,2,3].map(n=>`<button data-cells="${n}" aria-pressed="${st.cells===n}">${n}</button>`).join("")}</span></span></div>`;
+      top+=`<div class="ctrl"><b>Open the loop at:</b> <span class="seg">${["top","bottom","mid"].map(g=>`<button data-gap="${g}" aria-pressed="${st.gap===g}"${g==="mid"&&st.bulbs<2?" disabled":""}>${GAPNAME[g]}</button>`).join("")}</span></div></div>`;}
+    let h=top+`<div>${benchSVG(st,{tap:true,read:r})}</div><div class="status ${r.tone}" aria-live="polite">${esc(r.msg)}</div>`;
     h+=`<div class="ctrl" style="margin-top:8px"><span><b>Next tap moves:</b> <span class="seg"><button data-act="red" aria-pressed="${st.active==="red"}">Red probe</button><button data-act="black" aria-pressed="${st.active==="black"}">Black probe</button></span></span><button class="chip" data-clear="1">Lift probes</button></div>`;
-    if(o.controls){h+=`<div class="ctrl"><span><b>Cells:</b> <span class="seg">${[1,2,3].map(n=>`<button data-cells="${n}" aria-pressed="${st.cells===n}">${n}</button>`).join("")}</span></span><span><b>Bulbs:</b> <span class="seg">${[1,2].map(n=>`<button data-bulbs="${n}" aria-pressed="${st.bulbs===n}">${n}</button>`).join("")}</span></span></div>`;
-      h+=`<div class="ctrl"><span><b>Open the loop at:</b> <span class="seg">${["top","bottom","mid"].map(g=>`<button data-gap="${g}" aria-pressed="${st.gap===g}"${g==="mid"&&st.bulbs<2?" disabled":""}>${GAPNAME[g]}</button>`).join("")}</span></span></div>`;}
     const P=pts(st);
     h+=`<details><summary>Can't drag or tap? Use buttons</summary>`;
     h+=`<div class="chips"><b style="align-self:center;font-size:14px">Dial:</b>${["OFF","V","A","Ω"].map(k=>`<button class="chip" data-dial="${k}" aria-pressed="${st.dial===k}">${k}</button>`).join("")}</div>`;
@@ -440,7 +444,7 @@ function Bench(el,init,o){
     const P=pts(st); return st.probe[c]?[P[st.probe[c]].x,P[st.probe[c]].y]:REST[c].tip.slice();}
   function drawSvg(){const box=el.firstElementChild; if(box) box.innerHTML=benchSVG(st,{tap:true,read:reading(st)});}
   el.addEventListener("pointerdown",e=>{
-    const g=e.target.closest("[data-drag]"); if(!g||!el.contains(g)) return; e.preventDefault();
+    const g=e.target.closest("[data-drag]"); if(!g||!el.contains(g)) return; e.preventDefault(); try{window.getSelection().removeAllRanges();}catch(x){}
     const [kind,c]=g.getAttribute("data-drag").split(":"); const p=svgPt(e); const cur=curPos(kind,c);
     drag={kind,c,ox:cur[0]-p.x,oy:cur[1]-p.y,moved:false}; try{el.setPointerCapture(e.pointerId);}catch(x){}
     st.drag={c,kind,x:cur[0],y:cur[1]}; drawSvg();});
@@ -536,7 +540,7 @@ function AmBench(el,init,o){
   el.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ") return; const t=e.target; if(t.namespaceURI==="http://www.w3.org/2000/svg"&&t.dataset&&t.dataset.spot){e.preventDefault(); act(t);}});
   function svgPt(e){const svg=el.querySelector("svg"); const p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse());}
   function drawSvg(){const box=el.firstElementChild; if(box) box.innerHTML=amSVG(st).svg;}
-  el.addEventListener("pointerdown",e=>{const g=e.target.closest("[data-amdrag]"); if(!g||!el.contains(g)) return; e.preventDefault();
+  el.addEventListener("pointerdown",e=>{const g=e.target.closest("[data-amdrag]"); if(!g||!el.contains(g)) return; e.preventDefault(); try{window.getSelection().removeAllRanges();}catch(x){}
     const S=amSpots(st,st.clamp); const cur=st.pos?[S[st.pos].x,S[st.pos].y]:[380,st.clamp?244:236]; const p=svgPt(e);
     drag={ox:cur[0]-p.x,oy:cur[1]-p.y,moved:false}; try{el.setPointerCapture(e.pointerId);}catch(x){} st.drag={x:cur[0],y:cur[1]}; drawSvg();});
   el.addEventListener("pointermove",e=>{if(!drag) return; const p=svgPt(e); const x=Math.max(20,Math.min(410,p.x+drag.ox)), y=Math.max(20,Math.min(250,p.y+drag.oy));
