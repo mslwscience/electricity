@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energy In, Energy Out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bench:#E8EFF4; --panel:#FFFFFF; --panel2:#F2F6F9; --ink:#16293B; --muted:#4A5E70; --line:#B9C8D5;
+  --accent:#1B5FC1; --accent-ink:#FFFFFF; --good:#0B6B52; --goodbg:#DDF3EA; --warn:#7A4800; --warnbg:#FFF0D1;
+  --danger:#A3211A; --dangerbg:#FDE4E1;
+  --font-body:"Atkinson Hyperlegible", Verdana, "Segoe UI", system-ui, sans-serif;
+  --font-head:"Bricolage Grotesque", "Atkinson Hyperlegible", Verdana, system-ui, sans-serif;
+  --font-lcd:"Share Tech Mono", "Courier New", monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bench);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.45}
+main{max-width:960px;margin:0 auto;padding:16px 16px 96px}
+h1,h2{font-family:var(--font-head);margin:0 0 8px;line-height:1.1}
+h1{font-size:clamp(28px,4.6vw,40px);font-weight:800}
+h2{font-size:clamp(21px,3vw,26px);font-weight:800}
+h3{font-size:16px;margin:0 0 6px}
+p{margin:0 0 10px}
+.lead{max-width:66ch}
+.small{font-size:13px;color:var(--muted)}
+.slide{display:none}
+.slide.on{display:block}
+.intro{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:center;margin-top:8px}
+.intro svg{max-width:280px;width:100%;justify-self:center}
+.work{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:10px}
+@media (max-width:780px){.work,.intro{grid-template-columns:1fr}.intro svg{max-width:200px}}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.card.tight{padding:9px 12px}
+.def{border-left:6px solid var(--accent)}
+.svgwrap{background:var(--panel);border:2px solid var(--line);border-radius:12px;touch-action:none}
+.svgwrap svg{width:100%;height:auto;display:block}
+.status{border:2px solid var(--line);border-radius:10px;background:var(--panel);padding:8px 12px;min-height:42px;margin-top:8px;font-size:15px}
+.status.good{background:var(--goodbg);border-color:var(--good)}
+.status.warn{background:var(--warnbg);border-color:#C88A1A}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--accent);color:var(--accent-ink);border:2px solid var(--accent);border-radius:8px;padding:8px 16px;font-weight:700}
+.btn.ghost{background:var(--panel);color:var(--accent)}
+.btn.sm{padding:4px 10px;font-size:14px}
+.btn:disabled{opacity:.4;cursor:default}
+.ctrlbox{background:var(--panel);border:2px solid var(--accent);border-radius:10px;padding:7px 10px;margin-bottom:8px}
+.ctrl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.ctrl b{font-size:14px}
+.seg{display:inline-flex;flex-wrap:wrap;border:2px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:6px 11px;font-weight:700;font-size:14px;color:var(--ink)}
+.seg button+button{border-left:2px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+ol.steps{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+ol.steps li{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px;font-size:15px}
+ol.steps li .n{flex:0 0 26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px}
+ol.steps li.done{border-color:var(--good);background:var(--goodbg)}
+ol.steps li.done .n{background:var(--good);border-color:var(--good);color:#fff}
+details{margin-top:8px;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px}
+details summary{font-weight:700;cursor:pointer;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--muted)}
+.counter{display:grid;grid-template-columns:auto 1fr auto;gap:4px 8px;align-items:center;font-size:15px}
+.counter .v{font-family:var(--font-lcd);font-size:20px;text-align:right}
+.counter .tot{border-top:2px solid var(--ink);padding-top:4px;font-weight:700}
+.dot{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;color:#fff;border:2px solid #16293B}
+.dot.J{background:#1B5FC1}.dot.L{background:#FFD23F;color:#16293B}.dot.H{background:#D84315}.dot.S{background:#7B3FBF}.dot.M{background:#2E7D32}
+.key{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;align-items:center}
+.key span{display:inline-flex;gap:5px;align-items:center}
+.q{margin:10px 0}
+.q > b{display:block;margin-bottom:6px}
+.opt{display:block;width:100%;text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:7px 11px;margin:6px 0;font-weight:700;font-size:14px;color:var(--ink)}
+.opt.right{border-color:var(--good);background:var(--goodbg)}
+.opt.wrong{border-color:var(--danger);background:var(--dangerbg)}
+.fb{font-size:14px;border-radius:8px;padding:7px 10px;margin-top:4px}
+.fb.good{background:var(--goodbg)}
+.fb.warn{background:var(--warnbg)}
+.rtm{display:inline-flex;align-items:center;gap:6px;background:var(--panel);color:var(--accent);border:2px solid var(--accent);border-radius:999px;padding:4px 12px;font-weight:700;font-size:14px;margin:0 0 8px}
+.rtm svg{width:18px;height:18px}
+.savenote{font-size:12px;color:var(--muted);margin-left:8px}
+nav.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:8px 10px;z-index:5}
+.dots{display:flex;gap:6px}
+.dots button{width:15px;height:15px;border-radius:50%;border:2px solid var(--accent);background:transparent;padding:0}
+.dots button[aria-current="step"]{background:var(--accent)}
+svg .tap{cursor:pointer}
+svg [data-drag]{cursor:grab}
+.svgwrap,.svgwrap *{-webkit-user-select:none;user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
+</style>
+</head>
+<body>
+<main id="app">
+
+<!-- 0 START -->
+<section class="slide on" data-title="Start">
+  <div class="intro">
+    <div>
+      <h1>Energy in, energy out</h1>
+      <p class="lead">A battery sends energy into a circuit. Where does the energy go? Here you can <b>see the energy</b> as little dots. Energy is counted in <b>joules (J)</b>. You will count the joules that go in. You will count the joules that come out.</p>
+      <p class="lead">The <b>load</b> is the part that uses the energy. A bulb is a load.</p>
+      <h3>When you finish, you can:</h3>
+      <ul>
+        <li>Tell what kinds of energy come out of a load.</li>
+        <li>Show that joules out = joules in.</li>
+        <li>Use a thermometer to find heat.</li>
+        <li>Read a Sankey diagram.</li>
+      </ul>
+      <p><button class="btn" data-go="1">Start</button></p>
+      <p class="small">The numbers here are pretend. Everyone sees the same numbers.</p>
+    </div>
+    <svg viewBox="0 0 220 200" role="img" aria-label="A blue energy dot with a J goes into a light bulb. A yellow light dot and a red heat dot come out.">
+      <circle cx="120" cy="90" r="34" fill="#FFE58A" stroke="#16293B" stroke-width="3"/>
+      <rect x="106" y="122" width="28" height="22" rx="3" fill="#9AA5B1" stroke="#16293B" stroke-width="3"/>
+      <path d="M110,122 V104 Q120,82 130,104 V122" stroke="#8A5A2B" stroke-width="3" fill="none"/>
+      <circle cx="30" cy="150" r="14" fill="#1B5FC1" stroke="#16293B" stroke-width="2"/><text x="30" y="155" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="Arial">J</text>
+      <path d="M48,146 Q80,140 100,132" stroke="#16293B" stroke-width="2.5" fill="none" stroke-dasharray="5 4"/>
+      <circle cx="190" cy="40" r="14" fill="#FFD23F" stroke="#16293B" stroke-width="2"/><text x="190" y="45" text-anchor="middle" font-size="14" font-weight="700" fill="#16293B" font-family="Arial">L</text>
+      <circle cx="196" cy="128" r="14" fill="#D84315" stroke="#16293B" stroke-width="2"/><text x="196" y="133" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="Arial">H</text>
+      <path d="M152,72 L174,52 M156,104 L180,120" stroke="#16293B" stroke-width="2.5" stroke-dasharray="5 4"/>
+    </svg>
+  </div>
+</section>
+
+<!-- 1 WATCH THE JOULES -->
+<section class="slide" data-title="Watch the joules">
+  <h2>1. Watch the joules go in and out</h2>
+  <p class="lead">This battery has <b>100 J</b> of energy. Each <span class="dot J">J</span> blue dot is <b>1 joule</b> of energy. Watch where the energy goes.</p>
+  <div class="work">
+    <div>
+      <div class="ctrlbox"><div class="ctrl"><b>Buttons:</b><button class="btn sm" data-act="switch">Close the switch</button><button class="btn ghost sm" data-act="refill">Refill the battery</button></div></div>
+      <div class="svgwrap" data-bench="b1"></div>
+      <div class="status" data-status="b1"></div>
+    </div>
+    <div>
+      <div class="card tight"><h3>Joule counter</h3><div class="counter" data-counter="b1"></div></div>
+      <ol class="steps" id="s1Steps">
+        <li><span class="n">1</span><span>Click the <b>switch</b> at the top of the circuit. This closes the switch.</span></li>
+        <li><span class="n">2</span><span>Watch the <span class="dot J">J</span> blue dots. They carry energy to the bulb.</span></li>
+        <li><span class="n">3</span><span>Watch dots leave the bulb. <span class="dot L">L</span> is light. <span class="dot H">H</span> is heat.</span></li>
+        <li><span class="n">4</span><span>Wait until the battery shows <b>0 J</b>. Then look at <b>Total out</b>.</span></li>
+      </ol>
+      <div class="card tight" id="s1Q" style="margin-top:8px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 TAKE THE TEMPERATURE -->
+<section class="slide" data-title="Take the temperature">
+  <h2>2. Take the temperature</h2>
+  <p class="lead">Heat is hard to see. A <b>thermometer</b> can find it. Drag the thermometer by its <b>red tip</b>. Read the number. A room is about <b>22 °C</b>.</p>
+  <div class="work">
+    <div>
+      <div class="ctrlbox"><div class="ctrl"><b>Buttons:</b><button class="btn sm" data-act="switch">Close the switch</button></div></div>
+      <div class="svgwrap" data-bench="b2"></div>
+      <details><summary>Can't drag? Use buttons</summary><div class="ctrl" style="margin-top:6px"><b>Put the red tip on:</b><span class="seg"><button data-tspot="load">The bulb</button><button data-tspot="wire">The top wire</button><button data-tspot="batt">The battery</button><button data-tspot="air">The air</button></span></div></details>
+      <div class="status" data-status="b2"></div>
+    </div>
+    <div>
+      <ol class="steps" id="s2Steps">
+        <li><span class="n">1</span><span>Drag the <b>red tip</b> onto the <b>bulb</b>.</span></li>
+        <li><span class="n">2</span><span>Click the <b>switch</b> to close it. Wait until the number is over <b>50 °C</b>.</span></li>
+        <li><span class="n">3</span><span>Drag the red tip onto the <b>top wire</b>. Wait until the number stops changing.</span></li>
+        <li><span class="n">4</span><span>Drag the red tip onto the <b>battery</b>. Wait until the number stops changing.</span></li>
+        <li><span class="n">5</span><span>Drag the red tip back onto the <b>bulb</b>.</span></li>
+        <li><span class="n">6</span><span>Click the <b>switch</b> to open it. Wait until the bulb is under <b>40 °C</b>.</span></li>
+      </ol>
+      <div class="card def tight" style="margin-top:8px"><h3>Notice</h3><p style="margin:0">The wire and the battery get a <b>tiny</b> bit warm. That heat is very small. We do not count it.</p></div>
+      <p class="small">This battery is extra big (1000 J). It lasts a long time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 TRY OTHER LOADS -->
+<section class="slide" data-title="Try other loads">
+  <h2>3. Try other loads</h2>
+  <p class="lead">Each load changes energy in a different way. Test each load. Your results go into the table by themselves.</p>
+  <div class="work">
+    <div>
+      <div class="ctrlbox"><div class="ctrl"><b>Click a load:</b><span class="seg" id="loadSeg"></span></div><div class="ctrl" style="margin-top:6px"><b>Buttons:</b><button class="btn sm" data-act="switch">Close the switch</button><button class="btn ghost sm" data-act="refill">Refill the battery</button></div></div>
+      <div class="svgwrap" data-bench="b3"></div>
+      <div class="status" data-status="b3"></div>
+      <div class="card tight" style="margin-top:8px"><h3>Your results (100 J in each time)</h3><div style="overflow-x:auto"><table><thead><tr><th>Load</th><th>Light</th><th>Heat</th><th>Sound</th><th>Motion</th><th>Hottest</th></tr></thead><tbody id="results"></tbody></table></div></div>
+    </div>
+    <div>
+      <div class="card tight"><h3>Joule counter</h3><div class="counter" data-counter="b3"></div></div>
+      <div class="card tight"><h3>Test every load</h3><ol style="margin:0 0 6px;padding-left:1.3em;font-size:15px"><li>Click a load in the box above the picture.</li><li>Click the switch.</li><li>Wait until the battery shows <b>0 J</b>.</li></ol><ol class="steps" id="s3Steps" style="grid-template-columns:1fr 1fr"></ol></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 SHORT CIRCUIT -->
+<section class="slide" data-title="Short circuit">
+  <h2>4. Short circuit: where does the energy go?</h2>
+  <p class="lead">A <b>shortcut wire</b> is an easy path around the bulb. The charges skip the bulb. The bulb goes dark. But the battery still gives away its energy. Where does it go?</p>
+  <div class="work">
+    <div>
+      <div class="ctrlbox"><div class="ctrl"><b>Buttons:</b><button class="btn sm" data-act="switch">Close the switch</button><button class="btn sm" data-act="short" style="background:#A3211A;border-color:#A3211A">Add the shortcut wire</button><button class="btn ghost sm" data-act="refill">Refill the battery</button></div></div>
+      <div class="svgwrap" data-bench="b4"></div>
+      <details><summary>Can't drag? Use buttons</summary><div class="ctrl" style="margin-top:6px"><b>Put the red tip on:</b><span class="seg"><button data-tspot="load">The bulb</button><button data-tspot="sc">The shortcut wire</button><button data-tspot="batt">The battery</button><button data-tspot="air">The air</button></span></div></details>
+      <div class="status" data-status="b4"></div>
+    </div>
+    <div>
+      <div class="card tight" style="background:#FDE4E1;border-color:#A3211A"><p style="margin:0"><b>Safety rule:</b> Only make a short circuit on the computer. <b>Never</b> do this with real batteries or a wall outlet. Real wires can get very hot and start a fire.</p></div>
+      <div class="card tight"><h3>Joule counter</h3><div class="counter" data-counter="b4"></div></div>
+      <ol class="steps" id="s4Steps">
+        <li><span class="n">1</span><span>Click the <b>switch</b> to close it. Watch the bulb light.</span></li>
+        <li><span class="n">2</span><span>Wait until the battery shows <b>0 J</b>. How many seconds did it take?</span></li>
+        <li><span class="n">3</span><span>Click <b>Refill the battery</b>. Click the red <b>Add the shortcut wire</b> button.</span></li>
+        <li><span class="n">4</span><span>Click the <b>switch</b> to close it. Watch the bulb. Does it light?</span></li>
+        <li><span class="n">5</span><span>Click <b>Refill the battery</b>. Drag the <b>red tip</b> onto the <b>shortcut wire</b>. Click the switch. How hot does it get?</span></li>
+        <li><span class="n">6</span><span>Click <b>Refill the battery</b>. Drag the red tip onto the <b>bulb</b>. Click the switch. Is the bulb hot?</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 5 SANKEY -->
+<section class="slide" data-title="Make a Sankey diagram">
+  <h2>5. Turn your results into a Sankey diagram</h2>
+  <p class="lead">A <b>Sankey diagram</b> shows joules as arrows. The blue arrow on the left is energy going <b>in</b>. It splits into arrows of energy going <b>out</b>. A <b>wide</b> arrow = a lot of joules. A <b>thin</b> arrow = a few joules.</p>
+  <div class="ctrlbox"><div class="ctrl"><b>Click a load:</b><span class="seg" id="sankSeg"></span></div></div>
+  <div class="work">
+    <div><div class="svgwrap" id="sankey" style="touch-action:auto"></div></div>
+    <div>
+      <div class="card tight" id="sankNote"></div>
+      <div class="card def tight"><h3>In your notebook</h3><p style="margin:0">Draw the Sankey diagram for the <b>light bulb</b>. Write the joules on every arrow. Circle the <b>wasted</b> energy. Then do the same for the <b>short circuit</b>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 FIND -->
+<section class="slide" data-title="What did you find?">
+  <h2>What did you find?</h2>
+  <div class="work">
+    <div class="card"><h3>Your results</h3><div style="overflow-x:auto;max-height:250px;overflow-y:auto"><table><thead><tr><th>Load</th><th>Light</th><th>Heat</th><th>Sound</th><th>Motion</th><th>Hottest</th></tr></thead><tbody id="results2"></tbody></table></div></div>
+    <div class="card" id="findQs"></div>
+  </div>
+</section>
+
+<!-- 6 QUIZ -->
+<section class="slide" data-title="Check yourself">
+  <h2>6. Check yourself</h2>
+  <p>Answer 7 questions. You get one try on each.</p>
+  <div id="quiz"></div>
+</section>
+
+</main>
+
+<nav class="bar" aria-label="Slides">
+  <button class="btn ghost" id="back">Back</button>
+  <div style="display:flex;align-items:center"><div class="dots" id="dots"></div><button class="btn ghost" id="resetBtn" type="button" style="padding:4px 10px;font-size:13px;margin-left:10px" title="Erase your work and start this activity over">Start over</button><span class="savenote">Your work saves by itself.</span></div>
+  <button class="btn" id="next">Next</button>
+</nav>
+
+<script>
+(function(){
+"use strict";
+document.addEventListener("dragstart",e=>e.preventDefault());
+document.addEventListener("selectstart",e=>{if(e.target.closest&&e.target.closest(".svgwrap"))e.preventDefault();});
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const INK="#16293B";
+/* ---------- saved progress (this browser only) ---------- */
+var SAVEKEY='mslw-energy-v1';
+var SV={};try{SV=JSON.parse(localStorage.getItem(SAVEKEY)||'{}',function(k,v){return v==='__INF__'?Infinity:v;})||{};}catch(e){SV={};}
+function persist(){try{localStorage.setItem(SAVEKEY,JSON.stringify(SV,function(k,v){return v===Infinity?'__INF__':v;}));}catch(e){}}
+function startOver(){if(!confirm('Start over? This erases your work in this activity.'))return;try{localStorage.removeItem(SAVEKEY);}catch(e){}SV={};location.reload();}
+
+/* ---------- energy types and loads ---------- */
+const TYPES={L:{name:"Light",col:"#FFD23F",txt:INK},H:{name:"Heat",col:"#D84315",txt:"#fff"},S:{name:"Sound",col:"#7B3FBF",txt:"#fff"},M:{name:"Motion",col:"#2E7D32",txt:"#fff"}};
+const ORDER=["L","S","M","H"];
+const LOADS={
+  bulb:{name:"Light bulb",out:{L:20,H:80}},
+  speaker:{name:"Speaker",out:{S:20,H:80}},
+  fan:{name:"Fan",out:{M:30,S:10,H:60}},
+  toaster:{name:"Toaster",out:{L:5,H:95}},
+  led:{name:"LED bulb",out:{L:60,H:40}}
+};
+const LOADKEYS=Object.keys(LOADS);
+function loadTarget(k){return 22+0.75*(LOADS[k].out.H||0);} // more heat out = hotter
+const AIR=22;
+
+/* ---------- geometry ---------- */
+const BX=70, LX=360, TOPY=50, BOTY=260, BT=110, BB=200, LT=120, LB=200, SW1=170, SW2=220;
+const SCX=290;
+function mkPath(pts){const segl=[];let len=0;for(let i=1;i<pts.length;i++){const d=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);segl.push(d);len+=d;}return {pts,segl,len};}
+const P_LOAD=mkPath([[BX,BT],[BX,TOPY],[LX,TOPY],[LX,LT]]), P_SHORT=mkPath([[BX,BT],[BX,TOPY],[SCX,TOPY],[SCX,155]]);
+function along(d,P){const pts=P.pts;for(let i=0;i<P.segl.length;i++){if(d<=P.segl[i]){const t=d/P.segl[i];return [pts[i][0]+(pts[i+1][0]-pts[i][0])*t,pts[i][1]+(pts[i+1][1]-pts[i][1])*t];}d-=P.segl[i];}return pts[pts.length-1];}
+const DIRS={L:[-80,-25],S:[-20,20],M:[25,70],H:[-5,60]};
+
+function spotAt(x,y,sh){
+  if(sh&&Math.abs(x-SCX)<12&&y>TOPY+6&&y<BOTY-6) return "sc";
+  if(Math.abs(x-LX)<32&&y>LT-8&&y<LB+8) return "load";
+  if(x>BX-25&&x<BX+25&&y>BT-10&&y<BB+10) return "batt";
+  if(Math.abs(y-TOPY)<12&&x>BX-6&&x<LX+6) return "wire";
+  if(Math.abs(y-BOTY)<12&&x>BX-6&&x<LX+6) return "wire";
+  if((Math.abs(x-BX)<12||Math.abs(x-LX)<12)&&((y>TOPY&&y<BT)||(y>LB&&y<BOTY))) return "wire";
+  return "air";
+}
+const SPOTPOS={load:[LX+4,160],wire:[250,TOPY],batt:[BX+4,155],sc:[SCX,180],air:[470,270]};
+const SPOTNAME={load:"the load",wire:"the wire",batt:"the battery",sc:"the shortcut wire",air:"the air"};
+function spotName(B,s){return s==="load"?"the "+LOADS[B.load].name.toLowerCase():SPOTNAME[s];}
+
+/* ---------- drawing pieces ---------- */
+function jdot(x,y,t,op){const T=t==="J"?{col:"#1B5FC1",txt:"#fff"}:TYPES[t];
+  return `<g opacity="${op==null?1:op.toFixed(2)}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="8" fill="${T.col}" stroke="${INK}" stroke-width="1.5"/><text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="${T.txt}" font-family="Arial">${t}</text></g>`;}
+function loadSVG(k,on,time){
+  const x=LX, cy=160; let s="";
+  if(k==="bulb"){
+    if(on) s+=`<circle cx="${x}" cy="${cy-6}" r="44" fill="#FFD54F" opacity=".45"/>`;
+    s+=`<circle cx="${x}" cy="${cy-8}" r="26" fill="${on?"#FFE58A":"#FAFCFD"}" stroke="${INK}" stroke-width="2.5"/>`;
+    s+=`<path d="M${x-8},${cy+18} V${cy} Q${x},${cy-20} ${x+8},${cy} V${cy+18}" stroke="${on?"#E65100":"#8A5A2B"}" stroke-width="2.5" fill="none"/>`;
+    s+=`<rect x="${x-12}" y="${cy+16}" width="24" height="18" rx="2" fill="#9AA5B1" stroke="${INK}" stroke-width="2"/>`;
+  } else if(k==="led"){
+    if(on) s+=`<circle cx="${x}" cy="${cy-10}" r="40" fill="#BFE3FF" opacity=".6"/>`;
+    s+=`<path d="M${x-16},${cy+10} V${cy-10} A16,16 0 0 1 ${x+16},${cy-10} V${cy+10} Z" fill="${on?"#F2FAFF":"#E3EAF0"}" stroke="${INK}" stroke-width="2.5"/>`;
+    s+=`<rect x="${x-20}" y="${cy+10}" width="40" height="6" fill="#9AA5B1" stroke="${INK}" stroke-width="2"/>`;
+    s+=`<path d="M${x-7},${cy+16} V${cy+40} M${x+7},${cy+16} V${cy+40}" stroke="${INK}" stroke-width="2.5"/>`;
+  } else if(k==="fan"){
+    s+=`<rect x="${x-14}" y="${cy+8}" width="28" height="30" rx="4" fill="#9AA5B1" stroke="${INK}" stroke-width="2.5"/><text x="${x}" y="${cy+28}" text-anchor="middle" font-size="10" font-weight="700" fill="${INK}" font-family="Arial">M</text>`;
+    const a=on?(time*540)%360:0;
+    s+=`<g transform="rotate(${a.toFixed(1)} ${x} ${cy-14})">`;
+    for(let i=0;i<3;i++) s+=`<ellipse cx="${x}" cy="${cy-34}" rx="8" ry="19" fill="#7FB3E6" stroke="${INK}" stroke-width="2" transform="rotate(${i*120} ${x} ${cy-14})"/>`;
+    s+=`</g><circle cx="${x}" cy="${cy-14}" r="6" fill="${INK}"/><path d="M${x},${cy-8} V${cy+8}" stroke="${INK}" stroke-width="3"/>`;
+  } else if(k==="speaker"){
+    s+=`<rect x="${x-24}" y="${cy-14}" width="14" height="28" fill="#9AA5B1" stroke="${INK}" stroke-width="2.5"/>`;
+    s+=`<path d="M${x-10},${cy-14} L${x+14},${cy-34} V${cy+34} L${x-10},${cy+14} Z" fill="#CFD8E0" stroke="${INK}" stroke-width="2.5"/>`;
+    if(on){const p=(time*2)%1; for(let i=0;i<2;i++){const r=14+((p+i*.5)%1)*22; s+=`<path d="M${x+18+r*.3},${cy-r} Q${x+18+r},${cy} ${x+18+r*.3},${cy+r}" stroke="#7B3FBF" stroke-width="2.5" fill="none" opacity="${(1-((p+i*.5)%1)).toFixed(2)}"/>`;}}
+  } else if(k==="toaster"){
+    if(on) s+=`<rect x="${x-38}" y="${cy-30}" width="76" height="64" rx="14" fill="#FF8A65" opacity=".35"/>`;
+    s+=`<rect x="${x-30}" y="${cy-20}" width="60" height="46" rx="12" fill="#CFD8E0" stroke="${INK}" stroke-width="2.5"/>`;
+    s+=`<rect x="${x-20}" y="${cy-26}" width="14" height="18" rx="3" fill="${on?"#FF7043":"#3A4A5C"}" stroke="${INK}" stroke-width="2"/><rect x="${x+6}" y="${cy-26}" width="14" height="18" rx="3" fill="${on?"#FF7043":"#3A4A5C"}" stroke="${INK}" stroke-width="2"/>`;
+    s+=`<rect x="${x+28}" y="${cy-4}" width="8" height="12" rx="2" fill="${INK}"/>`;
+    if(on) s+=`<path d="M${x-14},${cy-12} V${cy+14} M${x+12},${cy-12} V${cy+14}" stroke="#E53935" stroke-width="3"/>`;
+  }
+  s+=`<text x="${x+40}" y="${LT+4}" font-size="13" font-weight="700" fill="${INK}" font-family="Arial">${LOADS[k].name}</text>`;
+  return s;
+}
+
+/* ---------- BENCH ---------- */
+const benches={};
+function Bench(id,opts){
+  const wrap=$(`[data-bench="${id}"]`), statusEl=$(`[data-status="${id}"]`), counterEl=$(`[data-counter="${id}"]`);
+  const slide=wrap.closest(".slide");
+  const B={id,opts,load:opts.load||"bulb",cap:opts.cap||100,left:0,inLoad:0,outs:{L:0,H:0,S:0,M:0},closed:false,dots:[],fly:[],spawnT:0,time:0,
+    T:{load:AIR,wire:AIR,batt:AIR,sc:AIR},peak:AIR,short:!!opts.short0,runT:0,thermo:opts.thermo?{x:SPOTPOS[opts.thermo][0],y:SPOTPOS[opts.thermo][1]}:null,drag:null,reported:false,started:false};
+  B.P=()=>B.short?P_SHORT:P_LOAD;
+  B.setShort=function(v){B.left+=B.dots.length;B.dots=[];B.short=v;B.reported=false;B.dirty=true;sync();B.save&&B.save();};
+  B.refill=function(){B.runT=0;B.left=B.cap;B.inLoad=0;B.outs={L:0,H:0,S:0,M:0};B.dots=[];B.fly=[];B.closed=false;B.peak=B.T.load;B.reported=false;B.started=false;B.dirty=true;sync();B.save&&B.save();};
+  B.setLoad=function(k){B.load=k;B.T.load=AIR;B.refill();};
+  B.toggle=function(){B.closed=!B.closed;if(B.closed)B.started=true;B.dirty=true;sync();B.save&&B.save();};
+  B.powered=()=>B.closed&&(B.left>0||B.dots.length>0);
+  B.spot=()=>B.thermo?spotAt(B.thermo.x,B.thermo.y,B.short):"air";
+  B.reading=()=>{const s=B.spot();return s==="air"?AIR:B.T[s];};
+  function pick(){const out=LOADS[B.load].out; const n=B.inLoad; let best=null,bd=-1e9;
+    for(const t of ORDER){if(!out[t])continue; const d=out[t]*(n)/100-B.outs[t]; if(d>bd){bd=d;best=t;}} return best;}
+  B.step=function(dt){
+    B.time+=dt; let ch=false;
+    B.saveT=(B.saveT||0)+dt; if(B.saveT>1&&B.closed){B.saveT=0;B.save();}
+    if(B.closed){
+      if(B.left>0||B.dots.length) B.runT+=dt;
+      const iv=B.short?0.02:0.1, sp=B.short?600:230, P=B.P();
+      if(B.left>0){B.spawnT+=dt; while(B.spawnT>=iv&&B.left>0){B.spawnT-=iv;B.left--;B.dots.push({d:0});ch=true;}}
+      for(const d of B.dots) d.d+=sp*dt;
+      while(B.dots.length&&B.dots[0].d>=P.len){B.dots.shift();B.inLoad++;
+        if(B.short){B.outs.H++; const atB=(B.inLoad%3===0); const r=atB?[150,210]:[110,250]; const a=(r[0]+Math.random()*(r[1]-r[0]))*Math.PI/180;
+          B.fly.push({t:"H",a,age:0,w:Math.random()*6,ox:atB?BX:SCX,oy:atB?155:120+Math.random()*90});}
+        else{const t=pick();B.outs[t]++;const r=DIRS[t];const a=(r[0]+Math.random()*(r[1]-r[0]))*Math.PI/180;B.fly.push({t,a,age:0,w:Math.random()*6,ox:LX,oy:150});}
+        ch=true;}
+    }
+    for(const f of B.fly) f.age+=dt; const n0=B.fly.length; B.fly=B.fly.filter(f=>f.age<1.3); if(B.fly.length!==n0) ch=true;
+    const pw=B.powered(), tau=B.short?0.7:2.2, k=1-Math.exp(-dt/tau);
+    const tg=pw&&B.short?{load:AIR,wire:45,batt:55,sc:90}:{load:pw?loadTarget(B.load):AIR,wire:pw?24:AIR,batt:pw?26:AIR,sc:AIR};
+    for(const s in tg){const o=B.T[s];B.T[s]+= (tg[s]-B.T[s])*k; if(Math.abs(B.T[s]-o)>0.002) ch=true;}
+    if(B.T.load>B.peak) B.peak=B.T.load;
+    if(!B.reported&&B.started&&B.left===0&&B.dots.length===0&&B.fly.length===0){B.reported=true;ch=true;if(opts.onDone)opts.onDone(B);B.save();}
+    if(opts.onTick) opts.onTick(B);
+    return ch||B.fly.length>0||B.dots.length>0||pw;
+  };
+  B.render=function(){
+    const pw=B.powered(); const W=`stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"`;
+    let s=`<svg viewBox="0 0 520 300" role="img" aria-label="A circuit with a battery, a switch and a ${LOADS[B.load].name}. The switch is ${B.closed?"closed":"open"}. The battery has ${B.left} joules left.">`;
+    s+=`<rect x="0" y="0" width="520" height="300" fill="#FFFFFF"/>`;
+    // wires
+    s+=`<path d="M${BX},${BT} V${TOPY} H${SW1}" ${W}/><path d="M${SW2},${TOPY} H${LX} V${LT}" ${W}/><path d="M${LX},${LB} V${BOTY} H${BX} V${BB}" ${W}/>`;
+    if(B.short){ if(pw) s+=`<path d="M${SCX},${TOPY} V${BOTY}" stroke="#FF7043" stroke-width="12" opacity=".45"/>`;
+      s+=`<path d="M${SCX},${TOPY} V${BOTY}" ${W}/><circle cx="${SCX}" cy="${TOPY}" r="4" fill="${INK}"/><circle cx="${SCX}" cy="${BOTY}" r="4" fill="${INK}"/>`;
+      s+=`<text x="${SCX-8}" y="${BOTY-12}" text-anchor="end" font-size="12" font-weight="700" fill="#A3211A" font-family="Arial">Shortcut wire</text>`;}
+    if(pw){const off=(-B.time*(B.short?160:40))%24; const fp=B.short?`M${BX},${BT} V${TOPY} H${SCX} V${BOTY} H${BX} V${BB}`:`M${BX},${BT} V${TOPY} H${LX} V${LT} M${LX},${LB} V${BOTY} H${BX} V${BB}`;
+      s+=`<path d="${fp}" stroke="#8FA3B5" stroke-width="2" stroke-dasharray="4 8" stroke-dashoffset="${off.toFixed(1)}" fill="none"/>`;}
+    // switch
+    const lx=B.closed?SW2:SW2-8, ly=B.closed?TOPY:TOPY-26;
+    s+=`<g class="tap" data-tap="switch" role="button" tabindex="0" aria-label="${B.closed?"Open":"Close"} the switch"><rect x="${SW1-14}" y="${TOPY-44}" width="${SW2-SW1+28}" height="60" fill="transparent"/><line x1="${SW1}" y1="${TOPY}" x2="${lx}" y2="${ly}" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><circle cx="${SW1}" cy="${TOPY}" r="5" fill="${INK}"/><circle cx="${SW2}" cy="${TOPY}" r="5" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
+      <text x="${(SW1+SW2)/2}" y="${TOPY-34}" text-anchor="middle" font-size="12" font-weight="700" fill="${B.closed?"#0B6B52":"#A3211A"}" font-family="Arial">Switch: ${B.closed?"closed":"open"} (click)</text></g>`;
+    // battery
+    const fh=(BB-BT-8)*(B.left/B.cap);
+    s+=`<rect x="${BX-6}" y="${BT-8}" width="12" height="8" rx="2" fill="#B87333" stroke="${INK}" stroke-width="2"/>`;
+    s+=`<rect x="${BX-20}" y="${BT}" width="40" height="${BB-BT}" rx="5" fill="#2B3A4A" stroke="${INK}" stroke-width="2.5"/>`;
+    s+=`<rect x="${BX-15}" y="${(BB-4-fh).toFixed(1)}" width="30" height="${fh.toFixed(1)}" fill="#1B5FC1"/>`;
+    s+=`<text x="${BX}" y="${BT-14}" text-anchor="middle" font-size="12" font-weight="700" fill="${INK}" font-family="Arial">+</text>`;
+    s+=`<text x="${BX+30}" y="${BT+18}" font-size="13" font-weight="700" fill="${INK}" font-family="Arial">Battery</text>`;
+    s+=`<text x="${BX+30}" y="${BT+40}" font-size="20" fill="#1B5FC1" font-family="Share Tech Mono, Courier New, monospace">${B.left} J</text>`;
+    // load
+    s+=loadSVG(B.load,pw&&!B.short,B.time);
+    // dots in wire
+    const P=B.P(); for(const d of B.dots){const [x,y]=along(d.d,P); s+=jdot(x,y,"J");}
+    // flying out
+    for(const f of B.fly){const r=(f.ox===LX?20:8)+f.age*85; let x=f.ox+Math.cos(f.a)*r, y=f.oy+Math.sin(f.a)*r; if(f.t==="H") x+=Math.sin(f.age*14+f.w)*5; s+=jdot(x,y,f.t,f.age>0.8?1-(f.age-0.8)/0.5:1);}
+    // thermometer
+    if(B.thermo){const {x,y}=B.thermo, tv=B.reading(), col=Math.max(0,Math.min(1,(tv-15)/100))*58;
+      s+=`<g data-drag="thermo" aria-label="Thermometer. Drag the red tip onto a part.">`;
+      s+=`<rect x="${x-16}" y="${y-118}" width="32" height="120" fill="transparent"/>`;
+      s+=`<rect x="${x-6}" y="${y-76}" width="12" height="70" rx="6" fill="#fff" stroke="${INK}" stroke-width="2"/>`;
+      s+=`<rect x="${x-2.5}" y="${(y-8-col).toFixed(1)}" width="5" height="${col.toFixed(1)}" fill="#E53935"/>`;
+      s+=`<circle cx="${x}" cy="${y}" r="7" fill="#E53935" stroke="${INK}" stroke-width="2"/>`;
+      s+=`<rect x="${x-30}" y="${y-110}" width="60" height="26" rx="5" fill="${INK}"/><text x="${x}" y="${y-91}" text-anchor="middle" font-size="16" fill="#fff" font-family="Share Tech Mono, Courier New, monospace">${tv.toFixed(1)}°C</text></g>`;}
+    // key
+    const ks=["J"].concat(B.short?["H"]:ORDER.filter(t=>LOADS[B.load].out[t]));
+    let kx=10; s+=`<text x="10" y="292" font-size="12" fill="${INK}" font-family="Arial" font-weight="700">Key:</text>`; kx=48;
+    for(const t of ks){s+=jdot(kx,288,t); const nm=t==="J"?"energy from battery":TYPES[t].name.toLowerCase(); s+=`<text x="${kx+12}" y="292" font-size="12" fill="${INK}" font-family="Arial">${nm}</text>`; kx+=26+nm.length*7.2;}
+    s+=`</svg>`;
+    wrap.innerHTML=s;
+    if(counterEl) drawCounter();
+    drawStatus();
+    B.dirty=false;
+  };
+  function drawCounter(){
+    const out=B.short?{H:1}:LOADS[B.load].out; let h=`<span class="dot J">J</span><span>Left in the battery</span><span class="v">${B.left} J</span>`;
+    h+=`<span class="dot J">J</span><span>${B.short?"Went through the shortcut wire":"Went into the "+LOADS[B.load].name.toLowerCase()}</span><span class="v">${B.inLoad} J</span>`;
+    for(const t of ORDER){if(!out[t]&&!B.outs[t])continue; h+=`<span class="dot ${t}">${t}</span><span>Out as ${TYPES[t].name.toLowerCase()}${B.short&&t==="H"?" (in the wires and battery)":""}</span><span class="v">${B.outs[t]} J</span>`;}
+    const tot=ORDER.reduce((a,t)=>a+B.outs[t],0);
+    h+=`<span class="tot"></span><span class="tot">Total out</span><span class="v tot">${tot} J</span>`;
+    counterEl.innerHTML=h;
+  }
+  function drawStatus(){
+    let msg="", cls="status";
+    if(B.thermo&&!counterEl){msg=`Thermometer: <b>${B.reading().toFixed(1)} °C</b> on ${spotName(B,B.spot())}. The switch is <b>${B.closed?"closed":"open"}</b>.`;}
+    else if(B.reported){const tot=ORDER.reduce((a,t)=>a+B.outs[t],0); msg=`The battery is empty. It took <b>${Math.round(B.runT)} seconds</b>. <b>${B.inLoad} J went in. ${tot} J came out.</b> No energy was lost.${B.short?" All of it became heat.":""}`; cls+=" good";}
+    else if(B.closed&&B.short&&B.left>0){msg=`<b>Short circuit!</b> The energy skips the bulb. A lot of current flows. The wires and the battery get hot.`; cls+=" warn";}
+    else if(!B.closed) msg=B.left===B.cap?"The switch is open. No energy flows. Click the switch to close it.":"The switch is open. The energy stopped. Click the switch to close it again.";
+    else msg="The switch is closed. Energy is flowing to the load.";
+    if(B.thermo&&counterEl) msg+=` Thermometer: <b>${B.reading().toFixed(1)} °C</b> on ${spotName(B,B.spot())}.`;
+    statusEl.className=cls; statusEl.innerHTML=msg;
+  }
+  function sync(){$$('[data-act="switch"]',slide).forEach(b=>b.textContent=B.closed?"Open the switch":"Close the switch"); $$('[data-act="short"]',slide).forEach(b=>b.textContent=B.short?"Remove the shortcut wire":"Add the shortcut wire"); B.dirty=true;}
+  B.sync=sync;
+  // events
+  wrap.addEventListener("click",e=>{if(e.target.closest('[data-tap="switch"]')) B.toggle();});
+  wrap.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.closest('[data-tap="switch"]')){e.preventDefault();B.toggle();}});
+  function pt(e){const svg=wrap.querySelector("svg"); const r=svg.getBoundingClientRect(); return {x:(e.clientX-r.left)*520/r.width,y:(e.clientY-r.top)*300/r.height};}
+  wrap.addEventListener("pointerdown",e=>{if(!B.thermo||!e.target.closest('[data-drag="thermo"]'))return; e.preventDefault(); const p=pt(e); B.drag={ox:B.thermo.x-p.x,oy:B.thermo.y-p.y}; try{wrap.setPointerCapture(e.pointerId);}catch(x){}});
+  wrap.addEventListener("pointermove",e=>{if(!B.drag)return; const p=pt(e); B.thermo.x=Math.max(20,Math.min(505,p.x+B.drag.ox)); B.thermo.y=Math.max(120,Math.min(292,p.y+B.drag.oy)); B.dirty=true;});
+  const up=()=>{if(!B.drag)return; B.drag=null; B.dirty=true; B.save(); if(opts.onMove)opts.onMove(B);};
+  wrap.addEventListener("pointerup",up); wrap.addEventListener("pointercancel",up);
+  $$('[data-act="switch"]',slide).forEach(b=>b.addEventListener("click",()=>B.toggle()));
+  $$('[data-act="refill"]',slide).forEach(b=>b.addEventListener("click",()=>B.refill()));
+  $$('[data-act="short"]',slide).forEach(b=>b.addEventListener("click",()=>B.setShort(!B.short)));
+  $$('[data-tspot]',slide).forEach(b=>b.addEventListener("click",()=>{const p=SPOTPOS[b.dataset.tspot];B.thermo={x:p[0],y:p[1]};B.dirty=true;B.save();if(opts.onMove)opts.onMove(B);}));
+  B.slide=slide;
+  B.save=function(){SV.bench=SV.bench||{}; SV.bench[id]={load:B.load,left:B.left+B.dots.length,inLoad:B.inLoad,outs:Object.assign({},B.outs),short:B.short,thermo:B.thermo?{x:B.thermo.x,y:B.thermo.y}:null,reported:B.reported,started:B.started,runT:B.runT,peak:B.peak}; persist();};
+  const sv=SV.bench&&SV.bench[id]?JSON.parse(JSON.stringify(SV.bench[id])):null;
+  B.refill();
+  if(sv){B.load=sv.load||B.load;B.left=sv.left;B.inLoad=sv.inLoad;B.outs=Object.assign({L:0,H:0,S:0,M:0},sv.outs);B.short=!!sv.short;if(sv.thermo&&B.thermo)B.thermo=sv.thermo;B.reported=!!sv.reported;B.started=!!sv.started;B.runT=sv.runT||0;B.peak=sv.peak||AIR;}
+  sync();
+  benches[id]=B; return B;
+}
+
+/* ---------- SLIDE 1 ---------- */
+const s1done=SV.s1done||[false,false,false,false];
+function markSteps(sel,arr){$$(sel+" li").forEach((li,i)=>li.classList.toggle("done",!!arr[i]));}
+Bench("b1",{load:"bulb",cap:100,
+  onTick:B=>{let c=false; if(B.closed&&!s1done[0]){s1done[0]=true;c=true;} if(B.inLoad>0&&!s1done[1]){s1done[1]=true;c=true;} if(B.outs.H+B.outs.L>0&&!s1done[2]){s1done[2]=true;c=true;}
+    if(c){markSteps("#s1Steps",s1done);SV.s1done=s1done;persist();}},
+  onDone:B=>{s1done[3]=true;markSteps("#s1Steps",s1done);SV.s1done=s1done;persist();}});
+markSteps("#s1Steps",s1done);
+const S1Q={q:"The battery gave 100 J. How much energy came out of the bulb in all?",o:["100 J","20 J","0 J"],a:0,y:"Right! 20 J of light + 80 J of heat = 100 J. Energy is never lost. It only changes form.",n:"Look at Total out when the battery shows 0 J."};
+function drawS1Q(){const pk=SV.s1q==null?null:SV.s1q;
+  $("#s1Q").innerHTML=`<div class="q" style="margin:0"><b>${S1Q.q}</b>${S1Q.o.map((t,j)=>`<button class="opt${pk===j?(j===S1Q.a?" right":" wrong"):""}" data-j="${j}">${t}</button>`).join("")}${pk==null?"":`<div class="fb ${pk===S1Q.a?"good":"warn"}">${pk===S1Q.a?S1Q.y:S1Q.n}</div>`}</div>`;}
+$("#s1Q").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;SV.s1q=+b.dataset.j;persist();drawS1Q();});
+drawS1Q();
+
+/* ---------- SLIDE 2 ---------- */
+const s2done=(SV.s2done&&SV.s2done.length===6)?SV.s2done:[false,false,false,false,false,false]; let s2hot=!!SV.s2hot, wireT=0, battT=0;
+const b2=Bench("b2",{load:"bulb",cap:1000,thermo:"air",
+  onTick:B=>{const sp=B.spot(), pw=B.powered(); let c=false;
+    if(!s2done[0]&&sp==="load"){s2done[0]=true;c=true;}
+    if(!s2done[1]&&sp==="load"&&pw&&B.T.load>=50){s2done[0]=s2done[1]=true;s2hot=true;c=true;}
+    if(sp==="wire"&&pw){wireT+=1/60;}else wireT=0; if(!s2done[2]&&wireT>1.5&&s2done[1]){s2done[2]=true;c=true;}
+    if(sp==="batt"&&pw){battT+=1/60;}else battT=0; if(!s2done[3]&&battT>1.5&&s2done[1]){s2done[3]=true;c=true;}
+    if(!s2done[4]&&s2done[3]&&sp==="load"){s2done[4]=true;c=true;}
+    if(!s2done[5]&&s2hot&&s2done[4]&&sp==="load"&&!B.closed&&B.T.load<40){s2done[5]=true;c=true;}
+    if(c){markSteps("#s2Steps",s2done);SV.s2done=s2done;SV.s2hot=s2hot;persist();}},
+  onMove:B=>{SV.thermo2=B.thermo;persist();}});
+markSteps("#s2Steps",s2done);
+
+/* ---------- SLIDE 3 ---------- */
+const results=SV.results||{};
+$("#s3Steps").innerHTML=LOADKEYS.map((k,i)=>`<li style="padding:4px 8px"><span class="n">${i+1}</span><span><b>${LOADS[k].name}</b></span></li>`).join("")+
+  `<li style="padding:4px 8px;grid-column:1/-1"><span class="n">6</span><span>Which load made the <b>most heat</b>? Which got the <b>hottest</b>?</span></li>`;
+function drawResults(){
+  const rows=LOADKEYS.filter(k=>results[k]).map(k=>{const r=results[k];return `<tr><td><b>${LOADS[k].name}</b></td><td>${r.L?r.L+" J":"0"}</td><td>${r.H} J</td><td>${r.S?r.S+" J":"0"}</td><td>${r.M?r.M+" J":"0"}</td><td>${r.hot} °C</td></tr>`;}).join("");
+  $("#results").innerHTML=rows||`<tr><td colspan="6" class="small">No results yet. Run a load until the battery shows 0 J.</td></tr>`;
+  $("#results2").innerHTML=LOADKEYS.filter(k=>results[k]).map(k=>{const r=results[k];return `<tr><td><b>${LOADS[k].name}</b></td><td>${r.L||0}</td><td>${r.H}</td><td>${r.S||0}</td><td>${r.M||0}</td><td>${r.hot} °C</td></tr>`;}).join("")||`<tr><td colspan="6" class="small">Go back to slide 4 and test the loads.</td></tr>`;
+  const d=LOADKEYS.map(k=>!!results[k]); const n=d.filter(Boolean).length; d.push(n>=5);
+  markSteps("#s3Steps",d);
+  SV.results=results; persist();
+}
+const b3=Bench("b3",{load:SV.load3||"bulb",cap:100,thermo:"load",
+  onDone:B=>{const tot=ORDER.reduce((a,t)=>a+B.outs[t],0); results[B.load]=Object.assign({},B.outs,{tot,hot:Math.round(B.peak)}); drawResults();}});
+function drawLoadSeg(){$("#loadSeg").innerHTML=LOADKEYS.map(k=>`<button data-load="${k}" aria-pressed="${b3.load===k}">${LOADS[k].name}</button>`).join("");}
+$("#loadSeg").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;b3.thermo={x:SPOTPOS.load[0],y:SPOTPOS.load[1]};b3.setLoad(b.dataset.load);SV.load3=b3.load;persist();drawLoadSeg();});
+drawLoadSeg(); drawResults();
+
+/* ---------- SLIDE 4b: SHORT CIRCUIT ---------- */
+const s4done=(SV.s4done&&SV.s4done.length===6)?SV.s4done:[false,false,false,false,false,false]; let bulbT=0;
+Bench("b4",{load:"bulb",cap:100,thermo:"air",
+  onTick:B=>{const pw=B.powered(), sp=B.spot(); let c=false;
+    if(!s4done[0]&&!B.short&&pw&&B.inLoad>0){s4done[0]=true;c=true;}
+    if(!s4done[2]&&B.short){s4done[2]=true;c=true;}
+    if(!s4done[3]&&B.short&&pw&&B.inLoad>5){s4done[3]=true;c=true;}
+    if(!s4done[4]&&B.short&&pw&&sp==="sc"&&B.T.sc>55){s4done[4]=true;c=true;}
+    if(B.short&&pw&&sp==="load"){bulbT+=1/60;}else bulbT=0; if(!s4done[5]&&bulbT>1){s4done[5]=true;c=true;}
+    if(c){markSteps("#s4Steps",s4done);SV.s4done=s4done;persist();}},
+  onDone:B=>{if(!B.short){s4done[0]=s4done[1]=true;}else{SV.shortDone=true;} markSteps("#s4Steps",s4done);SV.s4done=s4done;persist();}});
+markSteps("#s4Steps",s4done);
+
+/* ---------- SLIDE 5: SANKEY ---------- */
+let sank=SV.sank||"bulb";
+function sankeySVG(k){
+  const SH=k==="short"; const out=SH?{H:100}:LOADS[k].out, nm=SH?"short circuit":LOADS[k].name, sc=1.6, ts=ORDER.filter(t=>out[t]); const gap=26;
+  const totalH=100*sc+gap*(ts.length-1); let dy=(300-totalH)/2; const y0=(300-100*sc)/2;
+  let s=`<svg viewBox="0 0 520 300" role="img" aria-label="Sankey diagram for the ${nm}. 100 joules of electrical energy go in. ${ts.map(t=>out[t]+" joules come out as "+TYPES[t].name.toLowerCase()).join(", ")}.">`;
+  s+=`<rect width="520" height="300" fill="#fff"/>`;
+  s+=`<rect x="20" y="${y0}" width="170" height="${100*sc}" fill="#1B5FC1" opacity=".85"/>`;
+  s+=`<text x="30" y="${y0+100*sc/2-4}" font-size="15" font-weight="700" fill="#fff" font-family="Arial">Electrical</text><text x="30" y="${y0+100*sc/2+16}" font-size="15" font-weight="700" fill="#fff" font-family="Arial">100 J in</text>`;
+  let ys=y0;
+  for(const t of ts){const w=out[t]*sc, T=TYPES[t];
+    s+=`<path d="M190,${ys} C255,${ys} 255,${dy} 320,${dy} L320,${dy+w} C255,${dy+w} 255,${ys+w} 190,${ys+w} Z" fill="${T.col}" opacity=".9" stroke="${INK}" stroke-width="1"/>`;
+    s+=`<path d="M320,${dy-4} L${340+Math.min(w/2,20)},${dy+w/2} L320,${dy+w+4} Z" fill="${T.col}" stroke="${INK}" stroke-width="1"/>`;
+    s+=`<text x="${350+Math.min(w/2,20)}" y="${dy+w/2+5}" font-size="15" font-weight="700" fill="${INK}" font-family="Arial">${T.name} ${out[t]} J</text>`;
+    if(!SH&&t==="H"&&k!=="toaster") s+=`<text x="${350+Math.min(w/2,20)}" y="${dy+w/2+23}" font-size="13" fill="#A3211A" font-weight="700" font-family="Arial">(wasted)</text>`;
+    if(SH) s+=`<text x="${350+Math.min(w/2,20)}" y="${dy+w/2+25}" font-size="13" fill="${INK}" font-family="Arial">in the wires and battery</text>`;
+    ys+=w; dy+=w+gap;}
+  s+=`</svg>`; return s;
+}
+function drawSankey(){
+  $("#sankSeg").innerHTML=LOADKEYS.concat(["short"]).map(k=>`<button data-sk="${k}" aria-pressed="${sank===k}">${k==="short"?"Short circuit":LOADS[k].name}</button>`).join("");
+  $("#sankey").innerHTML=sankeySVG(sank);
+  const SH=sank==="short", out=SH?{H:100}:LOADS[sank].out, ts=ORDER.filter(t=>out[t]);
+  const r=SH?SV.shortDone:results[sank];
+  if(SH){$("#sankNote").innerHTML=`<h3>Short circuit: add up the arrows</h3><p style="font-size:18px;margin:0 0 6px"><span class="dot H">H</span> 100 J = <b>100 J</b></p><p style="margin:0">All of the energy turns into <b>heat</b> in the wires and the battery. None of it becomes light. The energy is not lost. It is all wasted. ${r?"":`<span class="small">Try the short circuit on slide 5.</span>`}</p>`; SV.sank=sank; persist(); return;}
+  $("#sankNote").innerHTML=`<h3>${LOADS[sank].name}: add up the arrows</h3><p style="font-size:18px;margin:0 0 6px">${ts.map(t=>`<span class="dot ${t}">${t}</span> ${out[t]} J`).join(" + ")} = <b>100 J</b></p><p style="margin:0">The out arrows add up to the <b>100 J</b> that went in. ${r?`<span class="small">This matches your table.</span>`:`<span class="small">You have not tested this load yet. Go back to slide 4 to test it.</span>`}</p>`;
+  SV.sank=sank; persist();
+}
+$("#sankSeg").addEventListener("click",e=>{const b=e.target.closest("[data-sk]");if(!b)return;sank=b.dataset.sk;drawSankey();});
+drawSankey();
+
+/* ---------- FIND ---------- */
+const FIND=[
+ {q:"The battery gave 100 J to a load. How many joules came out in all?",o:["100 J","Less than 100 J","0 J"],a:0,y:"Right. The joules out always add up to the joules in. Energy is never lost.",n:"Look at the Total out column in your table."},
+ {q:"Which load made the most light?",o:["The LED","The old bulb","The heater"],a:0,y:"Right. The LED bulb changed 60 J into light. The light bulb only changed 20 J into light.",n:"Look at the Light column. Which number is biggest?"},
+ {q:"The thermometer read the hottest when the load made more...",o:["heat","light","sound"],a:0,y:"Right. More heat out means a higher temperature.",n:"Compare the Heat column and the Hottest column."},
+ {q:"What kind of energy did every load make?",o:["Heat","Light","Motion"],a:0,y:"Right. Every load makes some heat. That is why devices get warm.",n:"Look down the Heat column. Does every load have a number?"},
+ {q:"In the short circuit, the bulb did not light. Where did the energy go?",o:["Heat in the wires and battery","It was lost","Light in the bulb"],a:0,y:"Right. The energy took the shortcut and turned into heat. That is why short circuits can start fires.",n:"Go back to slide 5 and put the red tip on the shortcut wire."},
+ {q:"Why do people use LED bulbs instead of old light bulbs?",o:["LEDs waste less energy as heat","LEDs make more sound","LEDs use more joules"],a:0,y:"Right. The LED changes more of its energy into light and wastes less as heat.",n:"Compare the light bulb and the LED bulb in your table."},
+ {q:"Did the wire get warm when the switch was closed?",o:["A tiny bit","As hot as the bulb","Not at all"],a:0,y:"Right. Wires have a tiny bit of resistance, so they make a tiny bit of heat.",n:"Go back to slide 3 and put the red tip on the top wire."}];
+let findCur=SV.findCur||0; const findDone=SV.findDone||FIND.map(()=>false), findAns=SV.findAns||FIND.map(()=>null);
+function showFind(){
+  SV.findCur=findCur; SV.findDone=findDone; SV.findAns=findAns; persist();
+  const tabs=FIND.map((f,i)=>`<button data-ft="${i}" aria-pressed="${i===findCur}" aria-label="Question ${i+1}${findDone[i]?", answered":""}">${i+1}${findDone[i]?" ✓":""}</button>`).join("");
+  let h=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px"><b>Question ${findCur+1} of ${FIND.length}</b><span class="seg" role="group" aria-label="Pick a question">${tabs}</span></div>`;
+  h+=FIND.map((f,i)=>`<div class="q" data-f="${i}"${i===findCur?"":" hidden"}><b>${f.q}</b>${f.o.map((t,j)=>`<button class="opt${findAns[i]===j?(j===f.a?" right":" wrong"):""}" data-j="${j}">${t}</button>`).join("")}<div class="fbx">${findAns[i]===null?"":`<div class="fb ${findAns[i]===f.a?"good":"warn"}">${findAns[i]===f.a?f.y:f.n}</div>`}</div></div>`).join("");
+  h+=`<div style="display:flex;justify-content:space-between;margin-top:8px"><button class="btn ghost" data-fn="-1" style="padding:5px 12px"${findCur===0?" disabled":""}>Previous question</button><button class="btn" data-fn="1" style="padding:5px 12px"${findCur===FIND.length-1?" disabled":""}>Next question</button></div>`;
+  $("#findQs").innerHTML=h;}
+$("#findQs").addEventListener("click",e=>{
+  const t=e.target.closest("[data-ft]"); if(t){findCur=+t.dataset.ft; showFind(); return;}
+  const n=e.target.closest("[data-fn]"); if(n){findCur=Math.max(0,Math.min(FIND.length-1,findCur+ +n.dataset.fn)); showFind(); return;}
+  const b=e.target.closest(".opt"); if(!b) return; const i=+b.closest(".q").dataset.f, j=+b.dataset.j;
+  findAns[i]=j; if(j===FIND[i].a) findDone[i]=true; showFind();});
+showFind();
+
+/* ---------- QUIZ ---------- */
+const QUIZ=[
+ {q:"In a Sankey diagram, what does the widest arrow show?",o:["The most energy","The least energy","The fastest energy"],a:0,w:"Wide arrow = a lot of joules. Thin arrow = a few joules."},
+ {q:"100 J goes into a fan. 30 J comes out as motion. 10 J comes out as sound. How much comes out as heat?",o:["60 J","40 J","100 J"],a:0,w:"30 + 10 + 60 = 100. The joules out add up to the joules in."},
+ {q:"In a circuit, energy is...",o:["never lost, it only changes form","used up and gone","made by the wires"],a:0,w:"Energy is never lost. A load changes it into light, heat, sound or motion."},
+ {q:"Which kind of energy does almost every load make?",o:["Heat","Sound","Motion"],a:0,w:"Every load makes some heat. That is why devices get warm."},
+ {q:"How can you find the heat coming out of a part?",o:["Put a thermometer on it","Count the wires","Look at the switch"],a:0,w:"A thermometer shows the temperature. A hotter part is giving off more heat."},
+ {q:"A shortcut wire goes around a bulb. What happens?",o:["The bulb goes dark and the wires get hot","The bulb gets brighter","Nothing changes"],a:0,w:"The charges take the easy path. The energy turns into heat in the wires and battery."},
+ {q:"A light bulb is supposed to make light. Its heat is called...",o:["wasted energy","lost energy that is gone forever","electrical energy"],a:0,w:"The heat is not lost. It is wasted, because we did not want it."}];
+const qz=SV.qz||{i:0,score:0,picked:null};
+function drawQuiz(){
+  SV.qz=qz; persist();
+  const el=$("#quiz");
+  if(qz.i>=QUIZ.length){el.innerHTML=`<div class="card"><h3>You got ${qz.score} out of ${QUIZ.length}.</h3><p>${qz.score>=6?"Great work! You can track where the energy goes.":"Go back over the slides and try again."}</p><button class="btn" id="qAgain">Try again</button></div>`; $("#qAgain").onclick=()=>{qz.i=0;qz.score=0;qz.picked=null;drawQuiz();}; return;}
+  const q=QUIZ[qz.i];
+  el.innerHTML=`<h3>Question ${qz.i+1} of ${QUIZ.length}</h3><div class="card"><div class="q"><b>${qz.i+1}. ${q.q}</b>${q.o.map((t,j)=>{let c="";if(qz.picked!==null){if(j===q.a)c="right";else if(j===qz.picked)c="wrong";}return `<button class="opt ${c}" data-j="${j}" ${qz.picked!==null?"disabled":""}>${t}</button>`;}).join("")}${qz.picked!==null?`<div class="fb ${qz.picked===q.a?"good":"warn"}">${qz.picked===q.a?"Correct! ":"Not quite. "}${q.w}</div><p style="margin-top:10px"><button class="btn" id="qNext">${qz.i===QUIZ.length-1?"See my score":"Next question"}</button></p>`:""}</div></div>`;
+  if(qz.picked===null) $$(".opt",el).forEach(b=>b.onclick=()=>{qz.picked=+b.dataset.j; if(qz.picked===q.a) qz.score++; drawQuiz();});
+  else $("#qNext").onclick=()=>{qz.i++;qz.picked=null;drawQuiz();};
+}
+drawQuiz();
+
+/* ---------- READ TO ME ---------- */
+const SPK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+const canSpeak=("speechSynthesis" in window);
+function slideText(sl){const parts=[]; const h=sl.querySelector("h1,h2"); if(h) parts.push(h.textContent);
+  sl.querySelectorAll(".lead, ol li, ul li, .card h3 + p, .safety p, .card[style*='FDE4E1'] p").forEach(el=>{if(!el.closest("#quiz")&&!el.closest("#findQs")) parts.push(el.textContent.replace(/\s+/g," ").trim());});
+  const qq=sl.querySelector(".q:not([hidden])"); if(qq){parts.push(qq.querySelector("b").textContent); qq.querySelectorAll(".opt").forEach((o,i)=>parts.push("Choice "+(i+1)+": "+o.textContent));}
+  return [...new Set(parts)].join(". ").replace(/\.\s*\./g,".");}
+let speaking=null;
+function stopSpeak(){if(canSpeak) speechSynthesis.cancel(); if(speaking){speaking.innerHTML=SPK+" Read to me"; speaking=null;}}
+if(canSpeak) $$(".slide").forEach(sl=>{const b=document.createElement("button"); b.className="rtm"; b.type="button"; b.innerHTML=SPK+" Read to me";
+  b.addEventListener("click",()=>{if(speaking===b){stopSpeak();return;} stopSpeak(); const u=new SpeechSynthesisUtterance(slideText(sl)); u.rate=0.9; u.onend=()=>{if(speaking===b)stopSpeak();}; speaking=b; b.innerHTML=SPK+" Stop reading"; speechSynthesis.speak(u);});
+  sl.insertBefore(b,sl.firstChild);});
+
+/* ---------- ANIMATION LOOP ---------- */
+let last=performance.now();
+function frame(now){const dt=Math.min(0.05,(now-last)/1000); last=now;
+  for(const id in benches){const B=benches[id]; if(!B.slide.classList.contains("on")) continue; const busy=B.step(dt); if(busy||B.dirty) B.render();}
+  requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+
+/* ---------- NAV ---------- */
+const slides=$$(".slide"); let cur=0;
+$("#dots").innerHTML=slides.map((s,i)=>`<button aria-label="Slide ${i+1}: ${s.dataset.title}"></button>`).join("");
+function go(i){stopSpeak();cur=Math.max(0,Math.min(slides.length-1,i)); slides.forEach((s,j)=>s.classList.toggle("on",j===cur));
+  $$("#dots button").forEach((b,j)=>{if(j===cur)b.setAttribute("aria-current","step");else b.removeAttribute("aria-current");});
+  for(const id in benches) benches[id].dirty=true;
+  $("#back").disabled=cur===0; $("#next").disabled=cur===slides.length-1; window.scrollTo(0,0); SV.slide=cur; persist();}
+$("#back").onclick=()=>go(cur-1); $("#next").onclick=()=>go(cur+1);
+$("#dots").addEventListener("click",e=>{const i=$$("#dots button").indexOf(e.target); if(i>=0) go(i);});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(+b.dataset.go);});
+$("#resetBtn").onclick=startOver;
+go(SV.slide||0);
+})();
+</script>
+</body>
+</html>
