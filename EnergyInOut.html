@@ -19,7 +19,7 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bench);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.45}
-main{max-width:960px;margin:0 auto;padding:16px 16px 96px}
+main{max-width:960px;margin:0 auto;padding:10px 16px 8px}
 h1,h2{font-family:var(--font-head);margin:0 0 8px;line-height:1.1}
 h1{font-size:clamp(28px,4.6vw,40px);font-weight:800}
 h2{font-size:clamp(21px,3vw,26px);font-weight:800}
@@ -31,14 +31,14 @@ p{margin:0 0 10px}
 .slide.on{display:block}
 .intro{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:center;margin-top:8px}
 .intro svg{max-width:280px;width:100%;justify-self:center}
-.work{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:10px}
-@media (max-width:780px){.work,.intro{grid-template-columns:1fr}.intro svg{max-width:200px}}
-.card{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
-.card.tight{padding:9px 12px}
+.work{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px;align-items:start;margin-top:6px}
+@media (max-width:620px){.work,.intro{grid-template-columns:1fr}.intro svg{max-width:200px}}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.card.tight{padding:7px 11px}
 .def{border-left:6px solid var(--accent)}
 .svgwrap{background:var(--panel);border:2px solid var(--line);border-radius:12px;touch-action:none}
 .svgwrap svg{width:100%;height:auto;display:block}
-.status{border:2px solid var(--line);border-radius:10px;background:var(--panel);padding:8px 12px;min-height:42px;margin-top:8px;font-size:15px}
+.status{border:2px solid var(--line);border-radius:10px;background:var(--panel);padding:6px 11px;min-height:38px;margin-top:6px;font-size:15px}
 .status.good{background:var(--goodbg);border-color:var(--good)}
 .status.warn{background:var(--warnbg);border-color:#C88A1A}
 button{font:inherit;cursor:pointer}
@@ -46,16 +46,16 @@ button{font:inherit;cursor:pointer}
 .btn.ghost{background:var(--panel);color:var(--accent)}
 .btn.sm{padding:4px 10px;font-size:14px}
 .btn:disabled{opacity:.4;cursor:default}
-.ctrlbox{background:var(--panel);border:2px solid var(--accent);border-radius:10px;padding:7px 10px;margin-bottom:8px}
+.ctrlbox{background:var(--panel);border:2px solid var(--accent);border-radius:10px;padding:5px 9px;margin-bottom:6px}
 .ctrl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .ctrl b{font-size:14px}
 .seg{display:inline-flex;flex-wrap:wrap;border:2px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
 .seg button{border:0;background:transparent;padding:6px 11px;font-weight:700;font-size:14px;color:var(--ink)}
 .seg button+button{border-left:2px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
-ol.steps{list-style:none;padding:0;margin:0;display:grid;gap:7px}
-ol.steps li{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px;font-size:15px}
-ol.steps li .n{flex:0 0 26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px}
+ol.steps{list-style:none;padding:0;margin:0;display:grid;gap:5px}
+ol.steps li{display:flex;gap:8px;align-items:flex-start;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:4px 9px;font-size:15px;line-height:1.35}
+ol.steps li .n{flex:0 0 24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px}
 ol.steps li.done{border-color:var(--good);background:var(--goodbg)}
 ol.steps li.done .n{background:var(--good);border-color:var(--good);color:#fff}
 details{margin-top:8px;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 11px}
@@ -63,8 +63,8 @@ details summary{font-weight:700;cursor:pointer;font-size:14px}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
 th{font-size:13px;color:var(--muted)}
-.counter{display:grid;grid-template-columns:auto 1fr auto;gap:4px 8px;align-items:center;font-size:15px}
-.counter .v{font-family:var(--font-lcd);font-size:20px;text-align:right}
+.counter{display:grid;grid-template-columns:auto 1fr auto;gap:1px 8px;align-items:center;font-size:15px}
+.counter .v{font-family:var(--font-lcd);font-size:18px;text-align:right}
 .counter .tot{border-top:2px solid var(--ink);padding-top:4px;font-weight:700}
 .dot{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;color:#fff;border:2px solid #16293B}
 .dot.J{background:#1B5FC1}.dot.L{background:#FFD23F;color:#16293B}.dot.H{background:#D84315}.dot.S{background:#7B3FBF}.dot.M{background:#2E7D32}
@@ -77,11 +77,12 @@ th{font-size:13px;color:var(--muted)}
 .opt.wrong{border-color:var(--danger);background:var(--dangerbg)}
 .fb{font-size:14px;border-radius:8px;padding:7px 10px;margin-top:4px}
 .fb.good{background:var(--goodbg)}
+#s1Q .opt{display:inline-block;width:auto;margin:4px 6px 4px 0;padding:6px 16px}
 .fb.warn{background:var(--warnbg)}
-.rtm{display:inline-flex;align-items:center;gap:6px;background:var(--panel);color:var(--accent);border:2px solid var(--accent);border-radius:999px;padding:4px 12px;font-weight:700;font-size:14px;margin:0 0 8px}
+.rtm{float:right;display:inline-flex;align-items:center;gap:6px;background:var(--panel);color:var(--accent);border:2px solid var(--accent);border-radius:999px;padding:4px 12px;font-weight:700;font-size:14px;margin:0 0 4px 10px}
 .rtm svg{width:18px;height:18px}
 .savenote{font-size:12px;color:var(--muted);margin-left:8px}
-nav.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:8px 10px;z-index:5}
+nav.bar{position:sticky;bottom:0;max-width:960px;margin:0 auto;border:2px solid var(--line);border-radius:12px 12px 0 0;background:var(--panel);border-top:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:8px 10px;z-index:5}
 .dots{display:flex;gap:6px}
 .dots button{width:15px;height:15px;border-radius:50%;border:2px solid var(--accent);background:transparent;padding:0}
 .dots button[aria-current="step"]{background:var(--accent)}
@@ -132,6 +133,7 @@ svg [data-drag]{cursor:grab}
       <div class="ctrlbox"><div class="ctrl"><b>Buttons:</b><button class="btn sm" data-act="switch">Close the switch</button><button class="btn ghost sm" data-act="refill">Refill the battery</button></div></div>
       <div class="svgwrap" data-bench="b1"></div>
       <div class="status" data-status="b1"></div>
+      <div class="card tight" id="s1Q" style="margin-top:6px"></div>
     </div>
     <div>
       <div class="card tight"><h3>Joule counter</h3><div class="counter" data-counter="b1"></div></div>
@@ -141,7 +143,6 @@ svg [data-drag]{cursor:grab}
         <li><span class="n">3</span><span>Watch dots leave the bulb. <span class="dot L">L</span> is light. <span class="dot H">H</span> is heat.</span></li>
         <li><span class="n">4</span><span>Wait until the battery shows <b>0 J</b>. Then look at <b>Total out</b>.</span></li>
       </ol>
-      <div class="card tight" id="s1Q" style="margin-top:8px"></div>
     </div>
   </div>
 </section>
@@ -175,43 +176,43 @@ svg [data-drag]{cursor:grab}
 <!-- 3 TRY OTHER LOADS -->
 <section class="slide" data-title="Try other loads">
   <h2>3. Try other loads</h2>
-  <p class="lead">Each load changes energy in a different way. Test each load. Your results go into the table by themselves.</p>
+  <p class="lead">Each load changes energy in a different way. <b>1.</b> Click a load in the box. <b>2.</b> Click the switch. <b>3.</b> Wait until the battery shows <b>0 J</b>. Test all 5 loads. You get a ✓ for each one.</p>
   <div class="work">
     <div>
-      <div class="ctrlbox"><div class="ctrl"><b>Click a load:</b><span class="seg" id="loadSeg"></span></div><div class="ctrl" style="margin-top:6px"><b>Buttons:</b><button class="btn sm" data-act="switch">Close the switch</button><button class="btn ghost sm" data-act="refill">Refill the battery</button></div></div>
+      <div class="ctrlbox"><div class="ctrl"><b>Click a load:</b><span class="seg" id="loadSeg"></span></div><div class="ctrl" style="margin-top:5px"><button class="btn sm" data-act="switch">Close the switch</button><button class="btn ghost sm" data-act="refill">Refill the battery</button></div></div>
       <div class="svgwrap" data-bench="b3"></div>
       <div class="status" data-status="b3"></div>
-      <div class="card tight" style="margin-top:8px"><h3>Your results (100 J in each time)</h3><div style="overflow-x:auto"><table><thead><tr><th>Load</th><th>Light</th><th>Heat</th><th>Sound</th><th>Motion</th><th>Hottest</th></tr></thead><tbody id="results"></tbody></table></div></div>
     </div>
     <div>
       <div class="card tight"><h3>Joule counter</h3><div class="counter" data-counter="b3"></div></div>
-      <div class="card tight"><h3>Test every load</h3><ol style="margin:0 0 6px;padding-left:1.3em;font-size:15px"><li>Click a load in the box above the picture.</li><li>Click the switch.</li><li>Wait until the battery shows <b>0 J</b>.</li></ol><ol class="steps" id="s3Steps" style="grid-template-columns:1fr 1fr"></ol></div>
+      <div class="card tight"><h3>Your results (100 J in each time)</h3><div style="overflow-x:auto"><table><thead><tr><th>Load</th><th>Light</th><th>Heat</th><th>Sound</th><th>Motion</th><th>Hottest</th></tr></thead><tbody id="results"></tbody></table></div><p style="margin:6px 0 0;font-size:15px" id="s3Ask"></p></div>
     </div>
   </div>
 </section>
 
 <!-- 4 SHORT CIRCUIT -->
 <section class="slide" data-title="Short circuit">
-  <h2>4. Short circuit: where does the energy go?</h2>
-  <p class="lead">A <b>shortcut wire</b> is an easy path around the bulb. The charges skip the bulb. The bulb goes dark. But the battery still gives away its energy. Where does it go?</p>
+  <h2>4. Watch out! What if there is no load?</h2>
+  <p class="lead">The load uses the energy. It also <b>slows down</b> the charges. A <b>shortcut wire</b> lets the charges skip the load. Nothing slows them down. This is a <b>short circuit</b>. Where does the energy go?</p>
   <div class="work">
     <div>
-      <div class="ctrlbox"><div class="ctrl"><b>Buttons:</b><button class="btn sm" data-act="switch">Close the switch</button><button class="btn sm" data-act="short" style="background:#A3211A;border-color:#A3211A">Add the shortcut wire</button><button class="btn ghost sm" data-act="refill">Refill the battery</button></div></div>
+      <div class="ctrlbox"><div class="ctrl"><button class="btn sm" data-act="switch">Close the switch</button><button class="btn sm" data-act="short" style="background:#A3211A;border-color:#A3211A">Add the shortcut wire</button><button class="btn ghost sm" data-act="refill">Refill the battery</button></div></div>
       <div class="svgwrap" data-bench="b4"></div>
-      <details><summary>Can't drag? Use buttons</summary><div class="ctrl" style="margin-top:6px"><b>Put the red tip on:</b><span class="seg"><button data-tspot="load">The bulb</button><button data-tspot="sc">The shortcut wire</button><button data-tspot="batt">The battery</button><button data-tspot="air">The air</button></span></div></details>
       <div class="status" data-status="b4"></div>
+      <div class="card tight" style="background:#FDE4E1;border-color:#A3211A;margin-top:6px"><p style="margin:0"><b>Safety:</b> Only do this on the computer. <b>Never</b> with real batteries or outlets. Real wires can get hot and start a fire.</p></div>
     </div>
     <div>
-      <div class="card tight" style="background:#FDE4E1;border-color:#A3211A"><p style="margin:0"><b>Safety rule:</b> Only make a short circuit on the computer. <b>Never</b> do this with real batteries or a wall outlet. Real wires can get very hot and start a fire.</p></div>
       <div class="card tight"><h3>Joule counter</h3><div class="counter" data-counter="b4"></div></div>
       <ol class="steps" id="s4Steps">
-        <li><span class="n">1</span><span>Click the <b>switch</b> to close it. Watch the bulb light.</span></li>
-        <li><span class="n">2</span><span>Wait until the battery shows <b>0 J</b>. How many seconds did it take?</span></li>
-        <li><span class="n">3</span><span>Click <b>Refill the battery</b>. Click the red <b>Add the shortcut wire</b> button.</span></li>
-        <li><span class="n">4</span><span>Click the <b>switch</b> to close it. Watch the bulb. Does it light?</span></li>
-        <li><span class="n">5</span><span>Click <b>Refill the battery</b>. Drag the <b>red tip</b> onto the <b>shortcut wire</b>. Click the switch. How hot does it get?</span></li>
-        <li><span class="n">6</span><span>Click <b>Refill the battery</b>. Drag the red tip onto the <b>bulb</b>. Click the switch. Is the bulb hot?</span></li>
+        <li><span class="n">1</span><span>Close the <b>switch</b>. Watch the bulb light.</span></li>
+        <li><span class="n">2</span><span>Wait for <b>0 J</b>. How many seconds did it take?</span></li>
+        <li><span class="n">3</span><span>Click <b>Refill</b>. Click the red <b>Add the shortcut wire</b>.</span></li>
+        <li><span class="n">4</span><span>Close the <b>switch</b>. Does the bulb light?</span></li>
+        <li><span class="n">5</span><span>Click <b>Refill</b>. Drag the <b>red tip</b> onto the <b>shortcut wire</b>. Close the switch.</span></li>
+        <li><span class="n">6</span><span>Click <b>Refill</b>. Drag the red tip onto the <b>bulb</b>. Close the switch.</span></li>
       </ol>
+      <details style="margin-top:5px"><summary>Can't drag? Use buttons</summary><div class="ctrl" style="margin-top:6px"><b>Put the red tip on:</b><span class="seg"><button data-tspot="load">The bulb</button><button data-tspot="sc">The shortcut wire</button><button data-tspot="batt">The battery</button><button data-tspot="air">The air</button></span></div></details>
+
     </div>
   </div>
 </section>
@@ -496,19 +497,18 @@ markSteps("#s2Steps",s2done);
 
 /* ---------- SLIDE 3 ---------- */
 const results=SV.results||{};
-$("#s3Steps").innerHTML=LOADKEYS.map((k,i)=>`<li style="padding:4px 8px"><span class="n">${i+1}</span><span><b>${LOADS[k].name}</b></span></li>`).join("")+
-  `<li style="padding:4px 8px;grid-column:1/-1"><span class="n">6</span><span>Which load made the <b>most heat</b>? Which got the <b>hottest</b>?</span></li>`;
 function drawResults(){
   const rows=LOADKEYS.filter(k=>results[k]).map(k=>{const r=results[k];return `<tr><td><b>${LOADS[k].name}</b></td><td>${r.L?r.L+" J":"0"}</td><td>${r.H} J</td><td>${r.S?r.S+" J":"0"}</td><td>${r.M?r.M+" J":"0"}</td><td>${r.hot} °C</td></tr>`;}).join("");
   $("#results").innerHTML=rows||`<tr><td colspan="6" class="small">No results yet. Run a load until the battery shows 0 J.</td></tr>`;
   $("#results2").innerHTML=LOADKEYS.filter(k=>results[k]).map(k=>{const r=results[k];return `<tr><td><b>${LOADS[k].name}</b></td><td>${r.L||0}</td><td>${r.H}</td><td>${r.S||0}</td><td>${r.M||0}</td><td>${r.hot} °C</td></tr>`;}).join("")||`<tr><td colspan="6" class="small">Go back to slide 4 and test the loads.</td></tr>`;
-  const d=LOADKEYS.map(k=>!!results[k]); const n=d.filter(Boolean).length; d.push(n>=5);
-  markSteps("#s3Steps",d);
+  const n=LOADKEYS.filter(k=>results[k]).length;
+  $("#s3Ask").innerHTML=n>=5?`<b>You tested all 5!</b> Which load made the <b>most heat</b>? Which got the <b>hottest</b>?`:`You have tested <b>${n} of 5</b> loads.`;
+  if(typeof drawLoadSeg==="function"&&$("#loadSeg").children.length) drawLoadSeg();
   SV.results=results; persist();
 }
 const b3=Bench("b3",{load:SV.load3||"bulb",cap:100,thermo:"load",
   onDone:B=>{const tot=ORDER.reduce((a,t)=>a+B.outs[t],0); results[B.load]=Object.assign({},B.outs,{tot,hot:Math.round(B.peak)}); drawResults();}});
-function drawLoadSeg(){$("#loadSeg").innerHTML=LOADKEYS.map(k=>`<button data-load="${k}" aria-pressed="${b3.load===k}">${LOADS[k].name}</button>`).join("");}
+function drawLoadSeg(){$("#loadSeg").innerHTML=LOADKEYS.map(k=>`<button data-load="${k}" aria-pressed="${b3.load===k}">${results[k]?"✓ ":""}${LOADS[k].name}</button>`).join("");}
 $("#loadSeg").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;b3.thermo={x:SPOTPOS.load[0],y:SPOTPOS.load[1]};b3.setLoad(b.dataset.load);SV.load3=b3.load;persist();drawLoadSeg();});
 drawLoadSeg(); drawResults();
 
