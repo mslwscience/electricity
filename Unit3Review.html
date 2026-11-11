@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit 3 Review: Electrical Energy</title>
+<style>
+:root{--ink:#1d2433;--muted:#5b6475;--bg:#f6f8fb;--card:#fff;--line:#d5dbe5;--blue:#1b5fc1;--blueL:#eef4fb;--green:#0b6b52;--greenL:#ddf3ea;--red:#a3211a;--redL:#fde4e1;--gold:#f2b705}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);font-size:17px;line-height:1.4}
+header{background:var(--blue);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{font-size:21px;margin:0;flex:1}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.tabs button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;font-size:15px;font-weight:bold;color:var(--ink);cursor:pointer}
+.tabs button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+main{padding:12px 14px 20px;max-width:960px;margin:0 auto}
+.panel{display:none}.panel.on{display:block}
+h2{margin:4px 0 6px;font-size:21px}
+.how{color:var(--muted);margin:0 0 10px}
+.btn{border:0;border-radius:8px;padding:9px 15px;font-size:16px;font-weight:bold;cursor:pointer;background:var(--blue);color:#fff}
+.btn.alt{background:#fff;color:var(--blue);border:2px solid var(--blue)}
+.btn.green{background:var(--green)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.box{border-radius:8px;padding:9px 13px;margin:10px 0}
+.box.good{background:var(--greenL);border-left:6px solid var(--green)}
+.box.bad{background:var(--redL);border-left:6px solid var(--red)}
+.box.info{background:var(--blueL);border-left:6px solid var(--blue)}
+.score{font-weight:bold;background:#fff;border:2px solid var(--line);border-radius:8px;padding:5px 10px}
+/* flashcards */
+.fc{perspective:1000px;width:100%;max-width:560px;height:250px;margin:10px auto;cursor:pointer}
+.fc-in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.fc.flip .fc-in{transform:rotateY(180deg)}
+.fc-side{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;border:3px solid var(--blue);background:#fff}
+.fc-side.front{font-size:34px;font-weight:bold;color:var(--blue)}
+.fc-side.back{transform:rotateY(180deg);font-size:22px;background:var(--blueL)}
+.fc-hint{text-align:center;color:var(--muted);font-size:14px}
+/* match */
+.mgrid{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}
+.mcol{display:flex;flex-direction:column;gap:8px}
+.mi{border:2px solid var(--line);background:#fff;border-radius:8px;padding:10px;cursor:pointer;font-size:16px;text-align:left;min-height:48px}
+.mi.term{font-weight:bold}
+.mi.sel{border-color:var(--blue);background:var(--blueL)}
+.mi.done{border-color:var(--green);background:var(--greenL);color:#4a6;cursor:default}
+.mi.wrong{animation:shake .35s;border-color:var(--red);background:var(--redL)}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+/* word search */
+.ws-wrap{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.ws{display:grid;gap:2px;user-select:none;touch-action:manipulation}
+.ws div{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:19px;background:#fff;border:1px solid var(--line);border-radius:4px;cursor:pointer}
+.ws div.start{background:var(--gold)}
+.ws div.found{background:#9fdcc3}
+.wl{padding-left:24px;margin:0;flex:1;min-width:260px;font-size:15px}
+.wl li{padding:4px 4px;border-radius:4px;cursor:pointer}
+.wl li.cur{background:#e3eefc}
+.wl li .ans{white-space:nowrap;font-weight:bold;letter-spacing:2px;color:var(--muted)}
+.wl li.got .ans{color:var(--green)}
+.ws div.hint{outline:3px solid var(--gold);outline-offset:-3px}
+/* crossword */
+.cw-wrap{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.cw{display:grid;gap:0;background:transparent}
+.cw .c{width:32px;height:32px;position:relative}
+.cw .c.on{background:#fff;border:1px solid #444;margin:-.5px}
+.cw .c input{width:100%;height:100%;border:0;text-align:center;font-size:18px;font-weight:bold;text-transform:uppercase;background:transparent;padding:0;font-family:inherit}
+.cw .c input:focus{outline:none;background:#fff6c8}
+.cw .c.hl input{background:#e3eefc}
+.cw .c.ok input{color:var(--green)}
+.cw .c.no input{color:var(--red);background:var(--redL)}
+.cw .c .n{position:absolute;top:0;left:2px;font-size:9px;font-weight:bold;pointer-events:none}
+.clues{flex:1;min-width:250px;font-size:15px}
+.clues h3{margin:6px 0 4px;font-size:16px}
+.clues ol{margin:0;padding-left:0;list-style:none}
+.clues li{padding:3px 4px;cursor:pointer;border-radius:4px}
+.clues li.cur{background:#e3eefc}
+.clues li b{display:inline-block;min-width:24px}
+/* quiz show */
+.board{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.board .cat{background:var(--blue);color:#fff;font-weight:bold;text-align:center;padding:8px 4px;border-radius:6px;font-size:14px;display:flex;align-items:center;justify-content:center;min-height:56px}
+.board button{background:#173f86;color:var(--gold);font-size:24px;font-weight:bold;border:0;border-radius:6px;min-height:58px;cursor:pointer}
+.board button:disabled{background:#cfd6e2;color:#cfd6e2;cursor:default}
+.qcard{background:#fff;border:2px solid var(--line);border-radius:12px;padding:14px;margin-top:10px}
+.qtext{font-size:19px;font-weight:bold;margin-bottom:10px}
+.choices{display:flex;flex-direction:column;gap:7px}
+.choices button,.choices label{text-align:left;border:2px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font-size:16px;cursor:pointer;display:flex;gap:8px;align-items:flex-start;font-family:inherit;color:var(--ink)}
+.choices .right{border-color:var(--green);background:var(--greenL)}
+.choices .wrongc{border-color:var(--red);background:var(--redL)}
+.choices .letter{font-weight:bold;color:var(--blue);min-width:22px}
+table.data{border-collapse:collapse;margin:6px 0 10px;font-size:15px}
+table.data td,table.data th{border:1px solid #888;padding:4px 9px;text-align:center}
+table.data th{background:var(--blueL)}
+/* chase */
+.chase-q{background:#fff;border:2px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.chase-q .qtext{font-size:17px;margin-bottom:6px}
+.chase-ch{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:15px}
+.chase-ch span b{display:inline-block;width:24px;height:24px;border-radius:50%;color:#fff;text-align:center;line-height:24px;margin-right:5px}
+canvas{display:block;max-width:100%;border-radius:10px;margin:0 auto;touch-action:none}
+.pad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,46px);gap:5px;justify-content:center;margin-top:8px}
+.pad button{font-size:22px;border-radius:8px;border:2px solid var(--line);background:#fff;cursor:pointer}
+.legend{font-size:14px;color:var(--muted);text-align:center;margin-top:6px}
+.tiny{font-size:14px;color:var(--muted)}
+.tabs .tg{font-size:13px;font-weight:bold;color:var(--muted);align-self:center;margin-left:6px}
+.tabs .tg:first-child{margin-left:0}
+.tabs .brk{flex-basis:100%;height:0}
+/* mission map */
+.mm-banner{background:#0b1a47;color:#fff;border-radius:14px;padding:12px 16px;margin-bottom:12px;border-bottom:5px solid #ffd95c}
+.mm-banner h2{margin:0;color:#ffd95c;font-size:23px}
+.mm-banner p{margin:4px 0 0}
+.mm-prog{height:12px;background:#283a73;border-radius:8px;margin-top:8px;overflow:hidden}
+.mm-prog div{height:100%;background:#ffd95c;width:0;transition:width .4s}
+.mm-trail{position:relative;padding-left:44px}
+.mm-trail:before{content:"";position:absolute;left:19px;top:10px;bottom:10px;border-left:4px dashed #b88a3a}
+.mm-stop{position:relative;margin-bottom:14px}
+.mm-pin{position:absolute;left:-44px;top:8px;width:38px;height:38px;border-radius:50%;background:#fff;border:4px solid #0b1a47;font-weight:bold;display:flex;align-items:center;justify-content:center;font-size:17px}
+.mm-stop.done .mm-pin{background:#ffd95c}
+.mm-card{background:#fff;border:2px solid #0b1a47;border-radius:12px;padding:10px 14px;box-shadow:4px 4px 0 #a7b9fb}
+.mm-card h3{margin:0 0 6px;font-size:18px}
+.mm-card h3 .badge{font-size:13px;background:var(--blueL);color:var(--blue);border-radius:999px;padding:2px 8px;margin-left:6px}
+.bank{background:#fff4cc;border:2px solid #ffc93c;border-radius:10px;padding:7px;display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.bank .lbl{width:100%;font-size:13px;color:var(--muted)}
+.chip{border:2px solid #b88a3a;background:#fff;border-radius:8px;padding:5px 10px;font-size:16px;font-weight:bold;cursor:pointer;font-family:inherit;color:var(--ink)}
+.chip.sel{background:#0b1a47;color:#fff;border-color:#0b1a47}
+.chip.used{opacity:.3;cursor:default}
+.mm-s{margin:6px 0;line-height:2.1}
+.blank{display:inline-block;min-width:110px;border-bottom:3px solid #0b1a47;text-align:center;font-weight:bold;cursor:pointer;padding:0 6px;border-radius:4px 4px 0 0;background:#f2f5fb}
+.blank.ok{background:var(--greenL);border-color:var(--green);color:var(--green)}
+.blank.no{background:var(--redL);border-color:var(--red);color:var(--red)}
+/* sort */
+.sort-pile{display:flex;flex-wrap:wrap;gap:7px;min-height:52px;background:#fff;border:2px dashed var(--line);border-radius:10px;padding:8px;margin-bottom:10px}
+.scard{border:2px solid var(--blue);background:#fff;border-radius:8px;padding:8px 11px;font-size:16px;font-weight:bold;cursor:grab;font-family:inherit;color:var(--ink)}
+.scard.sel{background:var(--blue);color:#fff}
+.scard.wrong{animation:shake .35s;border-color:var(--red)}
+.buckets{display:grid;gap:10px}
+.bucket{border:3px solid var(--blue);border-radius:12px;background:var(--blueL);min-height:150px;padding:8px;cursor:pointer}
+.bucket h3{margin:0 0 6px;text-align:center;font-size:18px}
+.bucket .in{display:flex;flex-wrap:wrap;gap:5px}
+.bucket .in span{background:var(--greenL);border:2px solid var(--green);border-radius:6px;padding:4px 8px;font-size:14px;font-weight:bold}
+.bucket.over{background:#d4e4fa}
+/* power up */
+.pu{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.pu-word{font-size:30px;font-weight:bold;letter-spacing:8px;margin:8px 0}
+.keys{display:flex;flex-wrap:wrap;gap:5px;max-width:560px}
+.keys button{width:38px;height:42px;font-size:18px;font-weight:bold;border-radius:6px;border:2px solid var(--line);background:#fff;cursor:pointer}
+.keys button.hit{background:var(--greenL);border-color:var(--green)}
+.keys button.miss{background:var(--redL);border-color:var(--red);color:#bbb}
+/* fix circuit */
+.fx svg{width:100%;max-width:560px;display:block;margin:0 auto;background:#fff;border:2px solid var(--line);border-radius:12px}
+.fx [data-part]{cursor:pointer}
+.fx [data-part]:hover{filter:drop-shadow(0 0 4px #1b5fc1)}
+/* chain */
+.slots{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.slot{display:flex;align-items:center;gap:8px}
+.slot b{width:30px;height:30px;border-radius:50%;background:#0b1a47;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.slot div{flex:1;min-height:42px;border:2px dashed var(--line);border-radius:8px;padding:8px 10px;background:#fff;cursor:pointer;font-weight:bold}
+.slot div.ok{border:2px solid var(--green);background:var(--greenL)}
+.slot div.no{border:2px solid var(--red);background:var(--redL)}
+.slot .arrow{color:var(--muted)}
+/* memory */
+.mem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mem button{min-height:92px;border-radius:10px;border:2px solid var(--blue);background:var(--blue);color:#fff;font-size:15px;font-weight:bold;cursor:pointer;padding:6px;font-family:inherit}
+.mem button.up{background:#fff;color:var(--ink)}
+.mem button.term.up{color:var(--blue);font-size:19px}
+.mem button.got{background:var(--greenL);border-color:var(--green);color:var(--ink);cursor:default}
+/* zap */
+.zap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.hole{height:86px;border-radius:14px;background:#2a2f3d;border:4px solid #444b5e;display:flex;align-items:center;justify-content:center;padding:6px;overflow:hidden}
+.hole button{width:100%;height:100%;border:0;border-radius:10px;background:#ffd95c;font-size:16px;font-weight:bold;cursor:pointer;animation:pop .25s;font-family:inherit;color:var(--ink)}
+.hole button.zapped{background:#9fdcc3}.hole button.bad{background:#f2a49b}
+@keyframes pop{from{transform:scale(.3)}to{transform:scale(1)}}
+.timer{height:10px;background:#dfe4ee;border-radius:6px;overflow:hidden;margin:6px 0}
+.timer div{height:100%;background:var(--blue);transition:width .2s linear}
+/* bingo */
+.bingo{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:600px}
+.bingo .h{background:#0b1a47;color:#ffd95c;text-align:center;font-size:24px;font-weight:bold;padding:4px;border-radius:6px}
+.bingo button{min-height:66px;border:2px solid var(--line);background:#fff;border-radius:6px;font-size:13px;font-weight:bold;cursor:pointer;padding:3px;font-family:inherit;color:var(--ink)}
+.bingo button.mk{background:#ffd95c;border-color:#b88a3a}
+.bingo button.win{background:#9fdcc3;border-color:var(--green)}
+.caller{background:#fff;border:2px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+#printArea{display:none}
+@media print{body>*:not(#printArea){display:none!important}#printArea{display:block}.pcard{page-break-inside:avoid;break-inside:avoid;margin:0 0 18px}.pcard table{border-collapse:collapse;width:100%}.pcard td{border:2px solid #000;height:74px;width:20%;text-align:center;font:bold 14px Arial}.pcard th{font:bold 26px Arial;border:2px solid #000}}
+@media (max-width:640px){.mem{grid-template-columns:repeat(3,1fr)}.zap{grid-template-columns:1fr}.bingo button{font-size:11px;min-height:56px}}
+@media (max-width:640px){.board{grid-template-columns:repeat(5,1fr);gap:3px}.board .cat{font-size:11px}.board button{font-size:17px}.mgrid{grid-template-columns:1fr}.ws div{width:26px;height:26px;font-size:15px}}
+</style>
+</head>
+<body>
+<header><h1>Unit 3 Review: Electrical Energy</h1><button class="btn alt" id="readBtn" style="background:#fff">Read to me</button><button class="btn alt" id="resetAll" style="background:#fff">Start over</button></header>
+<nav class="tabs" id="tabs">
+  <span class="tg">Test prep:</span>
+  <button data-p="map" class="on">Mission Map</button>
+  <button data-p="quiz">Practice Quiz</button>
+  <button data-p="fix">Fix the Circuit</button>
+  <button data-p="sort">Sort It</button>
+  <button data-p="chain">Energy Chain</button>
+  <span class="brk"></span>
+  <span class="tg">Words:</span>
+  <button data-p="flash">Flashcards</button>
+  <button data-p="match">Match</button>
+  <button data-p="mem">Memory</button>
+  <button data-p="ws">Word Search</button>
+  <button data-p="cw">Crossword</button>
+  <button data-p="pu">Power Up</button>
+  <span class="brk"></span>
+  <span class="tg">Games:</span>
+  <button data-p="show">Quiz Show</button>
+  <button data-p="chase">Charge Chase</button>
+  <button data-p="zap">Zap It</button>
+  <button data-p="bingo">Bingo</button>
+</nav>
+<main>
+<section class="panel" id="p-flash">
+  <h2>Flashcards</h2>
+  <p class="how">Click the card to flip it. Then click <b>I know it</b> or <b>Still learning</b>.</p>
+  <div class="row"><span class="score" id="fcCount"></span><label class="tiny"><input type="checkbox" id="fcOnly"> Only show words I am still learning</label></div>
+  <div class="fc" id="fc"><div class="fc-in"><div class="fc-side front" id="fcFront"></div><div class="fc-side back" id="fcBack"></div></div></div>
+  <p class="fc-hint">Click the card to flip it.</p>
+  <div class="row" style="justify-content:center">
+    <button class="btn alt" id="fcPrev">Back</button>
+    <button class="btn" style="background:var(--red)" id="fcNo">Still learning</button>
+    <button class="btn green" id="fcYes">I know it</button>
+    <button class="btn alt" id="fcNext">Next</button>
+    <button class="btn alt" id="fcShuf">Shuffle</button>
+  </div>
+</section>
+
+<section class="panel" id="p-match">
+  <h2>Match</h2>
+  <p class="how">Click a word. Then click what it means. Match all 6 to win.</p>
+  <div class="row"><span class="score" id="mTime">Time: 0 s</span><span class="score" id="mBest"></span><button class="btn alt" id="mNew">New set</button></div>
+  <div class="mgrid"><div class="mcol" id="mTerms"></div><div class="mcol" id="mDefs"></div></div>
+  <div id="mMsg"></div>
+</section>
+
+<section class="panel" id="p-ws">
+  <h2>Word Search</h2>
+  <p class="how">Read a clue. Figure out the word. Then find it in the puzzle: click the <b>first letter</b>, then the <b>last letter</b>. Words go across, down, or on a slant.</p>
+  <div class="row"><span class="score" id="wsCount"></span><button class="btn alt" id="wsHint">Hint</button><button class="btn alt" id="wsNew">New puzzle</button></div>
+  <div class="ws-wrap"><div class="ws" id="wsGrid"></div><ol class="wl" id="wsList"></ol></div>
+  <div id="wsMsg"></div>
+</section>
+
+<section class="panel" id="p-cw">
+  <h2>Crossword</h2>
+  <p class="how">Click a clue or a box. Type the word. Click <b>Check</b> to see what is right.</p>
+  <div class="row"><button class="btn" id="cwCheck">Check</button><button class="btn alt" id="cwNew">New puzzle</button><button class="btn alt" id="cwShow">Show answers</button></div>
+  <div id="cwMsg"></div>
+  <div class="cw-wrap"><div class="cw" id="cwGrid"></div><div class="clues"><h3>Across</h3><ol id="cwAcross"></ol><h3>Down</h3><ol id="cwDown"></ol></div></div>
+</section>
+
+<section class="panel" id="p-show">
+  <h2>Quiz Show</h2>
+  <p class="how">Pick a box. Bigger numbers are harder. Answer right to win the points.</p>
+  <div class="row"><span class="score" id="showScore">Points: 0</span><span class="score" id="showBest"></span><button class="btn alt" id="showNew">New game</button></div>
+  <div class="board" id="board"></div>
+  <div id="showQ"></div>
+</section>
+
+<section class="panel" id="p-chase">
+  <h2>Charge Chase</h2>
+  <p class="how">You are the electron (yellow). Read the question. Move to the circle with the right letter. Stay away from the red Resistor!</p>
+  <div class="row"><span class="score" id="chScore">Points: 0</span><span class="score" id="chLives">Lives: 3</span><span class="score" id="chBest"></span><button class="btn green" id="chStart">Start</button></div>
+  <div class="chase-q" id="chQ"><div class="qtext">Click Start to play.</div></div>
+  <canvas id="chCan" width="608" height="416"></canvas>
+  <div class="pad"><span></span><button data-d="up" aria-label="Up">▲</button><span></span><button data-d="left" aria-label="Left">◀</button><button data-d="down" aria-label="Down">▼</button><button data-d="right" aria-label="Right">▶</button></div>
+  <p class="legend">Move with the arrow keys, W A S D, the buttons, or swipe.</p>
+  <div id="chMsg"></div>
+</section>
+
+<section class="panel" id="p-quiz">
+  <h2>Practice Quiz</h2>
+  <p class="how">10 questions, like the test. Read every answer before you choose. Some questions ask you to choose TWO.</p>
+  <div class="row"><span class="score" id="qzProg"></span><span class="score" id="qzBest"></span><button class="btn alt" id="qzNew">New quiz</button></div>
+  <div id="qzBox"></div>
+</section>
+<section class="panel on" id="p-map">
+  <div class="mm-banner"><h2>Unit 3 Mission Map</h2><p>Every good adventurer takes a map! Fill in each stop. Click a word in the yellow bank, then click the blank. Click <b>Check this stop</b> to see if you are right.</p><div class="mm-prog"><div id="mmBar"></div></div><p class="tiny" style="color:#cfd8f5" id="mmProg"></p></div>
+  <div class="mm-trail" id="mmTrail"></div>
+  <div class="row"><button class="btn alt" id="mmReset">Clear the whole map</button></div>
+</section>
+
+<section class="panel" id="p-sort">
+  <h2>Sort It</h2>
+  <p class="how">Click a card. Then click the box it belongs in. You can also drag the card.</p>
+  <div class="row"><span class="score" id="sortTitle"></span><span class="score" id="sortMiss"></span><button class="btn alt" id="sortNext">Next sort</button></div>
+  <div class="sort-pile" id="sortPile"></div>
+  <div class="buckets" id="sortBuckets"></div>
+  <div id="sortMsg"></div>
+</section>
+
+<section class="panel" id="p-pu">
+  <h2>Power Up</h2>
+  <p class="how">Read the clue. Guess the word one letter at a time. Each wrong letter uses up a charge in the battery. Spell the word before the battery runs out to light the bulb!</p>
+  <div class="row"><span class="score" id="puStreak"></span><span class="score" id="puBest"></span><button class="btn alt" id="puNew">New word</button></div>
+  <div class="pu"><div id="puArt"></div><div style="flex:1;min-width:280px"><div class="box info" id="puClue"></div><div class="pu-word" id="puWord"></div><div class="keys" id="puKeys"></div></div></div>
+  <div id="puMsg"></div>
+</section>
+
+<section class="panel fx" id="p-fix">
+  <h2>Fix the Circuit</h2>
+  <p class="how">The bulb will not light the right way. Find the problem. Click the part that is causing it.</p>
+  <div class="row"><span class="score" id="fxProg"></span><span class="score" id="fxMiss"></span><button class="btn alt" id="fxNew">Start over</button></div>
+  <div id="fxPic"></div>
+  <div id="fxMsg"></div>
+</section>
+
+<section class="panel" id="p-chain">
+  <h2>Energy Chain</h2>
+  <p class="how">Put the steps in order. Click a card to put it in the next empty step. Click a step to take it back out. Then click <b>Check</b>.</p>
+  <div class="row"><span class="score" id="chainTitle"></span><button class="btn" id="chainCheck">Check</button><button class="btn alt" id="chainNext">Next chain</button></div>
+  <div class="sort-pile" id="chainPile"></div>
+  <div class="slots" id="chainSlots"></div>
+  <div id="chainMsg"></div>
+</section>
+
+<section class="panel" id="p-mem">
+  <h2>Memory</h2>
+  <p class="how">Flip 2 cards. Find a word and what it means. Match all 6 pairs in as few turns as you can.</p>
+  <div class="row"><span class="score" id="memMoves"></span><span class="score" id="memBest"></span><button class="btn alt" id="memNew">New game</button></div>
+  <div class="mem" id="memGrid"></div>
+  <div id="memMsg"></div>
+</section>
+
+<section class="panel" id="p-zap">
+  <h2>Zap It</h2>
+  <p class="how">Answers pop up. Zap the right answer before it goes away! Zapping a wrong answer costs a life.</p>
+  <div class="row"><span class="score" id="zapScore"></span><span class="score" id="zapLives"></span><span class="score" id="zapBest"></span><button class="btn green" id="zapStart">Start</button></div>
+  <div class="qcard"><div class="qtext" id="zapQ">Click Start to play.</div><div class="timer"><div id="zapTime"></div></div></div>
+  <div class="zap" id="zapHoles"></div>
+  <div id="zapMsg"></div>
+</section>
+
+<section class="panel" id="p-bingo">
+  <h2>Bingo</h2>
+  <p class="how">Your teacher reads a meaning. Find the word on your card and click it. Get 5 in a row (across, down, or corner to corner) to win. You can also play alone: click <b>Call the next word</b>.</p>
+  <div class="row"><button class="btn alt" id="bgNew">New card</button><button class="btn" id="bgCall">Call the next word</button><button class="btn alt" id="bgPrint">Teacher: print 30 cards</button></div>
+  <div class="caller" id="bgCaller">Called meanings will show here.</div>
+  <div class="bingo" id="bgCard"></div>
+  <div id="bgMsg"></div>
+</section>
+</main>
+<div id="printArea"></div>
+
+<script>
+/* ---------- data ---------- */
+const VOCAB=[
+{t:"Charge",d:"A tiny bit of electricity. It is positive (+) or negative (−).",w:"CHARGE",c:"A tiny bit of electricity that is + or −"},
+{t:"Attract",d:"To pull together. Opposite charges (+ and −) attract.",w:"ATTRACT",c:"To pull together"},
+{t:"Repel",d:"To push apart. Same charges (+ and +, or − and −) repel.",w:"REPEL",c:"To push apart"},
+{t:"Static electricity",d:"Charges that build up on an object and stay there until they jump, like a shock.",w:"STATIC",c:"___ electricity: charges build up on an object, then jump as a shock"},
+{t:"Electrical potential energy",d:"Stored energy from charges. Opposite charges pulled far apart store more energy.",w:null},
+{t:"Conductor",d:"A material that lets charges flow easily, like copper.",w:"CONDUCTOR",c:"A material, like copper, that lets charges flow easily"},
+{t:"Insulator",d:"A material that blocks charges, like plastic or rubber.",w:"INSULATOR",c:"A material, like rubber, that blocks charges"},
+{t:"Circuit",d:"A complete loop that electricity flows through.",w:"CIRCUIT",c:"A complete loop that electricity flows through"},
+{t:"Closed circuit",d:"A complete loop with no gaps. Current flows.",w:"CLOSED",c:"A ___ circuit has no gaps, so current flows"},
+{t:"Open circuit",d:"A loop with a gap. Current stops.",w:"OPEN",c:"An ___ circuit has a gap, so current stops"},
+{t:"Switch",d:"Opens and closes a circuit.",w:"SWITCH",c:"It opens and closes a circuit"},
+{t:"Source",d:"The part that gives the energy, like a battery.",w:"SOURCE",c:"The part that gives the energy, like a battery"},
+{t:"Load",d:"A part that changes electrical energy into a useful form, like light or motion.",w:"LOAD",c:"A part, like a bulb, that changes electrical energy into a useful form"},
+{t:"Voltage",d:"The push on the charges. Measured in volts (V).",w:"VOLTAGE",c:"The push on the charges"},
+{t:"Current",d:"How much charge flows. Measured in amps (A).",w:"CURRENT",c:"How much charge flows, measured in amps"},
+{t:"Resistance",d:"How much a part slows the current. Measured in ohms (Ω).",w:"RESISTANCE",c:"How much a part slows the current, measured in ohms"},
+{t:"Voltmeter",d:"Measures voltage. Put the red and black probes directly on either side of a part.",w:"VOLTMETER",c:"Measures the push, with red and black probes"},
+{t:"Ammeter",d:"Measures current. The current must flow through it.",w:"AMMETER",c:"Measures current in amps"},
+{t:"Short circuit",d:"A path with no load. The current gets very high and the wires get hot.",w:"SHORT",c:"A ___ circuit has no load, so the wires get hot"},
+{t:"Conservation of energy",d:"Energy is never made or lost. It only changes form.",w:null},
+{t:"Series circuit",d:"One path. All the parts are in a row.",w:"SERIES",c:"A ___ circuit has only one path"},
+{t:"Parallel circuit",d:"More than one path. Each bulb has its own path.",w:"PARALLEL",c:"A ___ circuit gives each bulb its own path"},
+{t:"Branch",d:"One of the paths in a parallel circuit.",w:"BRANCH",c:"One of the paths in a parallel circuit"},
+{t:"Generator",d:"A machine that changes motion into electrical energy.",w:"GENERATOR",c:"A machine that changes motion into electrical energy"},
+{t:"Turbine",d:"A wheel with blades. Wind, water or steam makes it spin.",w:"TURBINE",c:"A wheel with blades that wind, water or steam spins"},
+{t:"Coil",d:"Wire wrapped around in loops.",w:"COIL",c:"Wire wrapped around in loops"},
+{t:"Electromagnet",d:"A coil of wire that is a magnet only while current flows.",w:"ELECTROMAGNET",c:"A coil that is a magnet only while current flows"},
+{t:"Motor",d:"A machine that changes electrical energy into motion.",w:"MOTOR",c:"A machine that changes electrical energy into motion"},
+{t:"Mechanical energy",d:"The energy of moving things.",w:"MECHANICAL",c:"___ energy: the energy of moving things"},
+{t:"Power plant",d:"A building that makes electricity for a whole town or city.",w:null}
+];
+const CATS=["Charges and Energy","Circuits","Voltage, Current, Resistance","Series and Parallel","Generators and Motors"];
+/* k = index of right answer (or array of 2). lv = 1-4 difficulty for the Quiz Show. */
+const Q=[
+{c:0,lv:1,q:"Two balloons both have a negative charge. What happens when they get close?",a:["They push apart (repel).","They pull together (attract).","Nothing happens.","They both turn positive."],k:0,y:"Same charges repel."},
+{c:0,lv:2,q:"A rubbed balloon is negative. Your hair is positive. What happens when the balloon gets close to your hair?",a:["They pull together (attract).","They push apart (repel).","Nothing happens.","The hair turns negative."],k:0,y:"Opposite charges attract."},
+{c:0,lv:3,q:"A + charge and a − charge are pulled farther apart. What happens to their electrical potential energy?",a:["It goes up.","It goes down.","It stays the same.","It becomes zero."],k:0,y:"Pulling opposite charges apart stores energy, like lifting a ball higher."},
+{c:0,lv:4,q:"A light bulb is on. What does it change electrical energy into?",a:["Light and heat","Motion and sound","Chemical energy","Nuclear energy"],k:0,y:"A bulb is a load that makes light. It also gets warm, so some energy becomes heat."},
+{c:0,lv:1,q:"Which one is static electricity?",a:["A shock from a doorknob after you walk on carpet","A lamp plugged into the wall","A flashlight with batteries","A fan that is turned on"],k:0,y:"Charges build up on you, then jump to the doorknob."},
+{c:0,lv:2,q:"Energy is never ______.",a:["lost","changed","moved","used"],k:0,y:"Energy only changes form. This is conservation of energy."},
+{c:0,lv:3,q:"A fan is on. Where does the electrical energy go?",a:["Motion, sound and heat","Only motion","Only light","It disappears"],k:0,y:"The blades move, the motor hums and gets warm. Together they equal the energy in."},
+{c:1,lv:1,q:"In a flashlight, which part is the source of energy?",a:["The battery","The bulb","The switch","The wire"],k:0,y:"The source gives the energy. In a flashlight, that is the battery."},
+{c:1,lv:2,q:"What is a load?",a:["A part that changes electrical energy into something useful, like light or motion","A part that stores new charges for the battery","A gap in the circuit","A wire that speeds up the current"],k:0,y:"Bulbs, fans and buzzers are loads."},
+{c:1,lv:1,q:"Which list has only conductors?",a:["Copper, aluminum, gold","Copper, plastic, wood","Rubber, glass, plastic","Paper, silver, air"],k:0,y:"Metals like copper, aluminum and gold let charges flow easily."},
+{c:1,lv:2,q:"You turn a switch off. What kind of circuit is it now?",a:["Open","Closed","Short","Parallel"],k:0,y:"Turning the switch off makes a gap. A circuit with a gap is open."},
+{c:1,lv:3,q:"A bulb's thin wire (filament) breaks. Why does the light go out?",a:["The circuit is now open. Charges need a complete loop.","The battery ran out of energy.","The copper wire turned into an insulator.","The bulb turned into a source."],k:0,y:"The break is a gap, so the loop is not complete."},
+{c:1,lv:4,q:"A wire goes from one end of the battery straight to the other end. There is no load. What happens?",a:["The current gets very high and the wires get hot.","Nothing happens because there is no bulb.","The current stops.","The battery charges up."],k:0,y:"This is a short circuit. Nothing slows the charges, so the energy turns into heat."},
+{c:1,lv:3,q:"In a short circuit, where does most of the energy go?",a:["Heat in the wires and battery","Light","Sound","Back into the battery"],k:0,y:"With no load, the wires and battery get hot."},
+{c:2,lv:1,q:"What does a voltmeter measure?",a:["Voltage (the push)","Current","Resistance","Weight"],k:0,y:"Volt-meter measures volts."},
+{c:2,lv:1,q:"What does an ammeter measure?",a:["Current (how much charge flows)","Voltage","Resistance","Heat"],k:0,y:"Amm-eter measures amps."},
+{c:2,lv:2,q:"Which unit is used for resistance?",a:["Ohms (Ω)","Volts (V)","Amps (A)","Joules (J)"],k:0,y:"Volts = voltage, amps = current, ohms = resistance."},
+{c:2,lv:2,q:"1 battery gives 1.5 volts. How many volts do 3 batteries in a row give?",a:["4.5 V","1.5 V","3.0 V","6.0 V"],k:0,y:"1.5 + 1.5 + 1.5 = 4.5 V. More batteries, more push."},
+{c:2,lv:3,q:"The resistance stays the same. You add more voltage. What happens to the current?",a:["It goes up.","It goes down.","It stops.","It stays the same."],k:0,y:"More push makes more charge flow."},
+{c:2,lv:3,q:"Which wire has the most resistance?",a:["Long and skinny","Short and wide","Short and skinny","Long and wide"],k:0,y:"Longer and skinnier wires slow the current the most."},
+{c:2,lv:4,t:[["Wire","Resistance","Current"],["A","2 Ω","4 A"],["B","4 Ω","2 A"],["C","8 Ω","1 A"]],q:"Look at the table. As resistance goes up, what happens to the current?",a:["It goes down.","It goes up.","It stays the same.","There is no pattern."],k:0,y:"2 → 4 → 8 Ω, and the current went 4 → 2 → 1 A. More resistance, less current."},
+{c:2,lv:4,t:[["Wire","Resistance","Current"],["A","2 Ω","4 A"],["B","4 Ω","2 A"],["C","8 Ω","1 A"]],q:"Look at the table. Which wire lets charges flow the easiest?",a:["Wire A","Wire B","Wire C","They are all the same."],k:0,y:"Wire A has the least resistance and the most current."},
+{c:2,lv:3,q:"Where do the voltmeter's red and black probes go?",a:["Directly on either side of the part","Both on the same wire","Inside the battery","Anywhere on the table"],k:0,y:"The voltmeter compares the push on one side of the part to the other side."},
+{c:3,lv:1,q:"How many paths does a series circuit have?",a:["1","2","3","As many as there are bulbs"],k:0,y:"Series = one path, all in a row."},
+{c:3,lv:1,q:"One bulb is removed from a series circuit. What happens to the other bulbs?",a:["They go out.","They stay on.","They get brighter.","They blink."],k:0,y:"The one path now has a gap, so the circuit is open."},
+{c:3,lv:2,q:"One bulb is removed from a parallel circuit. What happens to the other bulbs?",a:["They stay on.","They go out.","They get dimmer.","They burn out."],k:0,y:"Each bulb has its own path, so the other paths are still closed."},
+{c:3,lv:2,q:"You add more bulbs in a row (series). What happens?",a:["All the bulbs get dimmer.","All the bulbs get brighter.","Nothing changes.","Only the first bulb lights."],k:0,y:"Each bulb adds resistance, so less current flows."},
+{c:3,lv:3,q:"Why are homes wired with parallel circuits?",a:["Turning off one thing does not turn off everything else.","It uses less wire.","It makes everything dimmer.","It stops all energy changes."],k:0,y:"Each device has its own path."},
+{c:3,lv:3,q:"You add more bulbs in parallel. What happens to their brightness?",a:["They stay just as bright.","They all get dimmer.","They all go out.","Only one stays on."],k:0,y:"Each bulb gets the full push of the battery. (The battery runs down faster.)"},
+{c:3,lv:4,q:"A 9 V battery runs 2 matching bulbs in series. How much voltage does each bulb get?",a:["4.5 V","9 V","18 V","0 V"],k:0,y:"In series, the bulbs share the push: 4.5 + 4.5 = 9 V."},
+{c:3,lv:4,q:"A 9 V battery runs 2 matching bulbs in parallel. How much voltage does each bulb get?",a:["9 V","4.5 V","18 V","3 V"],k:0,y:"In parallel, each bulb gets the full push of the battery."},
+{c:3,lv:2,q:"In a series circuit, the current is ______.",a:["the same everywhere","bigger after each bulb","zero after the first bulb","only in the battery"],k:0,y:"There is one path, so every charge goes through every part."},
+{c:4,lv:1,q:"What does a generator do?",a:["Changes motion into electrical energy","Changes electrical energy into motion","Stores charges","Measures voltage"],k:0,y:"Spin it, and electricity comes out."},
+{c:4,lv:1,q:"What does a motor do?",a:["Changes electrical energy into motion","Changes motion into electrical energy","Makes new energy","Blocks current"],k:0,y:"Put electricity in, and it spins."},
+{c:4,lv:2,q:"In a power plant, what spins the generator?",a:["A turbine","A battery","A switch","A light bulb"],k:0,y:"Wind, water or steam pushes the turbine's blades."},
+{c:4,lv:2,q:"Which one has a motor?",a:["A blender","A wind turbine","A dam","A hand-crank flashlight"],k:0,y:"Electricity goes in and the blades spin."},
+{c:4,lv:3,q:"Which one is a generator?",a:["A wind turbine","A fan","A blender","A drill"],k:0,y:"Wind spins it, and electricity comes out."},
+{c:4,lv:3,q:"How can you make a generator make more current?",a:["Spin the magnet faster.","Spin the magnet slower.","Stop the magnet.","Use fewer loops of wire."],k:0,y:"Faster spinning, a stronger magnet or more loops make more current."},
+{c:4,lv:4,q:"When does a coil of wire become a magnet (an electromagnet)?",a:["When current flows through it","When it is cold","When it is wrapped in plastic","Always"],k:0,y:"No current, no magnet."},
+{c:4,lv:4,q:"In a coal or nuclear power plant, what pushes the turbine blades?",a:["Steam","Wind","Sunlight","Batteries"],k:0,y:"The fuel heats water into steam. The steam spins the turbine."},
+/* practice-only: choose TWO and claim / evidence / reasoning */
+{c:3,lv:0,two:1,q:"Choose TWO. Which are true about a parallel circuit?",a:["Each bulb has its own path.","If one bulb goes out, the others stay on.","All the bulbs share one path.","Adding bulbs makes them all dimmer."],k:[0,1],y:"Parallel = more than one path, so one gap does not stop the others."},
+{c:1,lv:0,two:1,q:"Choose TWO. Which are true about a short circuit?",a:["The current skips the load.","The wires get very hot.","It is the same as an open circuit.","The battery saves its energy."],k:[0,1],y:"With no load to slow the charges, the current is very high and makes heat."},
+{c:4,lv:0,two:1,q:"Choose TWO. You turn the crank on a hand-crank flashlight. Which are true?",a:["It has a generator inside.","Motion changes into electrical energy.","It changes electrical energy into motion.","It works without anyone turning it."],k:[0,1],y:"You spin it, and electricity comes out. That is a generator."},
+{c:1,lv:0,q:"Sam unplugs one bulb. The other bulb stays on. Sam says, \"The circuit is parallel.\" Which sentence is the EVIDENCE?",a:["The other bulb stayed on after one bulb was unplugged.","The circuit is parallel.","Each bulb has its own path, so one gap does not break the other path.","Sam used new batteries."],k:0,y:"Evidence is what you saw or measured. The claim is the answer. The reasoning is the science rule."},
+{c:1,lv:0,q:"Sam unplugs one bulb. The other bulb stays on. Sam says, \"The circuit is parallel.\" Which sentence is the REASONING?",a:["Each bulb has its own path, so one gap does not break the other path.","The other bulb stayed on.","The circuit is parallel.","The bulbs were the same color."],k:0,y:"Reasoning is the science rule that connects the evidence to the claim."}
+];
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const KEY="mslw-unit3review-v1";
+let S={known:[],best:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s)S=Object.assign(S,s)}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function best(name,val,lowWins){const b=S.best[name];if(b==null||(lowWins?val<b:val>b)){S.best[name]=val;save();return true}return false}
+function speak(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.9;speechSynthesis.speak(u)}catch(e){}}
+let current="map";
+const readers={};
+$("#readBtn").onclick=()=>{const f=readers[current];if(f)speak(f())};
+$("#resetAll").onclick=()=>{if(!confirm("Erase your saved map, cards and best scores?"))return;S={known:[],best:{},map:{}};save();initAll()};
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+b.dataset.p));
+  current=b.dataset.p; if(current!=="chase")chPause(); try{speechSynthesis.cancel()}catch(e){}
+});
+function tableHTML(t){if(!t)return"";return '<table class="data">'+t.map((r,i)=>"<tr>"+r.map(c=>i?"<td>"+c+"</td>":"<th>"+c+"</th>").join("")+"</tr>").join("")+"</table>"}
+/* build a shuffled-choice copy of a question */
+function prep(q){const ord=shuffle(q.a.map((_,i)=>i));const keys=[].concat(q.k);return Object.assign({},q,{a:ord.map(i=>q.a[i]),k:keys.map(k=>ord.indexOf(k))})}
+
+/* ---------- flashcards ---------- */
+let fcOrder=[],fcI=0;
+function fcList(){const only=$("#fcOnly").checked;return VOCAB.map((v,i)=>i).filter(i=>!only||!S.known.includes(VOCAB[i].t))}
+function fcInit(){fcOrder=shuffle(fcList());fcI=0;fcShow()}
+function fcShow(){
+  const wasFlipped=$("#fc").classList.contains("flip");$("#fc").classList.remove("flip");
+  $("#fcCount").textContent="I know "+S.known.length+" of "+VOCAB.length;
+  if(!fcOrder.length){$("#fcFront").textContent="You know them all!";$("#fcBack").textContent="Uncheck the box to see every card.";return}
+  const v=VOCAB[fcOrder[fcI%fcOrder.length]];
+  const put=()=>{$("#fcFront").textContent=v.t;$("#fcBack").textContent=v.d};if(wasFlipped)setTimeout(put,200);else put();
+}
+$("#fc").onclick=()=>$("#fc").classList.toggle("flip");
+$("#fcNext").onclick=()=>{fcI=(fcI+1)%Math.max(1,fcOrder.length);fcShow()};
+$("#fcPrev").onclick=()=>{fcI=(fcI-1+fcOrder.length)%Math.max(1,fcOrder.length);fcShow()};
+$("#fcShuf").onclick=()=>{fcOrder=shuffle(fcOrder);fcI=0;fcShow()};
+$("#fcOnly").onchange=fcInit;
+function fcMark(k){if(!fcOrder.length)return;const t=VOCAB[fcOrder[fcI%fcOrder.length]].t;S.known=S.known.filter(x=>x!==t);if(k)S.known.push(t);save();
+  if($("#fcOnly").checked&&k){fcOrder=fcList();if(fcI>=fcOrder.length)fcI=0}else fcI=(fcI+1)%fcOrder.length;fcShow()}
+$("#fcYes").onclick=()=>fcMark(true);$("#fcNo").onclick=()=>fcMark(false);
+readers.flash=()=>{if(!fcOrder.length)return"";const v=VOCAB[fcOrder[fcI%fcOrder.length]];return v.t+". "+v.d};
+
+/* ---------- match ---------- */
+let mSet=[],mSel=null,mLeft=0,mT0=0,mTimer=null;
+function mInit(){
+  clearInterval(mTimer);mSet=shuffle(VOCAB).slice(0,6);mSel=null;mLeft=6;$("#mMsg").innerHTML="";
+  $("#mTerms").innerHTML=mSet.map((v,i)=>`<button class="mi term" data-i="${i}">${v.t}</button>`).join("");
+  $("#mDefs").innerHTML=shuffle(mSet.map((v,i)=>i)).map(i=>`<button class="mi def" data-i="${i}">${mSet[i].d}</button>`).join("");
+  mT0=0;$("#mTime").textContent="Time: 0 s";$("#mBest").textContent=S.best.match!=null?"Best: "+S.best.match+" s":"Best: none yet";
+  document.querySelectorAll("#p-match .mi").forEach(b=>b.onclick=()=>mClick(b));
+}
+function mClick(b){
+  if(b.classList.contains("done"))return;
+  if(!mT0){mT0=Date.now();mTimer=setInterval(()=>$("#mTime").textContent="Time: "+Math.round((Date.now()-mT0)/1000)+" s",500)}
+  if(!mSel||mSel.classList.contains("term")===b.classList.contains("term")){if(mSel)mSel.classList.remove("sel");mSel=b;b.classList.add("sel");speak(b.textContent);return}
+  if(mSel.dataset.i===b.dataset.i){[mSel,b].forEach(x=>{x.classList.remove("sel");x.classList.add("done")});mSel=null;mLeft--;
+    if(!mLeft){clearInterval(mTimer);const s=Math.round((Date.now()-mT0)/1000);const nb=best("match",s,true);$("#mBest").textContent="Best: "+S.best.match+" s";
+      $("#mMsg").innerHTML=`<div class="box good"><b>You matched all 6 in ${s} seconds!</b> ${nb?"New best time!":""} Click <b>New set</b> to play again.</div>`}}
+  else{const w=b;w.classList.add("wrong");setTimeout(()=>w.classList.remove("wrong"),400);mSel.classList.remove("sel");mSel=null}
+}
+$("#mNew").onclick=mInit;
+readers.match=()=>"Click a word. Then click what it means.";
+
+/* ---------- word search ---------- */
+const WS_N=12;let wsGrid=[],wsWords=[],wsFound=[],wsStart=null,wsClue=0;
+function wsInit(){
+  const pool=shuffle(VOCAB.filter(v=>v.w&&v.w.length<=WS_N).map(v=>v.w));
+  const dirs=[[0,1],[1,0],[1,1]];
+  for(let tries=0;tries<50;tries++){
+    wsGrid=Array.from({length:WS_N},()=>Array(WS_N).fill(""));wsWords=[];
+    for(const w of pool){if(wsWords.length>=10)break;
+      let placed=false;for(let t=0;t<120&&!placed;t++){const [dr,dc]=dirs[Math.floor(Math.random()*3)];
+        const r=Math.floor(Math.random()*(WS_N-(dr?w.length-1:0))),c=Math.floor(Math.random()*(WS_N-(dc?w.length-1:0)));
+        let ok=true;for(let i=0;i<w.length;i++){const x=wsGrid[r+dr*i][c+dc*i];if(x&&x!==w[i]){ok=false;break}}
+        if(ok){for(let i=0;i<w.length;i++)wsGrid[r+dr*i][c+dc*i]=w[i];wsWords.push({w,r,c,dr,dc});placed=true}}
+    }
+    if(wsWords.length>=10)break;
+  }
+  const AB="ABCDEFGHIJKLMNOPRSTUVWY";
+  for(let r=0;r<WS_N;r++)for(let c=0;c<WS_N;c++)if(!wsGrid[r][c])wsGrid[r][c]=AB[Math.floor(Math.random()*AB.length)];
+  wsFound=[];wsStart=null;wsClue=0;$("#wsMsg").innerHTML="";
+  const g=$("#wsGrid");g.style.gridTemplateColumns=`repeat(${WS_N},auto)`;
+  g.innerHTML=wsGrid.map((row,r)=>row.map((ch,c)=>`<div data-r="${r}" data-c="${c}">${ch}</div>`).join("")).join("");
+  g.querySelectorAll("div").forEach(d=>d.onclick=()=>wsClick(+d.dataset.r,+d.dataset.c,d));
+  wsDraw();
+}
+function wsCell(r,c){return document.querySelector(`#wsGrid div[data-r="${r}"][data-c="${c}"]`)}
+function wsDraw(){
+  $("#wsList").innerHTML=wsWords.map((o,i)=>{const got=wsFound.includes(o.w);const v=VOCAB.find(x=>x.w===o.w);return `<li data-i="${i}" class="${got?"got":""}${i===wsClue?" cur":""}">${v.c} <span class="ans">${got?o.w:o.w.replace(/./g,"_ ").trim()}</span></li>`}).join("");
+  document.querySelectorAll("#wsList li").forEach(l=>l.onclick=()=>{wsClue=+l.dataset.i;wsDraw();speak(l.firstChild.textContent)});
+  $("#wsCount").textContent="Found "+wsFound.length+" of "+wsWords.length;
+}
+function wsClick(r,c,d){
+  if(!wsStart){wsStart=[r,c];d.classList.add("start");return}
+  const [r0,c0]=wsStart;wsCell(r0,c0).classList.remove("start");wsStart=null;
+  const hit=wsWords.find(o=>!wsFound.includes(o.w)&&((o.r===r0&&o.c===c0&&o.r+o.dr*(o.w.length-1)===r&&o.c+o.dc*(o.w.length-1)===c)||(o.r===r&&o.c===c&&o.r+o.dr*(o.w.length-1)===r0&&o.c+o.dc*(o.w.length-1)===c0)));
+  if(hit){wsFound.push(hit.w);for(let i=0;i<hit.w.length;i++)wsCell(hit.r+hit.dr*i,hit.c+hit.dc*i).classList.add("found");
+    document.querySelectorAll("#wsGrid .hint").forEach(x=>x.classList.remove("hint"));
+    const v=VOCAB.find(x=>x.w===hit.w);const n=wsWords.indexOf(hit);$("#wsMsg").innerHTML=`<div class="box good"><b>Clue ${n+1}: ${v.t}!</b> ${v.d}</div>`;
+    const nx=wsWords.findIndex(o=>!wsFound.includes(o.w));if(nx>=0)wsClue=nx;wsDraw();
+    if(wsFound.length===wsWords.length)$("#wsMsg").innerHTML+=`<div class="box good"><b>You found every word!</b> Click <b>New puzzle</b> to play again.</div>`}
+  else if(!(r===r0&&c===c0)){$("#wsMsg").innerHTML=`<div class="box info">Not a word yet. Click the <b>first letter</b>, then the <b>last letter</b>.</div>`}
+}
+$("#wsNew").onclick=wsInit;
+readers.ws=()=>{const o=wsWords[wsClue];if(!o)return"";const v=VOCAB.find(x=>x.w===o.w);return "Clue "+(wsClue+1)+". "+v.c+". The word has "+o.w.length+" letters."};
+$("#wsHint").onclick=()=>{const o=wsWords[wsClue];if(!o||wsFound.includes(o.w))return;document.querySelectorAll("#wsGrid .hint").forEach(x=>x.classList.remove("hint"));wsCell(o.r,o.c).classList.add("hint");
+  $("#wsMsg").innerHTML=`<div class="box info">Hint for clue ${wsClue+1}: the word starts with <b>${o.w[0]}</b> and has <b>${o.w.length}</b> letters. Look for the gold box.</div>`};
+
+/* ---------- crossword ---------- */
+let CW=null,cwDir="a",cwCur=null;
+function cwBuild(words){
+  let best=null;
+  for(let attempt=0;attempt<40;attempt++){
+    const order=attempt?shuffle(words):words.slice().sort((a,b)=>b.w.length-a.w.length);
+    const cells=new Map(),placed=[];const k=(r,c)=>r+","+c;
+    const can=(w,r,c,dir)=>{const dr=dir==="d"?1:0,dc=dir==="a"?1:0;let cross=0;
+      if(cells.has(k(r-dr,c-dc))||cells.has(k(r+dr*w.length,c+dc*w.length)))return -1;
+      for(let i=0;i<w.length;i++){const rr=r+dr*i,cc=c+dc*i,cell=cells.get(k(rr,cc));
+        if(cell){if(cell.ch!==w[i]||cell[dir])return -1;cross++}
+        else{if(cells.has(k(rr+dc,cc+dr))||cells.has(k(rr-dc,cc-dr)))return -1}}
+      return cross};
+    const put=(o,r,c,dir)=>{const dr=dir==="d"?1:0,dc=dir==="a"?1:0;for(let i=0;i<o.w.length;i++){const kk=k(r+dr*i,c+dc*i);const cell=cells.get(kk)||{ch:o.w[i]};cell[dir]=true;cells.set(kk,cell)}placed.push({w:o.w,c:o.c,r,col:c,dir})};
+    put(order[0],0,0,"a");
+    for(const o of order.slice(1)){let opt=null;
+      for(const [kk,cell] of cells){const [r,c]=kk.split(",").map(Number);
+        for(let i=0;i<o.w.length;i++){if(o.w[i]!==cell.ch)continue;
+          for(const dir of ["a","d"]){if(cell[dir])continue;const sr=dir==="d"?r-i:r,sc=dir==="a"?c-i:c;const x=can(o.w,sr,sc,dir);
+            if(x>0&&(!opt||x>opt.x||(x===opt.x&&Math.random()<.3)))opt={x,r:sr,c:sc,dir}}}}
+      if(opt)put(o,opt.r,opt.c,opt.dir)}
+    let minR=1e9,minC=1e9,maxR=-1e9,maxC=-1e9;for(const kk of cells.keys()){const [r,c]=kk.split(",").map(Number);minR=Math.min(minR,r);minC=Math.min(minC,c);maxR=Math.max(maxR,r);maxC=Math.max(maxC,c)}
+    const H=maxR-minR+1,W=maxC-minC+1;if(W>18||H>18)continue;
+    const score=placed.length*100-(W*H)/4-Math.abs(W-H)*2;
+    if(!best||score>best.score)best={score,placed:placed.map(p=>Object.assign(p,{r:p.r-minR,col:p.col-minC})),H,W};
+  }
+  return best;
+}
+function cwInit(){
+  const words=shuffle(VOCAB.filter(v=>v.w).map(v=>({w:v.w,c:v.c}))).slice(0,13);
+  CW=cwBuild(words);
+  const grid=Array.from({length:CW.H},()=>Array(CW.W).fill(null));
+  const starts={};let n=0;
+  const sorted=CW.placed.slice().sort((a,b)=>a.r-b.r||a.col-b.col);
+  for(const p of sorted){const key=p.r+","+p.col;if(!starts[key])starts[key]=++n;p.n=starts[key];
+    for(let i=0;i<p.w.length;i++){const r=p.r+(p.dir==="d"?i:0),c=p.col+(p.dir==="a"?i:0);grid[r][c]=grid[r][c]||{ch:p.w[i],words:[]};grid[r][c].words.push(p)}}
+  CW.grid=grid;
+  const g=$("#cwGrid");g.style.gridTemplateColumns=`repeat(${CW.W},32px)`;g.innerHTML="";
+  for(let r=0;r<CW.H;r++)for(let c=0;c<CW.W;c++){const d=document.createElement("div");d.className="c";const cell=grid[r][c];
+    if(cell){d.classList.add("on");const num=starts[r+","+c];d.innerHTML=(num?`<span class="n">${num}</span>`:"")+`<input maxlength="1" aria-label="row ${r+1} column ${c+1}">`;
+      const inp=d.querySelector("input");cell.el=d;cell.inp=inp;
+      inp.onfocus=()=>{if(!cell.words.some(w=>w.dir===cwDir))cwDir=cell.words[0].dir;cwCur={r,c};cwHL()};
+      inp.onclick=()=>{if(cwCur&&cwCur.r===r&&cwCur.c===c&&cell.words.length>1){cwDir=cwDir==="a"?"d":"a";cwHL()}};
+      inp.oninput=()=>{inp.value=inp.value.replace(/[^a-z]/gi,"").slice(-1).toUpperCase();d.classList.remove("ok","no");if(inp.value)cwMove(1)};
+      inp.onkeydown=e=>{if(e.key==="Backspace"&&!inp.value){cwMove(-1);e.preventDefault()}
+        const m={ArrowRight:[0,1,"a"],ArrowLeft:[0,-1,"a"],ArrowDown:[1,0,"d"],ArrowUp:[-1,0,"d"]}[e.key];
+        if(m){e.preventDefault();const nr=r+m[0],nc=c+m[1];if(grid[nr]&&grid[nr][nc]){cwDir=m[2];grid[nr][nc].inp.focus()}}};}
+    g.appendChild(d)}
+  const li=p=>`<li data-id="${p.dir}${p.n}"><b>${p.n}.</b> ${p.c} <span class="tiny">(${p.w.length} letters)</span></li>`;
+  $("#cwAcross").innerHTML=sorted.filter(p=>p.dir==="a").map(li).join("");
+  $("#cwDown").innerHTML=sorted.filter(p=>p.dir==="d").map(li).join("");
+  document.querySelectorAll(".clues li").forEach(l=>l.onclick=()=>{const p=CW.placed.find(x=>x.dir+x.n===l.dataset.id);cwDir=p.dir;grid[p.r][p.col].inp.focus()});
+  $("#cwMsg").innerHTML="";
+}
+function cwWord(){if(!cwCur)return null;const cell=CW.grid[cwCur.r][cwCur.c];return cell.words.find(w=>w.dir===cwDir)||cell.words[0]}
+function cwHL(){document.querySelectorAll("#cwGrid .c").forEach(x=>x.classList.remove("hl"));const w=cwWord();if(!w)return;
+  for(let i=0;i<w.w.length;i++)CW.grid[w.r+(w.dir==="d"?i:0)][w.col+(w.dir==="a"?i:0)].el.classList.add("hl");
+  document.querySelectorAll(".clues li").forEach(l=>l.classList.toggle("cur",l.dataset.id===w.dir+w.n))}
+function cwMove(s){const w=cwWord();if(!w)return;const dr=w.dir==="d"?s:0,dc=w.dir==="a"?s:0;const n=CW.grid[cwCur.r+dr]&&CW.grid[cwCur.r+dr][cwCur.c+dc];if(n){n.inp.focus();if(s<0)n.inp.value=""}}
+$("#cwCheck").onclick=()=>{let right=0,total=0,blank=0;CW.grid.flat().filter(Boolean).forEach(cell=>{total++;cell.el.classList.remove("ok","no");if(!cell.inp.value){blank++;return}
+  if(cell.inp.value===cell.ch){right++;cell.el.classList.add("ok")}else cell.el.classList.add("no")});
+  $("#cwMsg").innerHTML=right===total?`<div class="box good"><b>You solved the whole puzzle!</b> Click <b>New puzzle</b> for another one.</div>`:`<div class="box info">${right} of ${total} letters are right. Red letters are wrong. ${blank} boxes are empty.</div>`};
+$("#cwShow").onclick=()=>{CW.grid.flat().filter(Boolean).forEach(cell=>{cell.inp.value=cell.ch;cell.el.classList.remove("no");cell.el.classList.add("ok")})};
+$("#cwNew").onclick=cwInit;
+readers.cw=()=>{const w=cwWord();return w?(w.n+(w.dir==="a"?" across. ":" down. ")+w.c+". "+w.w.length+" letters."):"Click a clue to hear it."};
+
+/* ---------- quiz show ---------- */
+let showPts=0,showLeft=0,showCur=null;
+function showInit(){
+  showPts=0;$("#showScore").textContent="Points: 0";$("#showQ").innerHTML="";
+  $("#showBest").textContent=S.best.show!=null?"Best: "+S.best.show:"Best: none yet";
+  let h=CATS.map(c=>`<div class="cat">${c}</div>`).join("");
+  const pick={};CATS.forEach((_,ci)=>{pick[ci]=[1,2,3,4].map(lv=>shuffle(Q.filter(q=>q.c===ci&&q.lv===lv))[0])});
+  showLeft=0;
+  for(let lv=1;lv<=4;lv++)CATS.forEach((_,ci)=>{const q=pick[ci][lv-1];if(q){showLeft++;h+=`<button data-c="${ci}" data-lv="${lv}">${lv*100}</button>`}else h+="<div></div>"});
+  $("#board").innerHTML=h;
+  document.querySelectorAll("#board button").forEach(b=>b.onclick=()=>{b.disabled=true;showAsk(prep(pick[b.dataset.c][b.dataset.lv-1]),+b.dataset.lv*100)});
+}
+function askHTML(q,id){return `<div class="qcard" id="${id}">${tableHTML(q.t)}<div class="qtext">${q.q}</div><div class="choices">${q.a.map((a,i)=>`<button data-i="${i}"><span class="letter">${"ABCD"[i]}</span><span>${a}</span></button>`).join("")}</div><div class="fb"></div></div>`}
+function showAsk(q,pts){showCur=q;$("#showQ").innerHTML=askHTML(q,"showCard");$("#showCard").scrollIntoView({behavior:"smooth",block:"nearest"});
+  document.querySelectorAll("#showCard .choices button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#showCard .choices button").forEach(x=>{x.disabled=true;if(q.k.includes(+x.dataset.i))x.classList.add("right")});
+    const ok=q.k.includes(+b.dataset.i);if(!ok)b.classList.add("wrongc");if(ok)showPts+=pts;showLeft--;
+    $("#showScore").textContent="Points: "+showPts;
+    $("#showCard .fb").innerHTML=`<div class="box ${ok?"good":"bad"}"><b>${ok?"Right! +"+pts:"Not quite. The answer is "+"ABCD"[q.k[0]]+"."}</b> ${q.y}</div>`+(showLeft?"":`<div class="box good"><b>Game over! You scored ${showPts} points.</b> ${best("show",showPts)?"New best score!":""} Click <b>New game</b> to play again.</div>`);
+    $("#showBest").textContent="Best: "+(S.best.show!=null?S.best.show:"none yet")})}
+$("#showNew").onclick=showInit;
+readers.show=()=>showCur?(showCur.q+" "+showCur.a.map((a,i)=>"ABCD"[i]+". "+a).join(". ")):"Pick a box.";
+
+/* ---------- charge chase ---------- */
+const MAZE=[
+"###################",
+"#........#........#",
+"#.##.###.#.###.##.#",
+"#.................#",
+"#.##.#.#####.#.##.#",
+"#....#...#...#....#",
+"####.###.#.###.####",
+"#.................#",
+"#.##.#.#####.#.##.#",
+"#....#...#...#....#",
+"#.##.###.#.###.##.#",
+"#.................#",
+"###################"];
+const CS=32,CH=$("#chCan"),cx=CH.getContext("2d");
+const LCOL=["#1b5fc1","#0b6b52","#8a4fb8","#c25e00"];
+let ch={on:false,paused:true,lives:3,pts:0,qs:[],q:null,p:null,g:null,dots:[],acc:0,gacc:0,last:0,freeze:0,raf:0};
+const open=(x,y)=>MAZE[y]&&MAZE[y][x]===".";
+const D={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+function dist(a,b){/* BFS steps */const q=[[a.x,a.y,0]],seen=new Set([a.x+","+a.y]);while(q.length){const [x,y,d]=q.shift();if(x===b.x&&y===b.y)return d;for(const [dx,dy] of Object.values(D)){const nx=x+dx,ny=y+dy,k=nx+","+ny;if(open(nx,ny)&&!seen.has(k)){seen.add(k);q.push([nx,ny,d+1])}}}return 99}
+function chNewQ(){
+  if(!ch.qs.length)ch.qs=shuffle(Q.filter(q=>!q.two&&!q.t));
+  ch.q=prep(ch.qs.pop());
+  const cells=[];MAZE.forEach((row,y)=>[...row].forEach((c,x)=>{if(c===".")cells.push({x,y})}));
+  ch.dots=[];for(const c of shuffle(cells)){if(ch.dots.length===ch.q.a.length)break;
+    if(dist(c,ch.p)<5||dist(c,ch.g)<2||ch.dots.some(d=>Math.abs(d.x-c.x)+Math.abs(d.y-c.y)<4))continue;ch.dots.push({x:c.x,y:c.y,i:ch.dots.length})}
+  $("#chQ").innerHTML=`<div class="qtext">${ch.q.q}</div><div class="chase-ch">${ch.q.a.map((a,i)=>`<span><b style="background:${LCOL[i]}">${"ABCD"[i]}</b>${a}</span>`).join("")}</div>`;
+}
+function chReset(){ch.p={x:9,y:11,dir:null,next:null};ch.g={x:9,y:3,dir:"left"};ch.freeze=900}
+function chStart(){ch={on:true,paused:false,lives:3,pts:0,qs:[],q:null,dots:[],acc:0,gacc:0,last:performance.now(),freeze:0,raf:ch.raf};chReset();chNewQ();chHud();$("#chMsg").innerHTML="";$("#chStart").textContent="Restart";cancelAnimationFrame(ch.raf);ch.raf=requestAnimationFrame(chLoop);CH.focus&&CH.focus()}
+function chPause(){if(ch.on)ch.paused=true}
+function chHud(){$("#chScore").textContent="Points: "+ch.pts;$("#chLives").textContent="Lives: "+ch.lives;$("#chBest").textContent="Best: "+(S.best.chase!=null?S.best.chase:"none yet")}
+function chHit(msg){ch.lives--;chHud();$("#chMsg").innerHTML=`<div class="box bad">${msg}</div>`;
+  if(ch.lives<=0){ch.on=false;const nb=best("chase",ch.pts);chHud();$("#chMsg").innerHTML+=`<div class="box info"><b>Game over! You scored ${ch.pts} points.</b> ${nb?"New best score!":""} Click <b>Restart</b> to play again.</div>`}
+  else{chReset()}}
+function chStepPlayer(){const p=ch.p;
+  if(p.next&&open(p.x+D[p.next][0],p.y+D[p.next][1])){p.dir=p.next}
+  if(p.dir&&open(p.x+D[p.dir][0],p.y+D[p.dir][1])){p.x+=D[p.dir][0];p.y+=D[p.dir][1]}
+  const d=ch.dots.find(d=>d.x===p.x&&d.y===p.y);
+  if(d){if(ch.q.k.includes(d.i)){ch.pts+=10;chHud();$("#chMsg").innerHTML=`<div class="box good"><b>Right! +10.</b> ${ch.q.y}</div>`;ch.freeze=700;chNewQ()}
+    else{ch.dots=ch.dots.filter(x=>x!==d);chHit(`<b>Not ${"ABCD"[d.i]}.</b> You lost a life. Try another letter.`)}}}
+function chStepGhost(){const g=ch.g,p=ch.p;const back={up:"down",down:"up",left:"right",right:"left"}[g.dir];
+  let opts=Object.keys(D).filter(k=>open(g.x+D[k][0],g.y+D[k][1])&&k!==back);if(!opts.length)opts=[back];
+  let pick;if(Math.random()<.3)pick=opts[Math.floor(Math.random()*opts.length)];
+  else pick=opts.sort((a,b)=>(Math.abs(g.x+D[a][0]-p.x)+Math.abs(g.y+D[a][1]-p.y))-(Math.abs(g.x+D[b][0]-p.x)+Math.abs(g.y+D[b][1]-p.y)))[0];
+  g.dir=pick;g.x+=D[pick][0];g.y+=D[pick][1]}
+function chLoop(t){const dt=Math.min(100,t-ch.last);ch.last=t;
+  if(ch.on&&!ch.paused){if(ch.freeze>0)ch.freeze-=dt;else{ch.acc+=dt;ch.gacc+=dt;
+    const px=ch.p.x,py=ch.p.y,gx=ch.g.x,gy=ch.g.y;let moved=false;
+    if(ch.acc>=170){ch.acc=0;chStepPlayer();moved=true}
+    if(ch.on&&ch.freeze<=0&&ch.gacc>=330){ch.gacc=0;chStepGhost();moved=true}
+    if(ch.on&&moved&&((ch.p.x===ch.g.x&&ch.p.y===ch.g.y)||(ch.p.x===gx&&ch.p.y===gy&&ch.g.x===px&&ch.g.y===py)))chHit("<b>The Resistor got you!</b> You lost a life.")}}
+  chDraw();ch.raf=requestAnimationFrame(chLoop)}
+function chDraw(){cx.fillStyle="#0b1020";cx.fillRect(0,0,CH.width,CH.height);
+  MAZE.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==="#"){cx.fillStyle="#2952b8";cx.fillRect(x*CS+2,y*CS+2,CS-4,CS-4)}}));
+  cx.textAlign="center";cx.textBaseline="middle";
+  for(const d of ch.dots){cx.fillStyle=LCOL[d.i];cx.beginPath();cx.arc(d.x*CS+16,d.y*CS+16,13,0,7);cx.fill();cx.fillStyle="#fff";cx.font="bold 17px Arial";cx.fillText("ABCD"[d.i],d.x*CS+16,d.y*CS+17)}
+  if(ch.p){cx.fillStyle="#f2d21b";cx.beginPath();cx.arc(ch.p.x*CS+16,ch.p.y*CS+16,13,0,7);cx.fill();cx.fillStyle="#222";cx.font="bold 13px Arial";cx.fillText("e−",ch.p.x*CS+16,ch.p.y*CS+17)}
+  if(ch.g){const x=ch.g.x*CS+3,y=ch.g.y*CS+3;cx.fillStyle="#e0402f";cx.beginPath();cx.moveTo(x,y+26);cx.lineTo(x,y+12);cx.arc(x+13,y+12,13,Math.PI,0);cx.lineTo(x+26,y+26);
+    for(let i=0;i<3;i++){cx.lineTo(x+26-i*9-4.5,y+21);cx.lineTo(x+26-(i+1)*9,y+26)}cx.fill();cx.fillStyle="#fff";cx.font="bold 13px Arial";cx.fillText("R",x+13,y+14)}
+  if(!ch.on||ch.paused){cx.fillStyle="rgba(0,0,0,.45)";cx.fillRect(0,0,CH.width,CH.height);cx.fillStyle="#fff";cx.font="bold 24px Arial";cx.fillText(ch.on?"Paused: click Start to keep going":"Click Start to play",CH.width/2,CH.height/2)}}
+$("#chStart").onclick=()=>{if(ch.on&&ch.paused){ch.paused=false;ch.last=performance.now();$("#chStart").textContent="Restart";return}chStart()};
+function chGo(d){if(ch.on){if(ch.paused)return;ch.p.next=d;if(!ch.p.dir)ch.p.dir=d}}
+document.querySelectorAll(".pad button").forEach(b=>b.onclick=()=>chGo(b.dataset.d));
+document.addEventListener("keydown",e=>{if(current!=="chase"||!ch.on)return;const m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right",W:"up",S:"down",A:"left",D:"right"}[e.key];if(m){e.preventDefault();chGo(m)}});
+let sw=null;CH.addEventListener("pointerdown",e=>sw=[e.clientX,e.clientY]);CH.addEventListener("pointerup",e=>{if(!sw)return;const dx=e.clientX-sw[0],dy=e.clientY-sw[1];sw=null;if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;chGo(Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up"))});
+readers.chase=()=>ch.q?(ch.q.q+" "+ch.q.a.map((a,i)=>"ABCD"[i]+". "+a).join(". ")):"Click Start to play.";
+
+/* ---------- practice quiz ---------- */
+let qz={list:[],i:0,right:0,miss:[]};
+function qzInit(){
+  const twos=shuffle(Q.filter(q=>q.two)).slice(0,2);
+  const per=CATS.map((_,ci)=>shuffle(Q.filter(q=>q.c===ci&&!q.two)).slice(0,2)).flat();
+  qz={list:shuffle(per.slice(0,8).concat(twos)).map(prep),i:0,right:0,miss:[]};
+  $("#qzBest").textContent="Best: "+(S.best.quiz!=null?S.best.quiz+" / 10":"none yet");qzShow();
+}
+function qzShow(){const q=qz.list[qz.i];$("#qzProg").textContent="Question "+(qz.i+1)+" of "+qz.list.length+" · Right: "+qz.right;
+  const opts=q.a.map((a,i)=>q.two?`<label><input type="checkbox" data-i="${i}"><span class="letter">${"ABCD"[i]}</span><span>${a}</span></label>`:`<button data-i="${i}"><span class="letter">${"ABCD"[i]}</span><span>${a}</span></button>`).join("");
+  $("#qzBox").innerHTML=`<div class="qcard" id="qzCard">${tableHTML(q.t)}<div class="qtext">${q.q}</div><div class="choices">${opts}</div>${q.two?'<div class="row"><button class="btn" id="qzCheck">Check</button></div>':""}<div class="fb"></div></div>`;
+  if(q.two){$("#qzCheck").onclick=()=>{const picked=[...document.querySelectorAll("#qzCard input:checked")].map(x=>+x.dataset.i);
+      if(picked.length!==2){$("#qzCard .fb").innerHTML='<div class="box info">Choose exactly TWO answers.</div>';return}
+      qzDone(q,picked.length===2&&picked.every(i=>q.k.includes(i)),picked)}}
+  else document.querySelectorAll("#qzCard .choices button").forEach(b=>b.onclick=()=>qzDone(q,q.k.includes(+b.dataset.i),[+b.dataset.i]));
+}
+function qzDone(q,ok,picked){
+  document.querySelectorAll("#qzCard .choices > *").forEach(x=>{const i=+(x.dataset.i!=null?x.dataset.i:x.querySelector("input").dataset.i);x.style.pointerEvents="none";
+    if(q.k.includes(i))x.classList.add("right");else if(picked.includes(i))x.classList.add("wrongc")});
+  const c=$("#qzCheck");if(c)c.remove();
+  if(ok)qz.right++;else qz.miss.push(CATS[q.c]);
+  const last=qz.i===qz.list.length-1;
+  $("#qzCard .fb").innerHTML=`<div class="box ${ok?"good":"bad"}"><b>${ok?"Right!":"Not quite. The answer is "+q.k.map(k=>"ABCD"[k]).join(" and ")+"."}</b> ${q.y}</div><div class="row"><button class="btn" id="qzNext">${last?"See my score":"Next question"}</button></div>`;
+  $("#qzProg").textContent="Question "+(qz.i+1)+" of "+qz.list.length+" · Right: "+qz.right;
+  $("#qzNext").onclick=()=>{if(last)qzEnd();else{qz.i++;qzShow()}};
+}
+function qzEnd(){const nb=best("quiz",qz.right);$("#qzBest").textContent="Best: "+S.best.quiz+" / 10";
+  const study=[...new Set(qz.miss)];
+  $("#qzBox").innerHTML=`<div class="box ${qz.right>=8?"good":"info"}"><b>You got ${qz.right} out of ${qz.list.length} right.</b> ${nb?"New best score!":""}</div>`+
+  (study.length?`<div class="box info"><b>Study these topics:</b> ${study.join(", ")}.</div>`:`<div class="box good">You got every topic right. Great job!</div>`)+
+  `<div class="row"><button class="btn" id="qzAgain">Take a new quiz</button></div>`;$("#qzAgain").onclick=qzInit}
+$("#qzNew").onclick=qzInit;
+readers.quiz=()=>{const q=qz.list[qz.i];return q?(q.q+" "+q.a.map((a,i)=>"ABCD"[i]+". "+a).join(". ")):""};
+
+/* ---------- mission map ---------- */
+const MAP=[
+{t:"Charges",l:"3.02",s:["Opposite charges (+ and −) {attract}.","Like charges (+ and +, or − and −) {repel}.","The farther apart + and − charges are pulled, the {more} electrical potential energy they have."],x:["less"]},
+{t:"Circuit Parts",l:"3.01, 3.03",s:["The battery is the power {source}. It gives the {voltage} that pushes charges through the circuit.","A part that changes electrical energy into light, sound or motion is a {load}.","Copper, gold and aluminum are good {conductors}.","Plastic, rubber and glass are {insulators}."],x:["switch"]},
+{t:"Open, Closed and Short Circuits",l:"3.04, 3.05, 3.06",s:["When the switch is off, the circuit is {open} because the path has a {gap}.","When bare wires touch and the current skips the bulb, it is a {short} circuit. The wires get very {hot}.","Charges can only flow through a complete, {unbroken} path."],x:["closed"]},
+{t:"Voltage, Current and Resistance",l:"3.03, 3.05",s:["If the resistance stays the same and the voltage goes up, the current goes {up}.","A long, {skinny} wire has the most resistance.","As resistance increases, the current {decreases}.","The wire with the lowest resistance has the highest {conductivity}. It lets charges flow the easiest."],x:["wide"]},
+{t:"Series Circuits",l:"3.07, 3.09",s:["A series circuit has only {one} path.","Adding more bulbs in series increases the total {resistance}, so the current goes down and the bulbs get {dimmer}.","If one bulb is removed from a series circuit, the other bulbs go {out}."],x:["brighter"]},
+{t:"Parallel Circuits",l:"3.08, 3.09",s:["A parallel circuit has more than one path. Each path is a {branch}.","If one bulb is removed from a parallel circuit, the other bulbs stay {lit}.","Houses use {parallel} circuits, so turning off the TV does not turn off the kitchen lights."],x:["series"]},
+{t:"Generators and Motors",l:"3.10, 3.11",s:["A {motor} changes electrical energy into mechanical energy.","A {generator} changes mechanical energy into electrical energy.","A blender uses {electrical} energy from the outlet to make the {mechanical} energy that spins its blades."],x:["chemical"]},
+{t:"Energy Is Never Lost",l:"3.06",s:["Energy is never {lost}. It only changes {form}.","A light bulb changes electrical energy into light and {heat}."],x:["color"]},
+{t:"Claim, Evidence, Reasoning",l:"All lessons",s:["The answer to the question is the {claim}.","What you saw or measured is the {evidence}.","The science rule that explains it is the {reasoning}."],x:["title"]}
+];
+let mmSel=null;
+if(!S.map)S.map={};
+function mmBlanks(st){const out=[];st.s.forEach(s=>s.replace(/\{(.+?)\}/g,(m,w)=>out.push(w)));return out}
+function mmInit(){
+  const tr=$("#mmTrail");tr.innerHTML="";
+  MAP.forEach((st,si)=>{const ans=mmBlanks(st);const saved=(S.map[si]&&S.map[si].a)||[];
+    const bank=shuffle(ans.concat(st.x));let bi=0;
+    const sent=st.s.map(s=>'<div class="mm-s">'+s.replace(/\{(.+?)\}/g,()=>{const i=bi++;return `<span class="blank" data-s="${si}" data-b="${i}">${saved[i]||"&nbsp;"}</span>`})+"</div>").join("");
+    const d=document.createElement("div");d.className="mm-stop"+(S.map[si]&&S.map[si].done?" done":"");d.id="mm"+si;
+    d.innerHTML=`<div class="mm-pin">${S.map[si]&&S.map[si].done?"★":si+1}</div><div class="mm-card"><h3>Stop ${si+1}: ${st.t}<span class="badge">${st.l}</span></h3>
+      <div class="bank"><span class="lbl">Word bank. Not all words will be used.</span>${bank.map(w=>`<button class="chip${saved.includes(w)?" used":""}" data-s="${si}" data-w="${w}">${w}</button>`).join("")}</div>
+      ${sent}<div class="row"><button class="btn" data-check="${si}">Check this stop</button><button class="btn alt" data-clear="${si}">Clear</button></div><div class="fb"></div></div>`;
+    tr.appendChild(d)});
+  tr.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{if(c.classList.contains("used"))return;tr.querySelectorAll(".chip.sel").forEach(x=>x.classList.remove("sel"));
+    if(mmSel===c){mmSel=null;return}mmSel=c;c.classList.add("sel");speak(c.dataset.w)});
+  tr.querySelectorAll(".blank").forEach(b=>b.onclick=()=>mmPlace(b));
+  tr.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>mmCheck(+b.dataset.check));
+  tr.querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>{const si=+b.dataset.clear;delete S.map[si];save();mmInit();document.getElementById("mm"+si).scrollIntoView({block:"nearest"})});
+  mmProg();
+}
+function mmChip(si,w){return document.querySelector(`#mm${si} .chip[data-w="${w}"]`)}
+function mmPlace(b){const si=+b.dataset.s;const cur=b.textContent.trim();b.classList.remove("ok","no");
+  if(mmSel&&+mmSel.dataset.s===si){if(cur)mmChip(si,cur).classList.remove("used");b.textContent=mmSel.dataset.w;mmSel.classList.remove("sel");mmSel.classList.add("used");mmSel=null}
+  else if(cur){mmChip(si,cur).classList.remove("used");b.innerHTML="&nbsp;"}
+  else{const card=document.getElementById("mm"+si);card.querySelector(".fb").innerHTML='<div class="box info">First click a word in this stop\'s yellow word bank.</div>';return}
+  mmSave(si)}
+function mmSave(si){const a=[...document.querySelectorAll(`#mm${si} .blank`)].map(x=>x.textContent.trim());S.map[si]=Object.assign(S.map[si]||{},{a});save()}
+function mmCheck(si){const ans=mmBlanks(MAP[si]);const bl=[...document.querySelectorAll(`#mm${si} .blank`)];let right=0,empty=0;
+  bl.forEach((b,i)=>{const v=b.textContent.trim();b.classList.remove("ok","no");if(!v){empty++;return}if(v===ans[i]){right++;b.classList.add("ok")}else b.classList.add("no")});
+  const card=document.getElementById("mm"+si);const fb=card.querySelector(".fb");
+  if(right===ans.length){S.map[si]=Object.assign(S.map[si]||{},{done:true});save();card.classList.add("done");card.querySelector(".mm-pin").textContent="★";
+    fb.innerHTML=`<div class="box good"><b>Stop ${si+1} complete!</b> ${si<MAP.length-1?"On to the next stop.":"You finished the whole map!"}</div>`}
+  else fb.innerHTML=`<div class="box bad"><b>${right} of ${ans.length} are right.</b> ${empty?empty+" blank"+(empty>1?"s are":" is")+" empty. ":""}Click a red word to take it out, then try another word.</div>`;
+  mmProg()}
+function mmProg(){const n=MAP.filter((_,i)=>S.map[i]&&S.map[i].done).length;$("#mmProg").textContent=`Stops complete: ${n} of ${MAP.length}`;$("#mmBar").style.width=(100*n/MAP.length)+"%"}
+$("#mmReset").onclick=()=>{if(!confirm("Clear every stop on the map?"))return;S.map={};save();mmInit()};
+readers.map=()=>{const st=MAP.find((_,i)=>!(S.map[i]&&S.map[i].done))||MAP[0];return st.t+". "+st.s.map(s=>s.replace(/\{.+?\}/g,"blank")).join(" ")};
+
+/* ---------- sort it ---------- */
+const SORTS=[
+{n:"Conductor or Insulator?",b:["Conductor","Insulator"],it:[["Copper wire",0],["Aluminum foil",0],["Steel paper clip",0],["Gold ring",0],["Silver spoon",0],["Plastic straw",1],["Rubber band",1],["Glass",1],["Wood stick",1],["Cloth",1]],y:"Metals are conductors. Plastic, rubber, glass, wood and cloth are insulators."},
+{n:"Series or Parallel?",b:["Series","Parallel"],it:[["Only 1 path",0],["One bulb breaks, all go out",0],["More bulbs = dimmer bulbs",0],["Bulbs share the push",0],["Battery lasts longer",0],["More than 1 path",1],["One bulb breaks, others stay on",1],["More bulbs = same brightness",1],["Each bulb gets the full push",1],["Used in houses",1]],y:"Series = 1 path that everything shares. Parallel = each bulb has its own path."},
+{n:"Motor or Generator?",b:["Motor","Generator"],it:[["Fan",0],["Blender",0],["Drill",0],["Electric car",0],["Washing machine",0],["Wind turbine",1],["Dam",1],["Hand-crank flashlight",1],["Steam power plant",1]],y:"Motor: electricity in, motion out. Generator: motion in, electricity out."},
+{n:"Open, Closed or Short?",b:["Open","Closed","Short"],it:[["Switch turned off",0],["Bulb filament broken",0],["Wire unplugged",0],["Switch on, bulb glowing",1],["Complete loop through the bulb",1],["Wire goes from + to − with no load",2],["Current skips the bulb",2],["Wires get very hot",2]],y:"Open = a gap. Closed = a complete loop through the load. Short = a path that skips the load."},
+{n:"Source, Load or Switch?",b:["Source","Load","Switch"],it:[["Battery",0],["Solar cell",0],["Wall outlet",0],["Light bulb",1],["Buzzer",1],["Fan motor",1],["On/off button",2],["Light switch on the wall",2]],y:"The source gives energy. The load uses it. The switch opens and closes the loop."},
+{n:"Voltage, Current or Resistance?",b:["Voltage","Current","Resistance"],it:[["The push",0],["Measured in volts",0],["Measured with a voltmeter",0],["How much charge flows",1],["Measured in amps",1],["Measured with an ammeter",1],["Slows the current",2],["Measured in ohms",2],["Long, skinny wires have more",2]],y:"Voltage = push (volts). Current = flow (amps). Resistance = slowing (ohms)."}
+];
+let sortQ=[],sortCur=null,sortSel=null,sortMiss=0;
+function sortInit(){sortQ=shuffle(SORTS);sortNext()}
+function sortNext(){if(!sortQ.length)sortQ=shuffle(SORTS);sortCur=sortQ.pop();sortSel=null;sortMiss=0;$("#sortMsg").innerHTML="";
+  $("#sortTitle").textContent=sortCur.n;$("#sortMiss").textContent="Mistakes: 0";
+  $("#sortPile").innerHTML=shuffle(sortCur.it).map(([t,b])=>`<button class="scard" draggable="true" data-b="${b}">${t}</button>`).join("");
+  const bk=$("#sortBuckets");bk.style.gridTemplateColumns=`repeat(${sortCur.b.length},1fr)`;
+  bk.innerHTML=sortCur.b.map((n,i)=>`<div class="bucket" data-b="${i}"><h3>${n}</h3><div class="in"></div></div>`).join("");
+  document.querySelectorAll("#sortPile .scard").forEach(c=>{c.onclick=()=>{document.querySelectorAll("#sortPile .sel").forEach(x=>x.classList.remove("sel"));sortSel=c;c.classList.add("sel");speak(c.textContent)};
+    c.ondragstart=e=>{sortSel=c;e.dataTransfer.setData("text","x")}});
+  document.querySelectorAll(".bucket").forEach(b=>{b.onclick=()=>sortDrop(b);b.ondragover=e=>{e.preventDefault();b.classList.add("over")};b.ondragleave=()=>b.classList.remove("over");b.ondrop=e=>{e.preventDefault();b.classList.remove("over");sortDrop(b)}})}
+function sortDrop(b){if(!sortSel)return;const c=sortSel;sortSel=null;c.classList.remove("sel");
+  if(c.dataset.b===b.dataset.b){b.querySelector(".in").insertAdjacentHTML("beforeend",`<span>${c.textContent}</span>`);c.remove();
+    if(!document.querySelector("#sortPile .scard"))$("#sortMsg").innerHTML=`<div class="box good"><b>All sorted with ${sortMiss} mistake${sortMiss===1?"":"s"}!</b> ${sortCur.y} Click <b>Next sort</b>.</div>`}
+  else{sortMiss++;$("#sortMiss").textContent="Mistakes: "+sortMiss;c.classList.add("wrong");setTimeout(()=>c.classList.remove("wrong"),400);
+    $("#sortMsg").innerHTML=`<div class="box bad"><b>"${c.textContent}" is not ${sortCur.b[b.dataset.b]}.</b> Try another box.</div>`}}
+$("#sortNext").onclick=sortNext;
+readers.sort=()=>sortCur?sortCur.n+" The cards are: "+[...document.querySelectorAll("#sortPile .scard")].map(c=>c.textContent).join(", "):"";
+
+/* ---------- power up ---------- */
+let pu={q:[],w:null,g:[],ch:6,streak:0,over:false};
+function puInit(){pu.q=shuffle(VOCAB.filter(v=>v.w));pu.streak=0;puNew()}
+function puNew(){if(!pu.q.length)pu.q=shuffle(VOCAB.filter(v=>v.w));pu.w=pu.q.pop();pu.g=[];pu.ch=6;pu.over=false;$("#puMsg").innerHTML="";
+  $("#puClue").innerHTML=`<b>Clue:</b> ${pu.w.c}`;
+  $("#puKeys").innerHTML="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l=>`<button data-l="${l}">${l}</button>`).join("");
+  document.querySelectorAll("#puKeys button").forEach(b=>b.onclick=()=>puGuess(b.dataset.l));puDraw()}
+function puGuess(l){if(pu.over||pu.g.includes(l))return;pu.g.push(l);const b=document.querySelector(`#puKeys [data-l="${l}"]`);
+  if(pu.w.w.includes(l))b.classList.add("hit");else{b.classList.add("miss");pu.ch--}
+  const won=[...pu.w.w].every(x=>pu.g.includes(x));
+  if(won){pu.over=true;pu.streak++;const nb=best("power",pu.streak);$("#puMsg").innerHTML=`<div class="box good"><b>Power up! The bulb is lit.</b> ${pu.w.t}: ${pu.w.d} ${nb?"New best streak!":""}</div><div class="row"><button class="btn" id="puNext">Next word</button></div>`;$("#puNext").onclick=puNew}
+  else if(pu.ch<=0){pu.over=true;pu.streak=0;$("#puMsg").innerHTML=`<div class="box bad"><b>The battery ran out.</b> The word was <b>${pu.w.w}</b>. ${pu.w.d}</div><div class="row"><button class="btn" id="puNext">Next word</button></div>`;$("#puNext").onclick=puNew}
+  puDraw()}
+function puDraw(){const won=[...pu.w.w].every(x=>pu.g.includes(x));const lost=pu.ch<=0;
+  $("#puWord").textContent=[...pu.w.w].map(x=>pu.g.includes(x)||lost?x:"_").join("");
+  $("#puStreak").textContent="Words in a row: "+pu.streak;$("#puBest").textContent="Best: "+(S.best.power!=null?S.best.power:"none yet");
+  let bars="";for(let i=0;i<6;i++)bars+=`<rect x="${26+i*19}" y="152" width="15" height="34" rx="3" fill="${i<pu.ch?"#2fae6b":"#d9dde6"}"/>`;
+  const lit=won;
+  $("#puArt").innerHTML=`<svg width="190" height="210" viewBox="0 0 190 210">${lit?'<circle cx="95" cy="62" r="58" fill="#fff3a6"/>':""}
+    <circle cx="95" cy="62" r="40" fill="${lit?"#ffe45c":"#eef0f4"}" stroke="#555" stroke-width="3"/>
+    <path d="M80 70 l6 -12 l6 12 l6 -12 l6 12" fill="none" stroke="${lit?"#b36b00":"#888"}" stroke-width="3"/>
+    <rect x="78" y="100" width="34" height="20" fill="#999" stroke="#555" stroke-width="2"/>
+    <rect x="20" y="146" width="132" height="46" rx="6" fill="#fff" stroke="#333" stroke-width="3"/><rect x="152" y="160" width="10" height="18" fill="#333"/>
+    ${bars}<text x="95" y="206" text-anchor="middle" font-size="14" font-family="Arial">Charges left: ${Math.max(0,pu.ch)}</text></svg>`}
+document.addEventListener("keydown",e=>{if(current==="pu"&&/^[a-z]$/i.test(e.key)&&!e.ctrlKey&&!e.metaKey){puGuess(e.key.toUpperCase())}});
+$("#puNew").onclick=()=>{pu.streak=0;puNew()};
+readers.pu=()=>"Clue: "+pu.w.c+". The word has "+pu.w.w.length+" letters.";
+
+/* ---------- fix the circuit ---------- */
+const FX=[
+{p:"switch",st:{sw:"open"},y:"The switch was open. An open switch makes a gap, so charges cannot flow. Closing it completes the loop."},
+{p:"gap",st:{gap:true},y:"A wire was not connected. The gap made an open circuit."},
+{p:"battery",st:{bat:"missing"},y:"There was no battery. Without a source, nothing pushes the charges."},
+{p:"bulb",st:{bulb:"broken"},y:"The bulb's filament was broken. The break is a gap inside the bulb, so the circuit is open."},
+{p:"short",st:{short:true},y:"An extra wire went straight from one end of the battery to the other. The current skipped the bulb and the wires got hot. That is a short circuit."},
+{p:"plastic",st:{plastic:true},y:"Part of the loop was a plastic straw. Plastic is an insulator, so charges could not flow through it."},
+{p:"b2",st:{b2:"missing"},y:"This is a series circuit with only one path. With a bulb missing, the path has a gap, so the other bulb went out too."},
+{p:"bypass",st:{bypass:true},y:"An extra wire went around the bulb. The current took the path with no load and skipped the bulb."}
+];
+const FXNAME={switch:"The switch",gap:"That wire",battery:"The battery",bulb:"The bulb",short:"That wire",plastic:"That part",b2:"That bulb",bypass:"That wire",wire:"That wire"};
+let fx={q:[],cur:null,st:null,miss:0,done:0,fixed:false};
+function fxInit(){fx.q=shuffle(FX);fx.miss=0;fx.done=0;fxNext()}
+function fxNext(){if(!fx.q.length){$("#fxMsg").innerHTML=`<div class="box good"><b>You fixed all ${FX.length} circuits with ${fx.miss} wrong click${fx.miss===1?"":"s"}!</b> Click <b>Start over</b> to play again in a new order.</div>`;return}
+  fx.cur=fx.q.pop();fx.fixed=false;fx.st=Object.assign({sw:"closed",gap:false,bat:"ok",bulb:"ok",b2:null,short:false,plastic:false,bypass:false},fx.cur.st);
+  if(fx.cur.p!=="b2"&&fx.cur.p!=="gap"&&fx.cur.p!=="plastic"&&Math.random()<.4)fx.st.b2="ok";
+  $("#fxMsg").innerHTML="";fxDraw()}
+function fxLit(s){return s.sw==="closed"&&!s.gap&&s.bat==="ok"&&s.bulb==="ok"&&s.b2!=="missing"&&!s.short&&!s.plastic&&!s.bypass}
+function fxDraw(){const s=fx.st,lit=fxLit(s),hot=s.short;const wc=hot?"#e0402f":"#c46a1b",W=`stroke="${wc}" stroke-width="6" fill="none" stroke-linecap="round"`;
+  $("#fxProg").textContent=`Circuit ${fx.done+1} of ${FX.length}`;$("#fxMiss").textContent="Wrong clicks: "+fx.miss;
+  let g="";const seg=(x1,y1,x2,y2,part="wire")=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${W} data-part="${part}"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="transparent" stroke-width="22" data-part="${part}"/>`;
+  // top wire + switch
+  g+=seg(80,60,220,60)+seg(300,60,440,60);
+  g+=`<g data-part="switch"><rect x="205" y="15" width="110" height="65" fill="transparent"/><circle cx="220" cy="60" r="7" fill="#333"/><circle cx="300" cy="60" r="7" fill="#333"/>`+
+     (s.sw==="closed"?`<line x1="220" y1="60" x2="300" y2="60" stroke="#333" stroke-width="6"/>`:`<line x1="220" y1="60" x2="290" y2="22" stroke="#333" stroke-width="6"/>`)+`<text x="260" y="96" text-anchor="middle" font-size="14">Switch</text></g>`;
+  // left: battery
+  g+=seg(80,60,80,120)+seg(80,200,80,260);
+  g+=s.bat==="ok"?`<g data-part="battery"><rect x="55" y="120" width="50" height="80" rx="6" fill="#333"/><rect x="55" y="120" width="50" height="22" rx="6" fill="#d9a400"/><rect x="70" y="113" width="20" height="8" fill="#888"/><text x="80" y="137" text-anchor="middle" font-size="16" font-weight="bold">+</text><text x="80" y="190" text-anchor="middle" font-size="16" fill="#fff" font-weight="bold">−</text></g><text x="112" y="165" font-size="14">Battery</text>`
+    :`<g data-part="battery"><rect x="55" y="120" width="50" height="80" rx="6" fill="#fff" stroke="#888" stroke-width="3" stroke-dasharray="7 5"/><text x="80" y="164" text-anchor="middle" font-size="12" fill="#888">empty</text></g><text x="112" y="165" font-size="14">Battery?</text>`;
+  // right: bulb
+  g+=seg(440,60,440,128)+seg(440,192,440,260);
+  const filament=s.bulb==="ok"?`<path d="M428 168 l6 -14 l6 14 l6 -14 l6 14" fill="none" stroke="${lit?"#b36b00":"#777"}" stroke-width="3"/>`:`<path d="M428 168 l6 -14 l4 9" fill="none" stroke="#777" stroke-width="3"/><path d="M446 158 l6 10" fill="none" stroke="#777" stroke-width="3"/>`;
+  g+=`<g data-part="bulb">${lit?'<circle cx="440" cy="160" r="46" fill="#fff3a6"/>':""}<circle cx="440" cy="158" r="30" fill="${lit?"#ffe45c":"#eef0f4"}" stroke="#555" stroke-width="3"/>${filament}<rect x="426" y="186" width="28" height="12" fill="#999"/></g><text x="402" y="164" font-size="14" text-anchor="end">Bulb</text>`;
+  // bottom wire with optional gap / plastic / second bulb
+  const parts=[];if(s.gap)parts.push([150,190,"gap"]);if(s.plastic)parts.push([150,230,"plastic"]);if(s.b2)parts.push([295,345,"b2"]);
+  let x=440;parts.sort((a,b)=>b[0]-a[0]);
+  for(const [a,b,k] of parts){g+=seg(b,260,x,260);x=a;
+    if(k==="gap")g+=`<g data-part="gap"><rect x="${a-6}" y="240" width="${b-a+12}" height="40" fill="transparent"/><circle cx="${a}" cy="260" r="5" fill="${wc}"/><path d="M${b} 260 q 12 -26 28 -18" ${W}/></g><text x="${(a+b)/2}" y="295" text-anchor="middle" font-size="13" fill="#888">loose wire?</text>`;
+    if(k==="plastic")g+=`<g data-part="plastic"><rect x="${a}" y="252" width="${b-a}" height="16" rx="8" fill="#9ad3f5" stroke="#3a8fc4" stroke-width="2"/><text x="${(a+b)/2}" y="290" text-anchor="middle" font-size="13">plastic straw</text></g>`;
+    if(k==="b2")g+=s.b2==="ok"?`<g data-part="b2">${lit?'<circle cx="320" cy="252" r="32" fill="#fff3a6"/>':""}<circle cx="320" cy="250" r="20" fill="${lit?"#ffe45c":"#eef0f4"}" stroke="#555" stroke-width="3"/><rect x="309" y="262" width="22" height="10" fill="#999"/><line x1="295" y1="268" x2="345" y2="268" stroke="#555" stroke-width="4"/></g><text x="320" y="296" text-anchor="middle" font-size="13">Bulb 2</text>`
+      :`<g data-part="b2"><circle cx="320" cy="250" r="20" fill="#fff" stroke="#888" stroke-width="3" stroke-dasharray="6 4"/><line x1="295" y1="268" x2="345" y2="268" stroke="#555" stroke-width="4"/></g><text x="320" y="296" text-anchor="middle" font-size="13">empty socket</text>`}
+  g+=seg(80,260,x,260);
+  if(s.short)g+=`<polyline points="80,108 30,108 30,212 80,212" ${W} data-part="short"/><polyline points="80,108 30,108 30,212 80,212" stroke="transparent" stroke-width="24" fill="none" data-part="short"/>`;
+  if(s.bypass)g+=`<polyline points="440,108 500,108 500,212 440,212" ${W} data-part="bypass"/><polyline points="440,108 500,108 500,212 440,212" stroke="transparent" stroke-width="24" fill="none" data-part="bypass"/>`;
+  if(hot)g+=`<text x="260" y="160" text-anchor="middle" font-size="16" fill="#e0402f" font-weight="bold">The wires feel HOT!</text>`;
+  $("#fxPic").innerHTML=`<svg viewBox="0 0 540 310">${g}</svg>`;
+  document.querySelectorAll("#fxPic [data-part]").forEach(el=>el.addEventListener("click",ev=>{ev.stopPropagation();fxClick(el.dataset.part)}));
+}
+function fxClick(part){if(fx.fixed)return;
+  if(part===fx.cur.p){fx.fixed=true;const fixes={switch:{sw:"closed"},gap:{gap:false},battery:{bat:"ok"},bulb:{bulb:"ok"},short:{short:false},plastic:{plastic:false},b2:{b2:"ok"},bypass:{bypass:false}};
+    Object.assign(fx.st,fixes[part]);fxDraw();fx.done++;
+    $("#fxMsg").innerHTML=`<div class="box good"><b>You fixed it! The bulb lights.</b> ${fx.cur.y}</div><div class="row"><button class="btn" id="fxNext">${fx.q.length?"Next circuit":"See my score"}</button></div>`;$("#fxNext").onclick=fxNext}
+  else{fx.miss++;$("#fxMiss").textContent="Wrong clicks: "+fx.miss;$("#fxMsg").innerHTML=`<div class="box bad"><b>${FXNAME[part]||"That part"} is OK.</b> Look again. Is there a gap? A missing part? A path that skips the bulb?</div>`}}
+$("#fxNew").onclick=fxInit;
+readers.fix=()=>"The bulb will not light the right way. Find the problem and click it.";
+
+/* ---------- energy chain ---------- */
+const CHAINS=[
+{n:"Power plant to your fan",s:["Fuel heats water into steam.","Steam spins the turbine.","The turbine spins the generator.","Power lines carry the electricity.","A switch closes the circuit.","The fan's motor spins the blades."],y:"Motion becomes electrical energy at the plant, then electrical energy becomes motion in the fan."},
+{n:"Flashlight",s:["The battery stores chemical energy.","You push the switch on.","Current flows through the wires.","The bulb gives off light and heat."],y:"The battery is the source, the switch closes the loop, and the bulb is the load."},
+{n:"Wind to a lamp",s:["Wind pushes the blades.","The turbine spins.","The generator makes electrical energy.","Power lines carry it to homes.","The lamp gives off light."],y:"A wind turbine is a generator. The lamp is a load."},
+{n:"Inside a generator",s:["Moving water turns a wheel.","The wheel spins a magnet.","The magnet passes the coil of wire.","Current flows in the wire.","The bulb lights."],y:"Something has to move. A moving magnet near a coil makes current."},
+{n:"Inside a motor",s:["Current flows into the coil.","The coil becomes an electromagnet.","The magnet pushes and pulls the coil.","The coil spins.","The fan blades move."],y:"A motor is a generator backwards: electricity in, motion out."}
+];
+let chn={q:[],cur:null,put:[]};
+function chainInit(){chn.q=shuffle(CHAINS);chainNext()}
+function chainNext(){if(!chn.q.length)chn.q=shuffle(CHAINS);chn.cur=chn.q.pop();chn.put=Array(chn.cur.s.length).fill(null);$("#chainMsg").innerHTML="";$("#chainTitle").textContent=chn.cur.n;
+  $("#chainPile").innerHTML=shuffle(chn.cur.s).map(t=>`<button class="scard" data-t="${t.replace(/"/g,"&quot;")}">${t}</button>`).join("");
+  document.querySelectorAll("#chainPile .scard").forEach(c=>c.onclick=()=>{const i=chn.put.indexOf(null);if(i<0)return;chn.put[i]=c.dataset.t;c.remove();chainDraw();speak(c.dataset.t)});chainDraw()}
+function chainDraw(){$("#chainSlots").innerHTML=chn.put.map((t,i)=>`<div class="slot"><b>${i+1}</b><div data-i="${i}">${t||'<span class="tiny">Step '+(i+1)+'</span>'}</div></div>`).join("");
+  document.querySelectorAll("#chainSlots .slot div").forEach(d=>d.onclick=()=>{const i=+d.dataset.i;const t=chn.put[i];if(!t)return;chn.put[i]=null;
+    $("#chainPile").insertAdjacentHTML("beforeend",`<button class="scard" data-t="${t.replace(/"/g,"&quot;")}">${t}</button>`);
+    const c=$("#chainPile").lastElementChild;c.onclick=()=>{const j=chn.put.indexOf(null);if(j<0)return;chn.put[j]=c.dataset.t;c.remove();chainDraw()};chainDraw()})}
+$("#chainCheck").onclick=()=>{if(chn.put.includes(null)){$("#chainMsg").innerHTML='<div class="box info">Fill every step first.</div>';return}
+  let right=0;document.querySelectorAll("#chainSlots .slot div").forEach((d,i)=>{const ok=chn.put[i]===chn.cur.s[i];if(ok)right++;d.classList.add(ok?"ok":"no")});
+  $("#chainMsg").innerHTML=right===chn.put.length?`<div class="box good"><b>Perfect order!</b> ${chn.cur.y} Click <b>Next chain</b>.</div>`:`<div class="box bad"><b>${right} of ${chn.put.length} are in the right spot.</b> Click a red step to take it out and try again.</div>`};
+$("#chainNext").onclick=chainNext;
+readers.chain=()=>chn.cur?chn.cur.n+". The steps are: "+chn.cur.s.slice().sort().join(" "):"";
+
+/* ---------- memory ---------- */
+let mem={cards:[],open:[],moves:0,got:0,lock:false};
+function memInit(){const set=shuffle(VOCAB).slice(0,6);mem={cards:shuffle(set.flatMap((v,i)=>[{i,txt:v.t,term:1},{i,txt:v.d,term:0}])),open:[],moves:0,got:0,lock:false};
+  $("#memMsg").innerHTML="";$("#memGrid").innerHTML=mem.cards.map((c,k)=>`<button data-k="${k}" class="${c.term?"term":""}">?</button>`).join("");
+  document.querySelectorAll("#memGrid button").forEach(b=>b.onclick=()=>memFlip(b));memHud()}
+function memHud(){$("#memMoves").textContent="Turns: "+mem.moves;$("#memBest").textContent="Best: "+(S.best.memory!=null?S.best.memory+" turns":"none yet")}
+function memFlip(b){if(mem.lock||b.classList.contains("up")||b.classList.contains("got"))return;const c=mem.cards[+b.dataset.k];b.classList.add("up");b.textContent=c.txt;mem.open.push(b);
+  if(mem.open.length===2){mem.moves++;memHud();const [x,y]=mem.open;const cx_=mem.cards[+x.dataset.k],cy=mem.cards[+y.dataset.k];
+    if(cx_.i===cy.i&&cx_.term!==cy.term){x.classList.add("got");y.classList.add("got");mem.open=[];mem.got++;
+      if(mem.got===6){const nb=best("memory",mem.moves,true);memHud();$("#memMsg").innerHTML=`<div class="box good"><b>You found all 6 pairs in ${mem.moves} turns!</b> ${nb?"New best!":""} Click <b>New game</b>.</div>`}}
+    else{mem.lock=true;setTimeout(()=>{[x,y].forEach(z=>{z.classList.remove("up");z.textContent="?"});mem.open=[];mem.lock=false},1300)}}}
+$("#memNew").onclick=memInit;
+readers.mem=()=>"Flip 2 cards. Find a word and what it means.";
+
+/* ---------- zap it ---------- */
+let zp={on:false,q:null,qs:[],n:0,pts:0,lives:3,t:0,timer:null,pop:null};
+function zapStart(){clearInterval(zp.timer);clearInterval(zp.pop);zp={id:Math.random(),on:true,q:null,qs:shuffle(Q.filter(q=>!q.two&&!q.t)).slice(0,8),n:0,pts:0,lives:3,t:0,timer:null,pop:null};$("#zapMsg").innerHTML="";$("#zapStart").textContent="Restart";zapNext()}
+function zapHud(){$("#zapScore").textContent="Points: "+zp.pts;$("#zapLives").textContent="Lives: "+zp.lives;$("#zapBest").textContent="Best: "+(S.best.zap!=null?S.best.zap:"none yet")}
+function zapHoles(){$("#zapHoles").innerHTML=Array.from({length:6},(_,i)=>`<div class="hole" data-h="${i}"></div>`).join("")}
+function zapNext(){clearInterval(zp.timer);clearInterval(zp.pop);
+  if(!zp.on)return;if(zp.n>=zp.qs.length){zapEnd();return}
+  zp.q=prep(zp.qs[zp.n++]);zp.t=20;zapHoles();zapHud();
+  $("#zapQ").textContent=`Question ${zp.n} of ${zp.qs.length}: ${zp.q.q}`;$("#zapTime").style.width="100%";
+  zp.timer=setInterval(()=>{zp.t-=.2;$("#zapTime").style.width=Math.max(0,zp.t/20*100)+"%";if(zp.t<=0){clearInterval(zp.timer);clearInterval(zp.pop);
+    $("#zapMsg").innerHTML=`<div class="box info"><b>Time is up.</b> The answer was: ${zp.q.a[zp.q.k[0]]}. ${zp.q.y}</div>`;{const id=zp.id;setTimeout(()=>{if(zp.id===id)zapNext()},2600)}}},200);
+  zapPop();zp.pop=setInterval(zapPop,1300)}
+function zapPop(){if(current!=="zap")return;const empty=[...document.querySelectorAll("#zapHoles .hole")].filter(h=>!h.firstChild);if(!empty.length)return;
+  const showing=[...document.querySelectorAll("#zapHoles .hole button")].map(b=>+b.dataset.i);
+  const right=zp.q.k[0];let pool=zp.q.a.map((_,i)=>i).filter(i=>!showing.includes(i));if(!pool.length)return;
+  const i=pool.includes(right)&&Math.random()<.4?right:pool[Math.floor(Math.random()*pool.length)];
+  const h=empty[Math.floor(Math.random()*empty.length)];const b=document.createElement("button");b.dataset.i=i;b.textContent=zp.q.a[i];h.appendChild(b);
+  const life=setTimeout(()=>{if(b.parentNode&&!b.classList.contains("zapped"))b.remove()},3400);
+  b.onclick=()=>{if(!zp.on||b.classList.contains("zapped")||b.classList.contains("bad"))return;clearTimeout(life);
+    if(zp.q.k.includes(i)){b.classList.add("zapped");zp.pts+=10;zapHud();clearInterval(zp.timer);clearInterval(zp.pop);
+      $("#zapMsg").innerHTML=`<div class="box good"><b>Zap! +10.</b> ${zp.q.y}</div>`;{const id=zp.id;setTimeout(()=>{if(zp.id===id)zapNext()},1800)}}
+    else{b.classList.add("bad");zp.lives--;zapHud();$("#zapMsg").innerHTML=`<div class="box bad"><b>Not that one.</b> You lost a life.</div>`;setTimeout(()=>b.remove(),500);if(zp.lives<=0)zapEnd()}}}
+function zapEnd(){clearInterval(zp.timer);clearInterval(zp.pop);zp.on=false;const nb=best("zap",zp.pts);zapHud();
+  $("#zapMsg").innerHTML+=`<div class="box info"><b>Game over! You scored ${zp.pts} points.</b> ${nb?"New best score!":""} Click <b>Restart</b> to play again with new questions.</div>`}
+$("#zapStart").onclick=zapStart;
+readers.zap=()=>zp.q?zp.q.q:"Click Start to play.";
+
+/* ---------- bingo ---------- */
+let bg={card:[],marks:[],calls:[],called:[],won:false};
+function bgMake(){const terms=shuffle(VOCAB).slice(0,24).map(v=>v.t);terms.splice(12,0,"FREE");return terms}
+function bgInit(){bg={card:bgMake(),marks:Array(25).fill(false),calls:shuffle(VOCAB),called:[],won:false};bg.marks[12]=true;
+  $("#bgCaller").textContent="Called meanings will show here.";$("#bgMsg").innerHTML="";bgDraw()}
+function bgDraw(){$("#bgCard").innerHTML="BINGO".split("").map(l=>`<div class="h">${l}</div>`).join("")+bg.card.map((t,i)=>`<button data-i="${i}" class="${bg.marks[i]?"mk":""}">${t}</button>`).join("");
+  document.querySelectorAll("#bgCard button").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(i===12||bg.won)return;bg.marks[i]=!bg.marks[i];b.classList.toggle("mk");bgWin()})}
+function bgWin(){const L=[];for(let r=0;r<5;r++)L.push([0,1,2,3,4].map(c=>r*5+c));for(let c=0;c<5;c++)L.push([0,1,2,3,4].map(r=>r*5+c));L.push([0,6,12,18,24],[4,8,12,16,20]);
+  const line=L.find(l=>l.every(i=>bg.marks[i]));if(!line)return;
+  const calledT=bg.called.map(v=>v.t);const wrong=line.filter(i=>i!==12&&!calledT.includes(bg.card[i]));
+  if(bg.called.length&&wrong.length){$("#bgMsg").innerHTML=`<div class="box bad">You have 5 in a row, but <b>${wrong.map(i=>bg.card[i]).join(", ")}</b> ${wrong.length>1?"have":"has"} not been called yet. Check your card.</div>`;return}
+  bg.won=true;line.forEach(i=>document.querySelector(`#bgCard [data-i="${i}"]`).classList.add("win"));$("#bgMsg").innerHTML=`<div class="box good"><b>BINGO!</b> Click <b>New card</b> to play again.</div>`}
+$("#bgCall").onclick=()=>{if(!bg.calls.length){$("#bgCaller").innerHTML="<b>Every word has been called.</b>";return}const v=bg.calls.pop();bg.called.push(v);
+  $("#bgCaller").innerHTML=`<b>Meaning ${bg.called.length}:</b> ${v.d}<div class="tiny" style="margin-top:4px">Called so far: ${bg.called.length}. <a href="#" id="bgShow">Show the called words</a></div>`;
+  $("#bgShow").onclick=e=>{e.preventDefault();e.target.parentNode.innerHTML="Called words: "+bg.called.map(x=>x.t).join(", ")};speak(v.d)};
+$("#bgNew").onclick=bgInit;
+$("#bgPrint").onclick=()=>{let h="";for(let n=0;n<30;n++){const c=bgMake();h+=`<div class="pcard"><div style="font:bold 16px Arial;margin-bottom:4px">Unit 3 Bingo &nbsp; Name: ____________________</div><table><tr>${"BINGO".split("").map(l=>`<th>${l}</th>`).join("")}</tr>${[0,1,2,3,4].map(r=>"<tr>"+[0,1,2,3,4].map(cc=>`<td>${c[r*5+cc]}</td>`).join("")+"</tr>").join("")}</table></div>`}
+  h+=`<div class="pcard"><div style="font:bold 18px Arial">Caller list (teacher)</div><ol style="font:14px Arial">${shuffle(VOCAB).map(v=>`<li><b>${v.t}:</b> ${v.d}</li>`).join("")}</ol></div>`;
+  $("#printArea").innerHTML=h;window.print()};
+readers.bingo=()=>bg.called.length?bg.called[bg.called.length-1].d:"Click Call the next word.";
+
+/* ---------- start ---------- */
+function initAll(){mmInit();sortInit();puInit();fxInit();chainInit();memInit();zapHoles();zapHud();bgInit();fcInit();mInit();wsInit();cwInit();showInit();qzInit();chHud();if(!ch.raf)ch.raf=requestAnimationFrame(chLoop)}
+initAll();
+</script>
+</body>
+</html>
